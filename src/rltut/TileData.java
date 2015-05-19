@@ -8,9 +8,9 @@ import java.util.Map;
 import asciiPanel.AsciiPanel;
 
 public class TileData {
-	
+	public static TileData GRASS = new TileData(',', AsciiPanel.green, "Pasto cubierto ligeramente en rocio, se siente bien a los pies desnudos.", true);
 	public static TileData OPEN_DOOR = new TileData((char)9, AsciiPanel.brightBlack, "Dura puerta de madera abierta.", true).addInteraction(Interaction.CHANGES);
-	public static TileData CLOSE_DOOR = new TileData((char)10, AsciiPanel.brightBlack, "Dura puerta de madera cerrada.", true, false).addInteraction(Interaction.CHANGES);
+	public static TileData CLOSE_DOOR = new TileData((char)10, AsciiPanel.brightBlack, "Dura puerta de madera cerrada.", false, false).addInteraction(Interaction.CHANGES);
 	public static TileData FLOOR = new TileData((char)250, AsciiPanel.yellow, "Piso de tierra y roca.", true);
 	public static TileData WALL = new TileData((char)177, AsciiPanel.yellow, "Muro de tierra y roca.", false, false);
 	public static TileData TOWN_WALL = new TileData((char)177, Color.yellow, "Un alto muro de madera, usado como perímetro.", false, false);
@@ -46,7 +46,8 @@ public class TileData {
 	    valuesByName.put("PORTAL_DOWN", PORTAL_DOWN);
 	    valuesByName.put("PORTAL_UP", PORTAL_UP);
 	    valuesByName.put("FENCE", FENCE);
-
+	    valuesByName.put("GRASS", GRASS);
+	    
 	    VALUES_BY_NAME = Collections.unmodifiableMap(valuesByName);
 	}
 	

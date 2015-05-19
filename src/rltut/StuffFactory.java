@@ -41,7 +41,7 @@ public class StuffFactory {
 		Collections.shuffle(potionAppearances);
 	}
 	
-	public Creature newPlayer(List<String> messages, FieldOfView fov){
+	public Creature newPlayer(List<Message> messages, FieldOfView fov){
 		Creature player = new Creature(world, '@', AsciiPanel.brightWhite, "player", 100, 20, 5);
 		world.addAtEmptyLocation(player, 0);
 		new PlayerAi(player, messages, fov);

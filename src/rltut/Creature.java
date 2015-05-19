@@ -113,7 +113,7 @@ public class Creature {
 	
 	private String causeOfDeath;
 	public String causeOfDeath() { return causeOfDeath; }
-	
+		
 	public Creature(World world, char glyph, Color color, String name, int maxHp, int attack, int defense){
 		this.world = world;
 		this.glyph = glyph;
@@ -325,7 +325,13 @@ public class Creature {
 	}
 
 	public void notify(String message, Object ... params){
-		ai.onNotify(String.format(message, params));
+		Message newMessage = new Message(String.format(message, params));
+		ai.onNotify(newMessage);
+	}
+	
+	public void talkAction(Color color, String message, Object ... params){
+		Message newMessage = new Message(String.format(message, params), color);
+		ai.onNotify(newMessage);
 	}
 	
 	public void doAction(String message, Object ... params){

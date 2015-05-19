@@ -5,14 +5,15 @@ import java.util.List;
 import rltut.Creature;
 import rltut.FieldOfView;
 import rltut.Item;
+import rltut.Message;
 import rltut.TileData;
 
 public class PlayerAi extends CreatureAi {
 
-	private List<String> messages;
+	private List<Message> messages;
 	private FieldOfView fov;
 	
-	public PlayerAi(Creature creature, List<String> messages, FieldOfView fov) {
+	public PlayerAi(Creature creature, List<Message> messages, FieldOfView fov) {
 		super(creature);
 		this.messages = messages;
 		this.fov = fov;
@@ -37,7 +38,7 @@ public class PlayerAi extends CreatureAi {
 		}*/
 	}
 	
-	public void onNotify(String message){
+	public void onNotify(Message message){
 		messages.add(message);
 	}
 	

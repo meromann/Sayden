@@ -9,6 +9,7 @@ import rltut.FieldOfView;
 import rltut.Item;
 import rltut.LevelUpController;
 import rltut.Line;
+import rltut.Message;
 import rltut.Path;
 import rltut.Point;
 import rltut.TileData;
@@ -43,13 +44,16 @@ public class CreatureAi {
 		}
 	}
 	
+	public void onTalkedTo(Creature talker){
+	}
+	
 	public void onUpdate(){
 	}
 	
 	public void updateFow(FieldOfView fov){
 	}
 	
-	public void onNotify(String message){
+	public void onNotify(Message message){
 	}
 
 	public boolean canSee(int wx, int wy, int wz) {
@@ -67,6 +71,20 @@ public class CreatureAi {
 		}
 		
 		return true;
+	}
+	
+	public void wanderOn(TileData tile){
+		int mx = (int)(Math.random() * 3) - 1;
+		int my = (int)(Math.random() * 3) - 1;
+		
+		Creature other = creature.creature(creature.x + mx, creature.y + my, creature.z);
+		
+		if (other != null && other.name().equals(creature.name()) 
+				|| !creature.tile(creature.x+mx, creature.y+my, creature.z).isGround()
+				|| !(creature.tile(creature.x+mx, creature.y+my, creature.z) == tile))
+			return;
+		else
+			creature.moveBy(mx, my, 0);
 	}
 	
 	public void wander(){

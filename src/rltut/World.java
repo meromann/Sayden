@@ -21,6 +21,11 @@ public class World {
 	
 	public String name;
 	
+	public World(){
+		this.creatures = new ArrayList<Creature>();
+		this.items = new Item[width][height][depth];
+	}
+	
 	public World(TileData[][][] tiles, String name){
 		this.tiles = tiles;
 		this.width = tiles.length;
@@ -187,7 +192,15 @@ public class World {
 		return false;
 	}
 
+	public void add(List<Creature> pets){
+		for(int i = 0; i < pets.size(); i++){
+			pets.get(i).setWorld(this);
+		}
+		creatures.addAll(pets);
+	}
+	
 	public void add(Creature pet) {
+		pet.setWorld(this);
 		creatures.add(pet);
 	}
 }

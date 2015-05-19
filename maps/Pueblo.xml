@@ -41,10 +41,10 @@
 		<tile>
 			TOWN_FLOOR
 		</tile>
-		<tile interactable="change" action="Abres la puerta.">
-			CLOSE_DOOR
-			<tile_to>
-				OPEN_DOOR
+		<tile clone="CLOSE_DOOR" interactable="change" seeTrough="false" action="Abres la puerta">
+			PUERTA_CERRADA
+			<tile_to clone="OPEN_DOOR" seeTrough="true" action="Cierras la puerta">
+				PUERTA_ABIERTA
 			</tile_to>
 		</tile>
 		<tile>
@@ -61,6 +61,8 @@
 		</tile>
 	</tiles>
 	<npcs>
-	
+		<npc glyphC="@" permittedTile="3" color="127-131-134" talkColor="166-170-173" trabajo="herrero" x="4" y="5" z="0">
+			Tomas
+		</npc>
 	</npcs>
 </archivo>

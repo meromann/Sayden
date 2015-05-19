@@ -12,6 +12,7 @@ import rltut.Creature;
 import rltut.Item;
 import rltut.MapLoader;
 import rltut.FieldOfView;
+import rltut.Message;
 import rltut.StuffFactory;
 import rltut.TileData;
 import rltut.World;
@@ -22,16 +23,16 @@ public class PlayScreen implements Screen {
 	private Creature player;
 	private int screenWidth;
 	private int screenHeight;
-	private List<String> messages;
+	private List<Message> messages;
 	private FieldOfView fov;
 	private Screen subscreen;
 	
-	private String startingMap = "Test";
+	private String startingMap = "Pueblo";
 	
 	public PlayScreen(){
 		screenWidth = 80;
-		screenHeight = 23;
-		messages = new ArrayList<String>();
+		screenHeight = 24;
+		messages = new ArrayList<Message>();
 		
 		worldList = new HashMap<String, World>();
 		
@@ -99,10 +100,10 @@ public class PlayScreen implements Screen {
 			return "";
 	}
 
-	private void displayMessages(AsciiPanel terminal, List<String> messages) {
-		int top = screenHeight - messages.size();
+	private void displayMessages(AsciiPanel terminal, List<Message> messages) {
+		int top = (int)(screenHeight * 1.1f) - messages.size();
 		for (int i = 0; i < messages.size(); i++){
-			terminal.writeCenter(messages.get(i), top + i);
+			terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
 		}
 		if (subscreen == null)
 			messages.clear();
