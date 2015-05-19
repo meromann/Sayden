@@ -35,14 +35,17 @@ public class NpcAi extends CreatureAi {
 	
 	public void onTalkedTo(Creature talker){
 		if(!introduced){
-			creature.talkAction(talkColor, "[%s - %s] %s", name, job, introduction.get(0).message());
+			Color temp_color = introduction.get(0).color() != talkColor ? introduction.get(0).color() : talkColor;
+			creature.talkAction(temp_color, "[%s - %s] %s", name, job, introduction.get(0).message());
 			introduction.remove(0);
 			
 			if(introduction.isEmpty()){
 				introduced = true;
 				introduction.clear();
 			}
+			
 		}else{
+			
 			int randomMsg = 0;
 			
 			do {
@@ -50,8 +53,9 @@ public class NpcAi extends CreatureAi {
 			} 
 			while (randomMsg != lastGreetingMessage);
 			
+			Color temp_color = greetings.get(randomMsg).color() != talkColor ? greetings.get(randomMsg).color() : talkColor;
 			lastGreetingMessage = randomMsg;
-			creature.talkAction(talkColor, "[%s - %s] %s", name, job, greetings.get(randomMsg).message());
+			creature.talkAction(temp_color, "[%s - %s] %s", name, job, greetings.get(randomMsg).message());
 		}
 	}
 	

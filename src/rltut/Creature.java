@@ -21,6 +21,10 @@ public class Creature {
 	private Color color;
 	public Color color() { return color; }
 
+	private Color statusColor;
+	public Color statusColor() { return statusColor; }
+	public void modifyStatusColor(Color newColor) { this.statusColor = newColor; }
+	
 	private CreatureAi ai;
 	public void setCreatureAi(CreatureAi ai) { this.ai = ai; }
 	public CreatureAi getCreatureAi() { return ai; }

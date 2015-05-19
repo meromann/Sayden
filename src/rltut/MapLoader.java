@@ -19,8 +19,11 @@ public class MapLoader {
 	
 	private int mapWidth = 0;
 	private int mapHeight = 0;
+	/** Variable usada para recortar el XML con la informacion del mapa*/
 	private String mapReference;
+	/** Tileset cargado del XML*/
 	private LinkedList<TileData> tileSet;
+	/** Lista con los npcs que se agregarán al mapa recien creado */
 	private LinkedList<Creature> npcs;
 	
 	private World world;
@@ -33,19 +36,19 @@ public class MapLoader {
 		
 		if( checkFile(mapName) ){
 			String[] lines = mapReference.split("\n");
-			mapHeight = lines.length;
-			mapWidth = lines[0].length();
+			mapHeight = lines.length < ApplicationMain.WORLD_HEIGHT ? ApplicationMain.WORLD_HEIGHT : lines.length;
+			mapWidth = lines[0].length() < ApplicationMain.WORLD_HEIGHT ? ApplicationMain.WORLD_HEIGHT : lines[0].length();
 			
 			tiles = new TileData[mapWidth][mapHeight][1];
-						
+			
 			for(int y = 0; y < lines.length; y++){
 				for(int x = 0; x < lines[y].length(); x++){
 					char stringIndex = lines[y].replace("\n", "").replace("\r", "").replace("\t", "").charAt(x);
-					
-					tiles[x][y][0] = TileData.VALUES_BY_NAME.get("BOUNDS");
-					
+										
 					if(!(stringIndex >= '0' && stringIndex <= '9')){
 						//En caso de que arranquemos con letras
+						//Este es un fix puesto que cada numero identifica un tile, lo que delimita cada mapa a usar
+						//9 tiles, gracias a esto tambien se podran usar letras, siendo la a = 10
 						stringIndex -= 87;	// -87 para que a = 10
 						tiles[x][y][0] = tileSet.get((int)stringIndex);
 					}else{
@@ -55,13 +58,15 @@ public class MapLoader {
 				}
 			}
 			
-			world = new World(tiles, mapName);
-			world.add(npcs);
+			world = new World(tiles, mapName);	//Creamos el mapa
+			world.add(npcs);	//Le añadimos a los npc YA POPULADOS en checkFile()
 		}
 
 		return world;
 	}
 	
+	/** Esta funcion se encarga de leer el mapa y popular los objetos correspondientes
+	 *  dentro del juego. Esto incluye npcs y los tiles usados en cada mapa.*/
 	private boolean checkFile(String mapName){
 		 try {
 			File file = new File("maps/"+mapName+".xml");
@@ -71,7 +76,9 @@ public class MapLoader {
 			doc.getDocumentElement().normalize();
 
 			NodeList nodeLst = doc.getElementsByTagName("version");
-
+			
+			//Aqui se cargan las diferentes versiones del mapa (para soporte de diferentes tiles de mapas)
+			//TODO: Implementar z_index
 			for (int s = 0; s < nodeLst.getLength(); s++) {
 			    Node fstNode = nodeLst.item(s);
 			    
@@ -232,7 +239,7 @@ public class MapLoader {
 			Color messageColor = defaultColor;
 			String messageText = message.getTextContent().trim();
 			
-			if(!message.getAttribute("color").isEmpty()){		
+			if(!message.getAttribute("color").isEmpty()){	
 				String color = message.getAttribute("color");
 				String[] rgb = color.split("-");
 							

@@ -13,8 +13,15 @@ public class ApplicationMain extends JFrame implements KeyListener {
 	private AsciiPanel terminal;
 	private Screen screen;
 	
-	private int SCREEN_WIDTH = 80;
-	private int SCREEN_HEIGHT = 28;
+	public static final int SCREEN_WIDTH = 80;
+	public static final int SCREEN_HEIGHT = 30;
+	
+	public static final int WORLD_WIDTH = 80;
+	public static final int WORLD_HEIGHT = 24;
+	
+	public static final int MENU_OFFSET = (int)(SCREEN_HEIGHT * .95f);
+	
+	public static final String STARTING_MAP = "Pueblo";
 	
 	public ApplicationMain(){
 		super();

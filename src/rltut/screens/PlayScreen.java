@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import asciiPanel.AsciiPanel;
+import rltut.ApplicationMain;
 import rltut.Creature;
 import rltut.Item;
 import rltut.MapLoader;
@@ -26,14 +27,12 @@ public class PlayScreen implements Screen {
 	private List<Message> messages;
 	private FieldOfView fov;
 	private Screen subscreen;
-	
-	private String startingMap = "Pueblo";
-	
-	public PlayScreen(){
-		screenWidth = 80;
-		screenHeight = 24;
-		messages = new ArrayList<Message>();
 		
+	public PlayScreen(){
+		screenWidth = ApplicationMain.WORLD_WIDTH;
+		screenHeight = ApplicationMain.WORLD_HEIGHT;
+		
+		messages = new ArrayList<Message>();
 		worldList = new HashMap<String, World>();
 		
 		createWorld();
@@ -45,7 +44,7 @@ public class PlayScreen implements Screen {
 		createCreatures(factory);
 		createRocks(factory);
 		
-		worldList.put(startingMap, world);
+		worldList.put(ApplicationMain.STARTING_MAP, world);
 	}
 
 	private void createCreatures(StuffFactory factory){
@@ -60,12 +59,7 @@ public class PlayScreen implements Screen {
 	
 	private void createWorld(){
 		world = new MapLoader()
-					.preBuild(startingMap);
-					//.preBuild("Cementerio");
-		
-		/*world = new WorldBuilder(90, 32, 5)
-					.makeCaves()
-					.build();*/
+					.preBuild(ApplicationMain.STARTING_MAP);
 	}
 	
 	public int getScrollX() { return Math.max(0, Math.min(player.x - screenWidth / 2, world.width() - screenWidth)); }
@@ -81,7 +75,7 @@ public class PlayScreen implements Screen {
 		displayMessages(terminal, messages);
 		
 		String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.maxHp(), player.mana(), player.maxMana(), hunger());
-		terminal.write(stats, 1, 23);
+		terminal.write(stats, 1, ApplicationMain.MENU_OFFSET - 4);
 		
 		if (subscreen != null)
 			subscreen.displayOutput(terminal);
@@ -101,7 +95,7 @@ public class PlayScreen implements Screen {
 	}
 
 	private void displayMessages(AsciiPanel terminal, List<Message> messages) {
-		int top = (int)(screenHeight * 1.1f) - messages.size();
+		int top = ApplicationMain.MENU_OFFSET - messages.size();
 		for (int i = 0; i < messages.size(); i++){
 			terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
 		}
@@ -118,9 +112,9 @@ public class PlayScreen implements Screen {
 				int wy = y + top;
 
 				if (player.canSee(wx, wy, player.z))
-					terminal.write(world.glyph(wx, wy, player.z), x, y, world.color(wx, wy, player.z));
+					terminal.write(world.glyph(wx, wy, player.z), x, y, world.color(wx, wy, player.z), world.backgroundColor(wx, wy, player.z));
 				else
-					terminal.write(fov.tile(wx, wy, player.z).glyph(), x, y, Color.darkGray);
+					terminal.write(fov.tile(wx, wy, player.z).glyph(), x, y, Color.darkGray, Color.BLACK);
 			}
 		}
 	}

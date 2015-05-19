@@ -15,7 +15,7 @@ public class TileData {
 	public static TileData WALL = new TileData((char)177, AsciiPanel.yellow, "Muro de tierra y roca.", false, false);
 	public static TileData TOWN_WALL = new TileData((char)177, Color.yellow, "Un alto muro de madera, usado como perímetro.", false, false);
 	public static TileData BUILD_WALL = new TileData((char)177, Color.gray, "Un robusto muro de madera.", false, false);
-	public static TileData SECRET_BUILD_WALL = new TileData((char)177, Color.gray, "Un robusto muro de madera...un segundo...", false, false);
+	public static TileData SECRET_BUILD_WALL = new TileData((char)177, Color.gray, "Un muro de madera, sientes una ligera brisa colarse entre las planchas", false, false);
 	public static TileData TOWN_FLOOR = new TileData((char)250, Color.gray, "Una simple plancha de madera que sirve de piso.", true);
 	public static TileData STAIRS_UP = new TileData('<', AsciiPanel.white, "Una escalera de piedra que asciende.", true).addInteraction(Interaction.STAIRS_UP);
 	public static TileData STAIRS_DOWN = new TileData('>', AsciiPanel.white, "Una escalera de piedra que desciende.", true).addInteraction(Interaction.STAIRS_DOWN);
@@ -25,7 +25,7 @@ public class TileData {
 	public static TileData PORTAL_UP = new TileData((char)24, AsciiPanel.brightWhite, "Camino a otro mapa.", true);
 	public static TileData FENCE = new TileData((char)26, AsciiPanel.brightWhite, "Una valla de metal, vieja y oxidada.", true, false);
 
-	public static final TileData BOUNDS = new TileData('x', AsciiPanel.brightBlack, "Limites del mundo.", false, false);
+	public static final TileData BOUNDS = new TileData(' ', AsciiPanel.brightBlack, "Limites del mundo.", false, false);
 	public static final TileData UNKNOWN = new TileData(' ', AsciiPanel.white, "(desconocido)", true);
 	
 	static final Map<String, TileData> VALUES_BY_NAME;
@@ -65,6 +65,10 @@ public class TileData {
 	public Color color() { return this.color; }
 	public void setColor(Color color) { this.color = color; }
 	
+	private Color backgroundColor;
+	public Color backgroundColor() { return this.backgroundColor; }
+	public void setBackgroundColor(Color backgroundColor) { this.backgroundColor = backgroundColor; }
+	
 	private String details;
 	public String details() { return details; }
 	public void setDetails(String details) { this.details = details; }
@@ -103,6 +107,7 @@ public class TileData {
 	TileData(char glyph, Color color, String details, boolean seeTrough, boolean isGround){
 		this.glyph = glyph;
 		this.color = color;
+		this.backgroundColor = Color.black;
 		this.details = details;
 		this.seeTrough = seeTrough;
 		this.isGround = isGround;
@@ -113,6 +118,7 @@ public class TileData {
 	TileData(char glyph, Color color, String details, boolean seeTrough){
 		this.glyph = glyph;
 		this.color = color;
+		this.backgroundColor = Color.black;
 		this.details = details;
 		this.seeTrough = seeTrough;
 		this.portal_to = null;
@@ -123,6 +129,7 @@ public class TileData {
 	TileData(){
 		this.glyph = '?';
 		this.color = Color.PINK;
+		this.backgroundColor = Color.black;
 		this.details = "INITIALIZE_ERROR";
 		this.seeTrough = false;
 		this.isGround = true;

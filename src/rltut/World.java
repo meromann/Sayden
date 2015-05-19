@@ -48,7 +48,7 @@ public class World {
 		if (x < 0 || x >= width || y < 0 || y >= height || z < 0 || z >= depth)
 			return TileData.BOUNDS;
 		else
-			return tiles[x][y][z];
+			return tiles[x][y][z] == null ? TileData.BOUNDS : tiles[x][y][z];
 	}
 	
 	public char glyph(int x, int y, int z){
@@ -71,6 +71,14 @@ public class World {
 			return item(x,y,z).color();
 		
 		return tile(x, y, z).color();
+	}
+	
+	public Color backgroundColor(int x, int y, int z){
+		Creature creature = creature(x, y, z);
+		if (creature != null)
+			return creature.statusColor();
+				
+		return tile(x, y, z).backgroundColor();
 	}
 
 	/*public void dig(int x, int y, int z) {
