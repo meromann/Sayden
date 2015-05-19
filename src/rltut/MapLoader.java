@@ -2,6 +2,7 @@ package rltut;
 import java.awt.Color;
 import java.io.File;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -11,6 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import rltut.ai.NpcAi;
 
 public class MapLoader {
@@ -62,13 +64,13 @@ public class MapLoader {
 	
 	private boolean checkFile(String mapName){
 		 try {
-			  File file = new File("maps/"+mapName+".xml");
-			  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			  DocumentBuilder db = dbf.newDocumentBuilder();
-			  Document doc = db.parse(file);
-			  doc.getDocumentElement().normalize();
+			File file = new File("maps/"+mapName+".xml");
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.parse(file);
+			doc.getDocumentElement().normalize();
 
-			  NodeList nodeLst = doc.getElementsByTagName("version");
+			NodeList nodeLst = doc.getElementsByTagName("version");
 
 			for (int s = 0; s < nodeLst.getLength(); s++) {
 			    Node fstNode = nodeLst.item(s);
@@ -164,9 +166,9 @@ public class MapLoader {
 		int startPosZ = Integer.parseInt(creatureElement.getAttribute("z"));
 		
 		int permittedTile = Integer.parseInt((creatureElement.getAttribute("permittedTile").isEmpty() ? "-1" : creatureElement.getAttribute("permittedTile")));
-		
-		Color npcColor = null;
-		Color talkColor = null;
+			
+		Color npcColor = Color.white;
+		Color talkColor = Color.white;
 		
 		if(glyphC != ' ' || glyphN > 0){
 			actualGlyph = (char) (glyphN > 0 ? glyphN : glyphC);
@@ -192,19 +194,61 @@ public class MapLoader {
 			int b = Integer.parseInt(rgb[2]);
 			
 			talkColor = new Color(r,g,b);
+		}else{
+			talkColor = npcColor;
 		}
-
+		
 		Creature npc = new Creature(world, actualGlyph, npcColor, npcName, 10,1,1);
-		new NpcAi(npc, npcJob, talkColor);
+		new NpcAi(npc, npcName, npcJob, talkColor);
 		npc.x = startPosX;
 		npc.y = startPosY;
 		npc.z = startPosZ;
+		
+		if(creatureElement.getElementsByTagName("dialogue").getLength() > 0){
+			NodeList dialogueNode = creatureElement.getElementsByTagName("dialogue");
+			
+			Element dialogueList = (Element) dialogueNode.item(0);
+			
+			NodeList introduction = dialogueList.getElementsByTagName("introduction");
+			NodeList greetings = dialogueList.getElementsByTagName("greetings");
+			
+			((NpcAi) npc.getCreatureAi()).setIntroduction(retrieveMessageData(introduction, npc.color()));
+			((NpcAi) npc.getCreatureAi()).setGreetings(retrieveMessageData(greetings, npc.color()));
+		}
 		
 		if(permittedTile > 0){
 			((NpcAi) npc.getCreatureAi()).setPermittedTile(tileSet.get(permittedTile));
 		}
 		
 		return npc;
+	}
+	
+	private List<Message> retrieveMessageData(NodeList messageNode, Color defaultColor){
+		List<Message> messageList = new LinkedList<Message>();
+
+		for(int i = 0; i < messageNode.getLength(); i++){
+			Element message = (Element) messageNode.item(i);
+			
+			Color messageColor = defaultColor;
+			String messageText = message.getTextContent().trim();
+			
+			if(!message.getAttribute("color").isEmpty()){		
+				String color = message.getAttribute("color");
+				String[] rgb = color.split("-");
+							
+				int r = Integer.parseInt(rgb[0]);
+				int g = Integer.parseInt(rgb[1]);
+				int b = Integer.parseInt(rgb[2]);
+				
+				messageColor = new Color(r,g,b);
+			}
+			
+			Message introMessage = new Message(messageText, messageColor);
+			
+			messageList.add(introMessage);
+		}
+		
+		return messageList;
 	}
 	
 	private TileData analyzeTile(Element tileElement){

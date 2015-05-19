@@ -63,6 +63,35 @@
 	<npcs>
 		<npc glyphC="@" permittedTile="3" color="127-131-134" talkColor="166-170-173" trabajo="herrero" x="4" y="5" z="0">
 			Tomas
+			<dialogue>
+				<introduction>
+					Dejame en paz...
+				</introduction>
+				<introduction>
+					Crei haberte dicho que me dejes en paz...
+				</introduction>
+				<introduction>
+					Mi amada Maria...aun hoy dia juro sentir su perfume...
+				</introduction>
+				<introduction>
+					Oh basta! Que debo hacer para que te esfumes?!
+				</introduction>
+				<greetings>
+					No tu de nuevo...por lo que mas quieras...
+				</greetings>
+				<greetings>
+					Maria...mi amada Maria...
+				</greetings>
+				<greetings>
+					Susurros...susurros en la oscuridad...
+				</greetings>
+				<greetings>
+					La brisa gelida de este lugar...es como un susurro...
+				</greetings>
+				<greetings>
+					He he he...Aun te recuerdo mi amada...
+				</greetings>
+			</dialogue>
 		</npc>
 	</npcs>
 </archivo>

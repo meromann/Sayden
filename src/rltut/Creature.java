@@ -194,7 +194,8 @@ public class Creature {
 		if (other == null)
 			ai.onEnter(x+mx, y+my, z+mz, tile);
 		else
-			meleeAttack(other);
+			other.ai.onTalkedTo(this);
+			//meleeAttack(other);
 	}
 
 	public void meleeAttack(Creature other){
@@ -329,9 +330,19 @@ public class Creature {
 		ai.onNotify(newMessage);
 	}
 	
-	public void talkAction(Color color, String message, Object ... params){
+	public void notify(Color color, String message, Object ... params){
 		Message newMessage = new Message(String.format(message, params), color);
 		ai.onNotify(newMessage);
+	}
+	
+	public void talkAction(Color color, String message, Object ... params){
+		for (Creature other : getCreaturesWhoSeeMe()){
+			if (other == this){
+				other.notify(color, message + ".", params);
+			} else {
+				other.notify(color, message, params);
+			}
+		}
 	}
 	
 	public void doAction(String message, Object ... params){
@@ -343,7 +354,7 @@ public class Creature {
 			}
 		}
 	}
-	
+		
 	public void doAction(Item item, String message, Object ... params){
 		if (hp < 1)
 			return;
@@ -358,7 +369,7 @@ public class Creature {
 		}
 	}
 	
-	private List<Creature> getCreaturesWhoSeeMe(){
+	public List<Creature> getCreaturesWhoSeeMe(){
 		List<Creature> others = new ArrayList<Creature>();
 		int r = 9;
 		for (int ox = -r; ox < r+1; ox++){
