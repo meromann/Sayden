@@ -11,7 +11,7 @@ public class EatScreen extends InventoryBasedScreen {
 
 	@Override
 	protected String getVerb() {
-		return "eat";
+		return "comer";
 	}
 
 	@Override

@@ -11,7 +11,7 @@ public class QuaffScreen extends InventoryBasedScreen {
 
 	@Override
 	protected String getVerb() {
-		return "quaff";
+		return "beber";
 	}
 
 	@Override

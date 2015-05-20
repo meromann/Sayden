@@ -25,9 +25,11 @@ public class ApplicationMain extends JFrame implements KeyListener {
 	
 	public ApplicationMain(){
 		super();
+		//Instanciamos el panel de texto
 		terminal = new AsciiPanel(SCREEN_WIDTH, SCREEN_HEIGHT);
 		add(terminal);
 		pack();
+		//La primer pantalla es la StartScreen
 		screen = new StartScreen();
 		addKeyListener(this);
 		repaint();

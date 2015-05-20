@@ -12,11 +12,26 @@ import rltut.Line;
 import rltut.Message;
 import rltut.Path;
 import rltut.Point;
-import rltut.TileData;
+import rltut.Tile;
 
 public class CreatureAi {
 	protected Creature creature;
 	private Map<String, String> itemNames;
+	
+	private int relationTreshold;
+	private int relationship;
+	public int relationship() { return relationship; }
+	public void upRelationship(int level) { 
+		if(level > relationship) { 
+			relationship++; 
+		}else{
+			relationTreshold += level;
+			if(relationTreshold > relationship){
+				relationTreshold = 0;
+				relationship++;
+			}
+		}
+	}
 	
 	public CreatureAi(Creature creature){
 		this.creature = creature;
@@ -34,7 +49,7 @@ public class CreatureAi {
 		itemNames.put(item.name(), name);
 	}
 	
-	public void onEnter(int x, int y, int z, TileData tile){
+	public void onEnter(int x, int y, int z, Tile tile){
 		if (tile.isGround()){
 			creature.x = x;
 			creature.y = y;
@@ -43,6 +58,12 @@ public class CreatureAi {
 			creature.doAction("bump into a wall");
 		}
 	}
+	
+	public void onReceive(Item item, Creature from){}
+	
+	public void onGive(Item item, Creature to){}
+	
+	public void onFarewell(){}
 	
 	public void onTalkedTo(Creature talker){
 	}
@@ -73,7 +94,7 @@ public class CreatureAi {
 		return true;
 	}
 	
-	public void wanderOn(TileData tile){
+	public void wanderOn(Tile tile){
 		int mx = (int)(Math.random() * 3) - 1;
 		int my = (int)(Math.random() * 3) - 1;
 		
@@ -104,8 +125,8 @@ public class CreatureAi {
 		new LevelUpController().autoLevelUp(creature);
 	}
 
-	public TileData rememberedTile(int wx, int wy, int wz) {
-		return TileData.UNKNOWN;
+	public Tile rememberedTile(int wx, int wy, int wz) {
+		return Tile.UNKNOWN;
 	}
 
 	protected boolean canThrowAt(Creature other) {

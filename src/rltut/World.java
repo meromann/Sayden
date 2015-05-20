@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class World {
-	private TileData[][][] tiles;
+	private Tile[][][] tiles;
 	private Item[][][] items;
 	
 	private int width;
@@ -26,7 +26,7 @@ public class World {
 		this.items = new Item[width][height][depth];
 	}
 	
-	public World(TileData[][][] tiles, String name){
+	public World(Tile[][][] tiles, String name){
 		this.tiles = tiles;
 		this.width = tiles.length;
 		this.height = tiles[0].length;
@@ -44,11 +44,11 @@ public class World {
 		return null;
 	}
 	
-	public TileData tile(int x, int y, int z){
+	public Tile tile(int x, int y, int z){
 		if (x < 0 || x >= width || y < 0 || y >= height || z < 0 || z >= depth)
-			return TileData.BOUNDS;
+			return Tile.BOUNDS;
 		else
-			return tiles[x][y][z] == null ? TileData.BOUNDS : tiles[x][y][z];
+			return tiles[x][y][z] == null ? Tile.BOUNDS : tiles[x][y][z];
 	}
 	
 	public char glyph(int x, int y, int z){
@@ -91,7 +91,7 @@ public class World {
 			tiles[x][y][z] = Tile.OPEN_DOOR;
 	}*/
 	
-	public void changeTile(int x, int y, int z, TileData newTile){
+	public void changeTile(int x, int y, int z, Tile newTile){
 		tiles[x][y][z] = newTile;
 	}
 	
@@ -152,7 +152,7 @@ public class World {
 		items[x][y][depth] = item;
 	}
 	
-	public void addAtEmptyTileLocation(Item item, int depth, TileData tileType) {
+	public void addAtEmptyTileLocation(Item item, int depth, Tile tileType) {
 		int x;
 		int y;
 
@@ -189,7 +189,7 @@ public class World {
 				items[p.x][p.y][p.z] = item;
 				Creature c = this.creature(p.x, p.y, p.z);
 				if (c != null)
-					c.notify("A %s lands between your feet.", c.nameOf(item));
+					c.notify((item.gender() == 'M' ? "Un" : "Una") + " %s cae entre tus pies.", c.nameOf(item));
 				return true;
 			} else {
 				List<Point> neighbors = p.neighbors8();

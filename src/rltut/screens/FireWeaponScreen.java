@@ -7,7 +7,7 @@ import rltut.Point;
 public class FireWeaponScreen extends TargetBasedScreen {
 
 	public FireWeaponScreen(Creature player, int sx, int sy) {
-		super(player, "Fire " + player.nameOf(player.weapon()) + " at?", sx, sy);
+		super(player, "Donde disparas " + player.checkGender(player.weapon().gender(), true) + " " + player.nameOf(player.weapon()) + "?", sx, sy);
 	}
 
 	public boolean isAcceptable(int x, int y) {
@@ -26,7 +26,7 @@ public class FireWeaponScreen extends TargetBasedScreen {
 		Creature other = player.creature(x, y, player.z);
 		
 		if (other == null)
-			player.notify("There's no one there to fire at.");
+			player.notify("No hay nadie a quien disparar.");
 		else
 			player.rangedWeaponAttack(other);
 	}

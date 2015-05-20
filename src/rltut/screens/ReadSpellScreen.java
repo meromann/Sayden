@@ -39,7 +39,7 @@ public class ReadSpellScreen implements Screen {
 		}
 		
 		terminal.clear(' ', 0, 23, 80, 1);
-		terminal.write("What would you like to read?", 2, 23);
+		terminal.write("Que quieres conjurar?", 2, 23);
 		
 		terminal.repaint();
 	}

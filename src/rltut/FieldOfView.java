@@ -9,20 +9,20 @@ public class FieldOfView {
 		return z == depth && x >= 0 && y >= 0 && x < visible.length && y < visible[0].length && visible[x][y];
 	}
 	
-	private TileData[][][] tiles;
-	public TileData tile(int x, int y, int z){
+	private Tile[][][] tiles;
+	public Tile tile(int x, int y, int z){
 		return tiles[x][y][z];
 	}
 	
 	public FieldOfView(World world){
 		this.world = world;
 		this.visible = new boolean[world.width()][world.height()];
-		this.tiles = new TileData[world.width()][world.height()][world.depth()];
+		this.tiles = new Tile[world.width()][world.height()][world.depth()];
 		
 		for (int x = 0; x < world.width(); x++){
 			for (int y = 0; y < world.height(); y++){
 				for (int z = 0; z < world.depth(); z++){
-					tiles[x][y][z] = TileData.UNKNOWN;
+					tiles[x][y][z] = Tile.UNKNOWN;
 				}
 			}
 		}
@@ -31,12 +31,12 @@ public class FieldOfView {
 	public void updateWorld(World world){
 		this.world = world;
 		this.visible = new boolean[world.width()][world.height()];
-		this.tiles = new TileData[world.width()][world.height()][world.depth()];
+		this.tiles = new Tile[world.width()][world.height()][world.depth()];
 		
 		for (int x = 0; x < world.width(); x++){
 			for (int y = 0; y < world.height(); y++){
 				for (int z = 0; z < world.depth(); z++){
-					tiles[x][y][z] = TileData.UNKNOWN;
+					tiles[x][y][z] = Tile.UNKNOWN;
 				}
 			}
 		}
@@ -55,7 +55,7 @@ public class FieldOfView {
 					continue;
 				
 				for (Point p : new Line(wx, wy, wx + x, wy + y)){
-					TileData tile = world.tile(p.x, p.y, wz);
+					Tile tile = world.tile(p.x, p.y, wz);
 					visible[p.x][p.y] = true;
 					tiles[p.x][p.y][wz] = tile; 
 					

@@ -10,7 +10,7 @@ public class EquipScreen extends InventoryBasedScreen {
 	}
 
 	protected String getVerb() {
-		return "wear or wield";
+		return "equiparte";
 	}
 
 	protected boolean isAcceptable(Item item) {

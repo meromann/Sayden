@@ -41,9 +41,9 @@
 		<tile>
 			TOWN_FLOOR
 		</tile>
-		<tile clone="CLOSE_DOOR" interactable="change" seeTrough="false" action="Abres la puerta">
+		<tile clone="CLOSE_DOOR" interactable="change" seeTrough="false" action="abre la puerta">
 			PUERTA_CERRADA
-			<tile_to clone="OPEN_DOOR" seeTrough="true" action="Cierras la puerta">
+			<tile_to clone="OPEN_DOOR" seeTrough="true" action="cierra la puerta">
 				PUERTA_ABIERTA
 			</tile_to>
 		</tile>
@@ -64,10 +64,11 @@
 		</tile>
 	</tiles>
 	<npcs>
-		<npc glyphC="@" permittedTile="3" color="127-131-134" talkColor="166-170-173" trabajo="herrero" x="4" y="5" z="0">
+		<npc glyphC="@" gender="M" permittedTile="3" color="127-131-134" talkColor="166-170-173" trabajo="herrero"
+		x="4" y="5" z="0">
 			Tomas
 			<dialogue>
-				<introduction color="255-0-0">
+				<introduction>
 					Dejame en paz...
 				</introduction>
 				<introduction>
@@ -94,6 +95,18 @@
 				<greetings>
 					He he he...Aun te recuerdo mi amada...
 				</greetings>
+				<goodbye>
+					Al fin...no te molestes en regresar...
+				</goodbye>
+				<goodbye>
+					La soledad...el eterno susurro...
+				</goodbye>
+				<onreceive>
+					Como si esto hiciese diferencia...
+				</onreceive>
+				<ongive>
+					Que te sea de utilidad...ahora largate
+				</ongive>
 			</dialogue>
 		</npc>
 	</npcs>

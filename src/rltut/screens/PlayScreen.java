@@ -15,7 +15,7 @@ import rltut.MapLoader;
 import rltut.FieldOfView;
 import rltut.Message;
 import rltut.StuffFactory;
-import rltut.TileData;
+import rltut.Tile;
 import rltut.World;
 
 public class PlayScreen implements Screen {
@@ -99,7 +99,7 @@ public class PlayScreen implements Screen {
 		for (int i = 0; i < messages.size(); i++){
 			terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
 		}
-		if (subscreen == null)
+		if (subscreen == null || player.shopScreen() != null)
 			messages.clear();
 	}
 
@@ -142,7 +142,7 @@ public class PlayScreen implements Screen {
 			case KeyEvent.VK_E: subscreen = new EatScreen(player); break;
 			case KeyEvent.VK_W: subscreen = new EquipScreen(player); break;
 			case KeyEvent.VK_X: subscreen = new ExamineScreen(player); break;
-			case KeyEvent.VK_L: subscreen = new LookScreen(player, "Looking", 
+			case KeyEvent.VK_L: subscreen = new LookScreen(player, "Observando", 
 					player.x - getScrollX(), 
 					player.y - getScrollY()); break;
 			case KeyEvent.VK_T: subscreen = new ThrowScreen(player,
@@ -150,7 +150,7 @@ public class PlayScreen implements Screen {
 					player.y - getScrollY()); break;
 			case KeyEvent.VK_F: 
 				if (player.weapon() == null || player.weapon().rangedAttackValue() == 0)
-					player.notify("You don't have a ranged weapon equiped.");
+					player.notify("No tienes un arma de rango equipada.");
 				else
 					subscreen = new FireWeaponScreen(player,
 						player.x - getScrollX(), 
@@ -193,6 +193,9 @@ public class PlayScreen implements Screen {
 		if (player.level() > level)
 			subscreen = new LevelUpScreen(player, player.level() - level);
 		
+		if(player.shopScreen() != null && subscreen == null)
+			subscreen = player.shopScreen();
+		
 		if (subscreen == null)
 			world.update();
 				
@@ -203,7 +206,7 @@ public class PlayScreen implements Screen {
 	}
 
 	private boolean userIsTryingToExit(){
-		return player.z == 0 && world.tile(player.x, player.y, player.z).interaction() == TileData.Interaction.STAIRS_UP;
+		return player.z == 0 && world.tile(player.x, player.y, player.z).interaction() == Tile.Interaction.STAIRS_UP;
 	}
 	
 	private Screen userExits(){

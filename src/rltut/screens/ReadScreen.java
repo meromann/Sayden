@@ -16,7 +16,7 @@ public class ReadScreen extends InventoryBasedScreen {
 
 	@Override
 	protected String getVerb() {
-		return "read";
+		return "leer";
 	}
 
 	@Override

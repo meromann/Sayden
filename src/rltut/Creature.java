@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rltut.ai.CreatureAi;
+import rltut.screens.Screen;
 
 public class Creature {
 	private World world;
@@ -14,6 +15,9 @@ public class Creature {
 	public int x;
 	public int y;
 	public int z;
+	
+	private char gender;
+	public char gender() { return gender; }
 	
 	private char glyph;
 	public char glyph() { return glyph; }
@@ -28,6 +32,10 @@ public class Creature {
 	private CreatureAi ai;
 	public void setCreatureAi(CreatureAi ai) { this.ai = ai; }
 	public CreatureAi getCreatureAi() { return ai; }
+	
+	private String job;
+	public String job() { return job; }
+	public void setJob(String job) { this.job = job; }
 	
 	private int maxHp;
 	public int maxHp() { return maxHp; }
@@ -79,13 +87,13 @@ public class Creature {
 	public void modifyXp(int amount) { 
 		xp += amount;
 		
-		notify("You %s %d xp.", amount < 0 ? "lose" : "gain", amount);
+		notify("%s %d puntos de xp.", amount < 0 ? "Obtienes" : "Pierdes", amount);
 		
 		while (xp > (int)(Math.pow(level, 1.75) * 25)) {
 			level++;
-			doAction("advance to level %d", level);
+			doAction("avanza al nivel %d", level);
 			ai.onGainLevel();
-			modifyHp(level * 2, "Died from having a negative level?");
+			modifyHp(level * 2, "Muerte por tenes un nivel negativo?");
 		}
 	}
 	
@@ -117,8 +125,12 @@ public class Creature {
 	
 	private String causeOfDeath;
 	public String causeOfDeath() { return causeOfDeath; }
-		
-	public Creature(World world, char glyph, Color color, String name, int maxHp, int attack, int defense){
+	
+	private Screen shopScreen;
+	public Screen shopScreen() { return shopScreen; }
+	public void setShopScreen(Screen shop) { this.shopScreen = shop; }
+	
+	public Creature(World world, char glyph, char gender, Color color, String name, int maxHp, int attack, int defense){
 		this.world = world;
 		this.glyph = glyph;
 		this.color = color;
@@ -137,33 +149,54 @@ public class Creature {
 		this.maxMana = 5;
 		this.mana = maxMana;
 		this.regenManaPer1000 = 20;
+		this.job = name;
+		this.gender = gender;
+	}
+	
+	/**
+	 * 
+	 * @param g (el genero en char, puede ser 'M' o 'F', mayuscula o minuscula)
+	 * @param knowsObject (si false devuelve apersonales un - una)
+	 * @return Devuelve el articulo correspondiente al genero, si la accion
+	 * ocurre en una criatura en lugar del player devuelve el posesivo "su".
+	 */
+	public String checkGender(char g, boolean knowsObject){
+		g = Character.toUpperCase(g);
+		
+		if(knowsObject){
+			if(this.isPlayer){
+				return (g == 'M' ? "el" : "la");
+			}else{
+				return "su";
+			}
+		}else{
+			return (g == 'M' ? "un" : "una");
+		}
 	}
 	
 	public void moveBy(int mx, int my, int mz){
 		if (mx==0 && my==0 && mz==0)
 			return;
 		
-		TileData tile = world.tile(x+mx, y+my, z+mz);
+		Tile tile = world.tile(x+mx, y+my, z+mz);
 		
 		if (mz == -1){
-			if (tile.interaction() == TileData.Interaction.STAIRS_DOWN) {
-				doAction("walk up the stairs to level %d", z+mz+1);
+			if (tile.interaction() == Tile.Interaction.STAIRS_DOWN) {
+				doAction("sube las escaleras hacia el piso %d", z+mz+1);
 			} else {
-				doAction("try to go up but are stopped by the cave ceiling");
 				return;
 			}
 		} else if (mz == 1){
-			if (tile.interaction() == TileData.Interaction.STAIRS_UP) {
-				doAction("walk down the stairs to level %d", z+mz+1);
+			if (tile.interaction() == Tile.Interaction.STAIRS_UP) {
+				doAction("baja las escaleras hacia el piso %d", z+mz+1);
 			} else {
-				doAction("try to go down but are stopped by the cave floor");
 				return;
 			}
 		}
 		
 		if(tile.getPortalTo() != null &&
 				!tile.getPortalTo().isEmpty()){
-			doAction("go into the", tile.getPortalTo().toLowerCase());
+			doAction("mueve a un nuevo mapa: %s", tile.getPortalTo().toLowerCase());
 
 			this.world = new MapLoader()
 							.preBuild(tile.getPortalTo());
@@ -178,7 +211,7 @@ public class Creature {
 			return;
 		}
 		
-		if(tile.interaction() == TileData.Interaction.CHANGES && !tile.isGround()){
+		if(tile.interaction() == Tile.Interaction.CHANGES && !tile.isGround()){
 			if(tile.change_to() != null){
 				world.changeTile(x+mx, y+my, z+mz, tile.change_to());
 			}
@@ -203,16 +236,16 @@ public class Creature {
 	}
 
 	public void meleeAttack(Creature other){
-		commonAttack(other, attackValue(), "attack the %s for %d damage", other.name);
+		commonAttack(other, attackValue(), "ataca al %s golpeando por %d", other.name);
 	}
 
 	private void throwAttack(Item item, Creature other) {
-		commonAttack(other, attackValue / 2 + item.thrownAttackValue(), "throw a %s at the %s for %d damage", nameOf(item), other.name);
+		commonAttack(other, attackValue / 2 + item.thrownAttackValue(), "arroja "+ checkGender(item.gender(), true) +" %s al %s golpeando por %d", nameOf(item), other.name);
 		other.addEffect(item.quaffEffect());
 	}
 	
 	public void rangedWeaponAttack(Creature other){
-		commonAttack(other, attackValue / 2 + weapon.rangedAttackValue(), "fire a %s at the %s for %d damage", nameOf(weapon), other.name);
+		commonAttack(other, attackValue / 2 + weapon.rangedAttackValue(), "dispara "+ checkGender(weapon.gender(), true) +" %s al %s golpeando por %d", nameOf(weapon), other.name);
 	}
 	
 	private void commonAttack(Creature other, int attack, String action, Object ... params) {
@@ -230,7 +263,7 @@ public class Creature {
 		
 		doAction(action, params2);
 		
-		other.modifyHp(-amount, "Killed by a " + name);
+		other.modifyHp(-amount, "Asesinado por " + checkGender(gender, false) + " " + name);
 		
 		if (other.hp < 1)
 			gainXp(other);
@@ -253,14 +286,14 @@ public class Creature {
 		if (hp > maxHp) {
 			hp = maxHp;
 		} else if (hp < 1) {
-			doAction("die");
+			doAction("perece");
 			leaveCorpse();
 			world.remove(this);
 		}
 	}
 	
 	private void leaveCorpse(){
-		Item corpse = new Item('%', color, name + " corpse", null);
+		Item corpse = new Item('%', 'M', color, "cadaver de" + name, null);
 		corpse.modifyFoodValue(maxHp * 5);
 		world.addAtEmptySpace(corpse, x, y, z);
 		for (Item item : inventory.getItems()){
@@ -272,13 +305,13 @@ public class Creature {
 	public void open(int wx, int wy, int wz) {
 		modifyFood(-10);
 		//world.useDoor(wx, wy, wz);
-		doAction("open the door");
+		doAction("abre la puerta");
 	}
 	
 	public void dig(int wx, int wy, int wz) {
 		modifyFood(-10);
 		//world.dig(wx, wy, wz);
-		doAction("dig");
+		doAction("cava");
 	}
 	
 	public void update(){
@@ -307,7 +340,7 @@ public class Creature {
 		regenHpCooldown -= regenHpPer1000;
 		if (regenHpCooldown < 0){
 			if (hp < maxHp){
-				modifyHp(1, "Died from regenerating health?");
+				modifyHp(1, "Mueres por curarte vida?");
 				modifyFood(-1);
 			}
 			regenHpCooldown += 1000;
@@ -342,9 +375,10 @@ public class Creature {
 	public void talkAction(Color color, String message, Object ... params){
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify(color, message + ".", params);
+				other.notify(color, makeSecondPerson(message, false) + ".", params);
 			} else {
-				other.notify(color, message, params);
+				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " : "La " + name);
+				other.notify(color, String.format("%s %s.", nombre, message), params);
 			}
 		}
 	}
@@ -352,9 +386,10 @@ public class Creature {
 	public void doAction(String message, Object ... params){
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify(message + ".", params);
+				other.notify(makeSecondPerson(message, true) + ".", params);
 			} else {
-				other.notify(String.format("The %s %s.", name, makeSecondPerson(message)), params);
+				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
+				other.notify(String.format("%s %s.", nombre, message), params);
 			}
 		}
 	}
@@ -365,9 +400,10 @@ public class Creature {
 		
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify("You " + message + ".", params);
+				other.notify(makeSecondPerson(message, false) + ".", params);
 			} else {
-				other.notify(String.format("The %s %s.", name, makeSecondPerson(message)), params);
+				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " : "La " + name);
+				other.notify(String.format("%s %s.", nombre, message), params);
 			}
 			other.learnName(item);
 		}
@@ -392,9 +428,16 @@ public class Creature {
 		return others;
 	}
 	
-	private String makeSecondPerson(String text){
+	private String capitalize(String text){
+		return Character.toUpperCase(text.charAt(0))+""+text.substring(1);
+	}
+	
+	private String makeSecondPerson(String text, boolean capitalize){
 		String[] words = text.split(" ");
 		words[0] = words[0] + "s";
+		
+		if(capitalize)
+			words[0] = capitalize(words[0]);
 		
 		StringBuilder builder = new StringBuilder();
 		for (String word : words){
@@ -410,11 +453,11 @@ public class Creature {
 				|| ai.canSee(wx, wy, wz));
 	}
 
-	public TileData realTile(int wx, int wy, int wz) {
+	public Tile realTile(int wx, int wy, int wz) {
 		return world.tile(wx, wy, wz);
 	}
 	
-	public TileData tile(int wx, int wy, int wz) {
+	public Tile tile(int wx, int wy, int wz) {
 		if (canSee(wx, wy, wz))
 			return world.tile(wx, wy, wz);
 		else
@@ -432,9 +475,9 @@ public class Creature {
 		Item item = world.item(x, y, z);
 		
 		if (inventory.isFull() || item == null){
-			doAction("grab at the ground");
+			doAction("agarra la nada");
 		} else {
-			doAction("pickup a %s", nameOf(item));
+			doAction("levanta "+ checkGender(item.gender(), false) +" %s", nameOf(item));
 			world.remove(x, y, z);
 			inventory.add(item);
 		}
@@ -442,11 +485,11 @@ public class Creature {
 	
 	public void drop(Item item){
 		if (world.addAtEmptySpace(item, x, y, z)){
-			doAction("drop a " + nameOf(item));
+			doAction("suelta "+ checkGender(item.gender(), true) +" %s", nameOf(item));
 			inventory.remove(item);
 			unequip(item);
 		} else {
-			notify("There's nowhere to drop the %s.", nameOf(item));
+			notify("No hay lugar donde soltar"+ checkGender(item.gender(), true) +" %s.", nameOf(item));
 		}
 	}
 	
@@ -456,30 +499,30 @@ public class Creature {
 		if (food > maxFood) {
 			maxFood = (maxFood + food) / 2;
 			food = maxFood;
-			notify("You can't belive your stomach can hold that much!");
-			modifyHp(-1, "Killed by overeating.");
+			notify("No puedes creer que tu estomago soporte tanto!");
+			modifyHp(-1, "Muerte por comer demasiado.");
 		} else if (food < 1 && isPlayer()) {
-			modifyHp(-1000, "Starved to death.");
+			modifyHp(-1000, "Muerto de hambre.");
 		}
 	}
 	
-	public boolean isPlayer(){
-		return glyph == '@';
-	}
+	private boolean isPlayer;
+	public boolean isPlayer(){ return isPlayer; }
+	public void makePlayer() { this.isPlayer = true; }
 	
 	public void eat(Item item){
-		doAction("eat a " + nameOf(item));
+		doAction("come " + checkGender(item.gender(), true) + " " + nameOf(item));
 		consume(item);
 	}
 	
 	public void quaff(Item item){
-		doAction("quaff a " + nameOf(item));
+		doAction("bebe " + checkGender(item.gender(), true) + " " + nameOf(item));
 		consume(item);
 	}
 	
 	private void consume(Item item){
 		if (item.foodValue() < 0)
-			notify("Gross!");
+			notify("Asqueroso!");
 		
 		addEffect(item.quaffEffect());
 		
@@ -512,11 +555,11 @@ public class Creature {
 		
 		if (item == armor){
 			if (hp > 0)
-				doAction("remove a " + nameOf(item));
+				doAction("remueve " + checkGender(item.gender(), true) + " " + nameOf(item));
 			armor = null;
 		} else if (item == weapon) {
 			if (hp > 0) 
-				doAction("put away a " + nameOf(item));
+				doAction("guarda " + checkGender(item.gender(), true) + " " + nameOf(item));
 			weapon = null;
 		}
 	}
@@ -524,7 +567,7 @@ public class Creature {
 	public void equip(Item item){
 		if (!inventory.contains(item)) {
 			if (inventory.isFull()) {
-				notify("Can't equip %s since you're holding too much stuff.", nameOf(item));
+				notify("No puedes equipar "+ checkGender(item.gender(), true) + " %s ya que el inventario esta lleno!", nameOf(item));
 				return;
 			} else {
 				world.remove(item);
@@ -537,11 +580,11 @@ public class Creature {
 		
 		if (item.attackValue() + item.rangedAttackValue() >= item.defenseValue()){
 			unequip(weapon);
-			doAction("wield a " + nameOf(item));
+			doAction("empunia " +  checkGender(item.gender(), true) + " " + nameOf(item));
 			weapon = item;
 		} else {
 			unequip(armor);
-			doAction("put on a " + nameOf(item));
+			doAction("viste " +  checkGender(item.gender(), true) + " " + nameOf(item));
 			armor = item;
 		}
 	}
@@ -574,7 +617,7 @@ public class Creature {
 		if (c != null)
 			throwAttack(item, c);				
 		else
-			doAction("throw a %s", nameOf(item));
+			doAction("arroja "+ checkGender(item.gender(), true) +" %s", nameOf(item));
 		
 		if (item.quaffEffect() != null && c != null)
 			getRidOf(item);
@@ -593,10 +636,10 @@ public class Creature {
 		Creature other = creature(x2, y2, z);
 		
 		if (spell.manaCost() > mana){
-			doAction("point and mumble but nothing happens");
+			doAction("apunta y murmulla pero nada ocurre");
 			return;
 		} else if (other == null) {
-			doAction("point and mumble at nothing");
+			doAction("apunta y murmulla a la nada");
 			return;
 		}
 		
@@ -609,7 +652,7 @@ public class Creature {
 	}
 	
 	public void learnName(Item item){
-		notify("The " + item.appearance() + " is a " + item.name() + "!");
+		notify(capitalize(checkGender(item.gender(), true)) + item.appearance() + " es " + checkGender(item.gender(), false) + " " + item.name() + "!");
 		ai.setName(item, item.name());
 	}
 }

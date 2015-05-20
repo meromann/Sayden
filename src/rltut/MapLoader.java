@@ -22,24 +22,27 @@ public class MapLoader {
 	/** Variable usada para recortar el XML con la informacion del mapa*/
 	private String mapReference;
 	/** Tileset cargado del XML*/
-	private LinkedList<TileData> tileSet;
+	private LinkedList<Tile> tileSet;
 	/** Lista con los npcs que se agregarán al mapa recien creado */
 	private LinkedList<Creature> npcs;
 	
 	private World world;
-	private TileData[][][] tiles;
+	private Tile[][][] tiles;
 	
 	public World preBuild(String mapName)
 	{
-		tileSet = new LinkedList<TileData>();
+		tileSet = new LinkedList<Tile>();
 		npcs = new LinkedList<Creature>();
 		
 		if( checkFile(mapName) ){
 			String[] lines = mapReference.split("\n");
+			
+			//En caso de que el mapa sea mas chico que el mundo soportado
 			mapHeight = lines.length < ApplicationMain.WORLD_HEIGHT ? ApplicationMain.WORLD_HEIGHT : lines.length;
 			mapWidth = lines[0].length() < ApplicationMain.WORLD_HEIGHT ? ApplicationMain.WORLD_HEIGHT : lines[0].length();
 			
-			tiles = new TileData[mapWidth][mapHeight][1];
+			//TODO: Resolver z_index!!
+			tiles = new Tile[mapWidth][mapHeight][1];
 			
 			for(int y = 0; y < lines.length; y++){
 				for(int x = 0; x < lines[y].length(); x++){
@@ -121,7 +124,7 @@ public class MapLoader {
 			    	for(int t = 0; t < tileElementList.getLength(); t++){
 			    		Element tileElement = (Element)tileElementList.item(t);
 			    		
-			    		TileData tile = analyzeTile(tileElement);
+			    		Tile tile = analyzeTile(tileElement);
 			            
 			    		tileSet.add(t, tile);
 			    	}
@@ -158,6 +161,7 @@ public class MapLoader {
 		 return true;
 	}
 	
+	/** Analiza el esquema de datos presente en los npcs y los traduce en un objeto */
 	private Creature analyzeCreature(Element creatureElement){
 		NodeList textWNList = creatureElement.getChildNodes();
 		
@@ -166,6 +170,7 @@ public class MapLoader {
 		
 		int glyphN = Integer.parseInt((creatureElement.getAttribute("glyphN").isEmpty() ? "0" : creatureElement.getAttribute("glyphN")));
 		char glyphC = creatureElement.getAttribute("glyphC").isEmpty() ? ' ' : creatureElement.getAttribute("glyphC").charAt(0);
+		char gender = creatureElement.getAttribute("gender").isEmpty() ? 'M' : creatureElement.getAttribute("gender").charAt(0);
 		char actualGlyph = '@';
 		
 		int startPosX = Integer.parseInt(creatureElement.getAttribute("x"));
@@ -205,8 +210,8 @@ public class MapLoader {
 			talkColor = npcColor;
 		}
 		
-		Creature npc = new Creature(world, actualGlyph, npcColor, npcName, 10,1,1);
-		new NpcAi(npc, npcName, npcJob, talkColor);
+		Creature npc = new Creature(world, gender, actualGlyph, npcColor, npcName, 10,1,1);
+		new NpcAi(npc, npcJob, talkColor);
 		npc.x = startPosX;
 		npc.y = startPosY;
 		npc.z = startPosZ;
@@ -218,9 +223,15 @@ public class MapLoader {
 			
 			NodeList introduction = dialogueList.getElementsByTagName("introduction");
 			NodeList greetings = dialogueList.getElementsByTagName("greetings");
+			NodeList goodbye = dialogueList.getElementsByTagName("goodbye");
+			NodeList ongive = dialogueList.getElementsByTagName("ongive");
+			NodeList onreceive = dialogueList.getElementsByTagName("onreceive");
 			
 			((NpcAi) npc.getCreatureAi()).setIntroduction(retrieveMessageData(introduction, npc.color()));
 			((NpcAi) npc.getCreatureAi()).setGreetings(retrieveMessageData(greetings, npc.color()));
+			((NpcAi) npc.getCreatureAi()).setGoodbye(retrieveMessageData(goodbye, npc.color()));
+			((NpcAi) npc.getCreatureAi()).setOngive(retrieveMessageData(ongive, npc.color()));
+			((NpcAi) npc.getCreatureAi()).setOnreceive(retrieveMessageData(onreceive, npc.color()));
 		}
 		
 		if(permittedTile > 0){
@@ -230,6 +241,8 @@ public class MapLoader {
 		return npc;
 	}
 	
+	/** Analiza el esquema de datos presente en los dialogos de los npc, los añade a una coleccion y los
+	 * devuelve para agregarlos a la criatura */
 	private List<Message> retrieveMessageData(NodeList messageNode, Color defaultColor){
 		List<Message> messageList = new LinkedList<Message>();
 
@@ -258,15 +271,16 @@ public class MapLoader {
 		return messageList;
 	}
 	
-	private TileData analyzeTile(Element tileElement){
+	/** Analiza el esquema de datos presente en los tiles y lo traduce en un objeto */
+	private Tile analyzeTile(Element tileElement){
 		NodeList textWNList = tileElement.getChildNodes();
 		String tileName = ((Node)textWNList.item(0)).getNodeValue().trim();
-		TileData tile = null;
+		Tile tile = null;
 		
-		if(TileData.VALUES_BY_NAME.containsKey(tileName)){
-			tile = TileData.VALUES_BY_NAME.get(tileName);
+		if(Tile.VALUES_BY_NAME.containsKey(tileName)){
+			tile = Tile.VALUES_BY_NAME.get(tileName);
 		}else{
-			tile = new TileData();
+			tile = new Tile();
 		}
 				
 		String portal_to = tileElement.getAttribute("viaja");
@@ -278,7 +292,7 @@ public class MapLoader {
 		String cloneOf = tileElement.getAttribute("clone");
 		
 		if(cloneOf != null && !cloneOf.isEmpty()){
-			TileData patient_zero = TileData.VALUES_BY_NAME.get(cloneOf);
+			Tile patient_zero = Tile.VALUES_BY_NAME.get(cloneOf);
 			
 			tile.setGlyph(patient_zero.glyph());
 			tile.setColor(patient_zero.color());
@@ -292,7 +306,7 @@ public class MapLoader {
 			NodeList textToList = tileElement.getElementsByTagName("tile_to");
 			Element tileToName = (Element) textToList.item(0);
 				  			  	
-			TileData tile_to = analyzeTile(tileToName);
+			Tile tile_to = analyzeTile(tileToName);
 			
 			tile_to.setChangeTo(tile);
 			tile.setChangeTo(tile_to);

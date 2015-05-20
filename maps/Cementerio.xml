@@ -68,7 +68,7 @@
 		</tile>
 		<tile isGround="false" seeThrough="false" color="255-0-0" glyphN="10" 
 		details="Una gran puerta de madera con simbolos cristianos, completamente cerrada." 
-		interactable="change" action="con mucho esfuerzo, abres la puerta.">
+		interactable="change" action="abre la puerta con mucho esfuerzo">
 			INTERACTABLE
 			<tile_to isGround="true" seeThrough="true" glyphN="9" details="Sientes una brisa tenebrosa colarse desde el interior de la iglesia...">
 				OPEN_DOOR

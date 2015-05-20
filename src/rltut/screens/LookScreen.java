@@ -2,7 +2,7 @@ package rltut.screens;
 
 import rltut.Creature;
 import rltut.Item;
-import rltut.TileData;
+import rltut.Tile;
 
 public class LookScreen extends TargetBasedScreen {
 
@@ -23,7 +23,7 @@ public class LookScreen extends TargetBasedScreen {
 			return;
 		}
 		
-		TileData tile = player.tile(x, y, player.z);
+		Tile tile = player.tile(x, y, player.z);
 		caption = tile.glyph() + " " + tile.details();
 	}
 }

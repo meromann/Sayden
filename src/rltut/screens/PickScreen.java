@@ -3,15 +3,15 @@ package rltut.screens;
 import rltut.Creature;
 import rltut.Item;
 
-public class DropScreen extends InventoryBasedScreen {
+public class PickScreen extends InventoryBasedScreen {
 
-	public DropScreen(Creature player) {
+	public PickScreen(Creature player) {
 		super(player);
 	}
 
 	@Override
 	protected String getVerb() { 
-		return "soltar"; 
+		return "elegir"; 
 	}
 
 	@Override

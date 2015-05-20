@@ -6,7 +6,7 @@ import rltut.Creature;
 import rltut.FieldOfView;
 import rltut.Item;
 import rltut.Message;
-import rltut.TileData;
+import rltut.Tile;
 
 public class PlayerAi extends CreatureAi {
 
@@ -23,7 +23,7 @@ public class PlayerAi extends CreatureAi {
 		this.fov = fov;
 	}
 	
-	public void onEnter(int x, int y, int z, TileData tile){
+	public void onEnter(int x, int y, int z, Tile tile){
 		if (tile.isGround()){
 			creature.x = x;
 			creature.y = y;
@@ -31,7 +31,7 @@ public class PlayerAi extends CreatureAi {
 			
 			Item item = creature.item(creature.x, creature.y, creature.z);
 			if (item != null)
-				creature.notify("There's a " + creature.nameOf(item) + " here.");
+				creature.notify("Te topas con " + (item.gender() == 'M' ? "un " : "una ") + creature.nameOf(item) + ".");
 		}
 		/*} else if (tile.get()) {
 			creature.dig(x, y, z);
@@ -46,10 +46,17 @@ public class PlayerAi extends CreatureAi {
 		return fov.isVisible(wx, wy, wz);
 	}
 	
-	public void onGainLevel(){
+	public void onGainLevel(){}
+	
+	public void onReceive(Item item, Creature from){
+		from.doAction("Te entrega el %s", item.name());
+	}
+	
+	public void onGive(Item item, Creature to){
+		creature.doAction("Entregas el %s a %s", item.name(), to.name());
 	}
 
-	public TileData rememberedTile(int wx, int wy, int wz) {
+	public Tile rememberedTile(int wx, int wy, int wz) {
 		return fov.tile(wx, wy, wz);
 	}
 }

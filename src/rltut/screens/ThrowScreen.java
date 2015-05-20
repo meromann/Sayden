@@ -15,7 +15,7 @@ public class ThrowScreen extends InventoryBasedScreen {
 
 	@Override
 	protected String getVerb() {
-		return "throw";
+		return "arrojar";
 	}
 
 	@Override

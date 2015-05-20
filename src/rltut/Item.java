@@ -6,6 +6,9 @@ import java.util.List;
 
 public class Item {
 
+	private char gender;
+	public char gender() { return gender; }
+	
 	private char glyph;
 	public char glyph() { return glyph; }
 	
@@ -45,36 +48,53 @@ public class Item {
 	private List<Spell> writtenSpells;
 	public List<Spell> writtenSpells() { return writtenSpells; }
 	
+	private int perceivedValue;
+	public int perceivedValue() { return perceivedValue; }
+	public void setPerceivedValue(int newValue) { this.perceivedValue = newValue; }
+	
 	public void addWrittenSpell(String name, int manaCost, Effect effect){
 		writtenSpells.add(new Spell(name, manaCost, effect));
 	}
 	
-	public Item(char glyph, Color color, String name, String appearance){
+	public Item(char glyph, char gender, Color color, String name, String appearance, int value){
 		this.glyph = glyph;
 		this.color = color;
 		this.name = name;
+		this.gender = gender;
 		this.appearance = appearance == null ? name : appearance;
 		this.thrownAttackValue = 1;
 		this.writtenSpells = new ArrayList<Spell>();
+		this.perceivedValue = value;
+	}
+	
+	public Item(char glyph, char gender, Color color, String name, String appearance){
+		this.glyph = glyph;
+		this.color = color;
+		this.name = name;
+		this.gender = gender;
+		this.appearance = appearance == null ? name : appearance;
+		this.thrownAttackValue = 1;
+		this.writtenSpells = new ArrayList<Spell>();
+		this.perceivedValue = 0;
 	}
 	
 	public String details() {
 		String details = "";
 		
 		if (attackValue != 0)
-			details += "  attack:" + attackValue;
+			details += "  ataque:" + attackValue;
 
 		if (thrownAttackValue != 1)
-			details += "  thrown:" + thrownAttackValue;
+			details += "  arrojadizo:" + thrownAttackValue;
 		
 		if (rangedAttackValue > 0)
-			details += "  ranged:" + rangedAttackValue;
+			details += "  rango:" + rangedAttackValue;
 		
 		if (defenseValue != 0)
-			details += "  defense:" + defenseValue;
+			details += "  defensa:" + defenseValue;
 
 		if (foodValue != 0)
-			details += "  food:" + foodValue;
+			details += "  comida:" + foodValue;
 		
 		return details;
 	}
