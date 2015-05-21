@@ -143,6 +143,9 @@ public class World {
 		int x;
 		int y;
 		
+		if(depth <= -1)
+			return;
+		
 		do {
 			x = (int)(Math.random() * width);
 			y = (int)(Math.random() * height);

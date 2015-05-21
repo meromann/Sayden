@@ -46,6 +46,8 @@ public class StuffFactory {
 		world.addAtEmptyLocation(player, 0);
 		new PlayerAi(player, messages, fov);
 		player.makePlayer();
+		player.inventory().add(newDagger(-1));
+		player.inventory().add(newOPDagger(-1));
 		return player;
 	}
 	
@@ -108,8 +110,14 @@ public class StuffFactory {
 	
 	public Item newDagger(int depth){
 		Item item = new Item(')', 'F', AsciiPanel.white, "daga", null);
-		item.modifyAttackValue(5);
-		item.modifyThrownAttackValue(5);
+		item.addDamageType(DamageType.PIERCING, 1);
+		world.addAtEmptyLocation(item, depth);
+		return item;
+	}
+	
+	public Item newOPDagger(int depth){
+		Item item = new Item(')', 'F', AsciiPanel.white, "op daga", null);
+		item.addDamageType(DamageType.PIERCING, 10);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}

@@ -216,6 +216,10 @@ public class MapLoader {
 		npc.y = startPosY;
 		npc.z = startPosZ;
 		
+		if(creatureElement.getElementsByTagName("inventory").getLength() > 0){
+			
+		}
+		
 		if(creatureElement.getElementsByTagName("dialogue").getLength() > 0){
 			NodeList dialogueNode = creatureElement.getElementsByTagName("dialogue");
 			

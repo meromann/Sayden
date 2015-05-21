@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Item {
-
+	
 	private char gender;
 	public char gender() { return gender; }
 	
@@ -48,6 +48,14 @@ public class Item {
 	private List<Spell> writtenSpells;
 	public List<Spell> writtenSpells() { return writtenSpells; }
 	
+	private List<DamageType> damageTypes;
+	public List<DamageType> damageTypes() { return damageTypes; }
+	public Item addDamageType(DamageType newDamage, int power) { 
+		DamageType newType = new DamageType(newDamage.name(), newDamage.wondType());
+		this.damageTypes.add(newType.addPower(power)); 
+		return this; 
+	}
+	
 	private int perceivedValue;
 	public int perceivedValue() { return perceivedValue; }
 	public void setPerceivedValue(int newValue) { this.perceivedValue = newValue; }
@@ -64,6 +72,7 @@ public class Item {
 		this.appearance = appearance == null ? name : appearance;
 		this.thrownAttackValue = 1;
 		this.writtenSpells = new ArrayList<Spell>();
+		this.damageTypes = new ArrayList<DamageType>();
 		this.perceivedValue = value;
 	}
 	
@@ -75,13 +84,18 @@ public class Item {
 		this.appearance = appearance == null ? name : appearance;
 		this.thrownAttackValue = 1;
 		this.writtenSpells = new ArrayList<Spell>();
+		this.damageTypes = new ArrayList<DamageType>();
 		this.perceivedValue = 0;
 	}
 	
 	public String details() {
 		String details = "";
 		
-		if (attackValue != 0)
+		for(int i = 0; i < damageTypes.size(); i++){
+			details += "  "+damageTypes.get(i).name() + ": " + damageTypes.get(i).power();
+		}
+		
+		/*if (attackValue != 0)
 			details += "  ataque:" + attackValue;
 
 		if (thrownAttackValue != 1)
@@ -94,7 +108,7 @@ public class Item {
 			details += "  defensa:" + defenseValue;
 
 		if (foodValue != 0)
-			details += "  comida:" + foodValue;
+			details += "  comida:" + foodValue;*/
 		
 		return details;
 	}
