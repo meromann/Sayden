@@ -1,6 +1,11 @@
 package rltut;
 
 import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,6 +112,11 @@ public class Creature {
 	private List<Effect> effects;
 	public List<Effect> effects(){ return effects; }
 	
+	private List<Wound> wounds;
+	public List<Wound> wounds() { return wounds; }
+	
+	public void addWound(Wound wound){ wounds.add(wound); wound.onApply(this); }
+	
 	private int maxMana;
 	public int maxMana() { return maxMana; }
 	public void modifyMaxMana(int amount) { maxMana += amount; }
@@ -146,11 +156,50 @@ public class Creature {
 		this.level = 1;
 		this.regenHpPer1000 = 10;
 		this.effects = new ArrayList<Effect>();
+		this.wounds = new ArrayList<Wound>();
 		this.maxMana = 5;
 		this.mana = maxMana;
 		this.regenManaPer1000 = 20;
 		this.job = name;
 		this.gender = gender;
+	}
+	
+	public void fetchWound(String woundType, String woundPlace, int woundSeverity, Creature enemy){
+		File file = new File("wounds/Wound"+woundType.toUpperCase()+".txt");
+		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+			boolean woundPicked = false;
+			while(woundPicked == false){
+				for(String line; (line = br.readLine()) != null; ) {
+			        if(line.indexOf(woundPlace+woundSeverity) > -1){
+			        	String[] action = line.split("-");
+			        	doAction(action[1], 
+			        			this.isPlayer ? "la" : "tu", 
+			        					this.isPlayer ? ("de " + (enemy.gender() == 'M' ? "el " : "la ") + enemy.name()) : "");
+			        	
+			        	final String applyAction = line.substring(line.indexOf("APPLY(")+1,line.indexOf(")APPLY")).split(",")[1];
+			        	final float applyChance = Float.parseFloat(line.substring(line.indexOf("APPLY(")+6,line.indexOf(")APPLY")).split(",")[0]);
+			        	
+			        	enemy.addWound(new Wound(Integer.parseInt(action[3]), woundSeverity, action[2]){
+			    			public void onApply(Creature creature){ 
+			    				if(Math.random() < applyChance) { 
+			    					creature.notifyArround(applyAction, creature.isPlayer() ? " te" : "", creature.isPlayer() ? "" : "al " + creature.name()+""); 
+			    				} 
+			    			}
+			    			public void update(Creature creature){ super.update(creature); }
+			    			public void onFinish(Creature creature){}
+			    		});
+			        	
+			        	woundPicked = true;
+			        }else{
+			        	continue;
+			        }
+			    }
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -231,8 +280,8 @@ public class Creature {
 		if (other == null)
 			ai.onEnter(x+mx, y+my, z+mz, tile);
 		else
-			other.ai.onTalkedTo(this);
-			//meleeAttack(other);
+			//other.ai.onTalkedTo(this);
+			meleeAttack(other);
 	}
 
 	public void meleeAttack(Creature other){
@@ -261,7 +310,8 @@ public class Creature {
 		}
 		params2[params2.length - 1] = amount;
 		
-		doAction(action, params2);
+		//doAction(action, params2);
+		fetchWound("BLUNT", "back", 1, other);
 		
 		other.modifyHp(-amount, "Asesinado por " + checkGender(gender, false) + " " + name);
 		
@@ -293,7 +343,7 @@ public class Creature {
 	}
 	
 	private void leaveCorpse(){
-		Item corpse = new Item('%', 'M', color, "cadaver de" + name, null);
+		Item corpse = new Item('%', 'M', color, "cadaver de " + name, null);
 		corpse.modifyFoodValue(maxHp * 5);
 		world.addAtEmptySpace(corpse, x, y, z);
 		for (Item item : inventory.getItems()){
@@ -315,11 +365,26 @@ public class Creature {
 	}
 	
 	public void update(){
-		modifyFood(-1);
+		//modifyFood(-1);
 		regenerateHealth();
 		regenerateMana();
 		updateEffects();
+		updateWounds();
 		ai.onUpdate();
+	}
+	
+	private void updateWounds(){
+		List<Wound> done = new ArrayList<Wound>();
+		
+		for (Wound wound : wounds){
+			wound.update(this);
+			if (wound.isHealed()) {
+				wound.onFinish(this);
+				done.add(wound);
+			}
+		}
+		
+		wounds.removeAll(done);
 	}
 	
 	private void updateEffects(){
@@ -370,6 +435,12 @@ public class Creature {
 	public void notify(Color color, String message, Object ... params){
 		Message newMessage = new Message(String.format(message, params), color);
 		ai.onNotify(newMessage);
+	}
+	
+	public void notifyArround(String message, Object ... params){
+		for (Creature other : getCreaturesWhoSeeMe()){
+			other.notify(message, params);
+		}
 	}
 	
 	public void talkAction(Color color, String message, Object ... params){

@@ -1,0 +1,1 @@
+back1-golpea %s espalda %s-moreton-12-APPLY(0.9,El impacto%s aturde %s)APPLY

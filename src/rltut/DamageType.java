@@ -14,7 +14,7 @@ public class DamageType {
 	
 	private String woundType;
 	public String wondType() { return woundType; }
-	
+		
 	public DamageType(String name, String woundType){
 		this.name = name;
 		this.woundType = woundType;

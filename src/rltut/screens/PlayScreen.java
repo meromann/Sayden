@@ -49,6 +49,7 @@ public class PlayScreen implements Screen {
 
 	private void createCreatures(StuffFactory factory){
 		player = factory.newPlayer(messages, fov);
+		factory.newZombie(0, player);
 	}
 
 	private void createRocks(StuffFactory factory) {
