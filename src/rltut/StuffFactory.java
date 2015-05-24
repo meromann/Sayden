@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import rltut.Item.ItemType;
-import rltut.ai.BatAi;
 import rltut.ai.FungusAi;
 import rltut.ai.GoblinAi;
 import rltut.ai.PlayerAi;
@@ -43,7 +42,9 @@ public class StuffFactory {
 	}
 	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
-		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 10, "BLUNT");
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.PIERCING, 1);
+		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
+		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 10, puños, piel);
 		world.addAtEmptyLocation(player, 0);
 		new PlayerAi(player, messages, fov);
 		player.makePlayer();
@@ -52,29 +53,32 @@ public class StuffFactory {
 		return player;
 	}
 	
-	public Creature newFungus(int depth, int spreadcount){
-		Creature fungus = new Creature(world, 'f', 'M', AsciiPanel.green, "hongo", 10, "NONE");
+	/*public Creature newFungus(int depth, int spreadcount){
+		Creature fungus = new Creature(world, 'f', 'M', AsciiPanel.green, "hongo", 10, "NONE", 0);
 		world.addAtEmptyLocation(fungus, depth);
 		new FungusAi(fungus, this, spreadcount);
 		return fungus;
-	}
+	}*/
 	
 	public Creature newZombie(int depth, Creature player){
-		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, "BLUNT");
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
+		Item dientes = new Item(ItemType.INTRINSIC, 'M', "dientes").addDamageType(DamageType.SLICE, 1);
+		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.BLUNT, 1);
+		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, Math.random() < 0.3 ? dientes : puños, piel);
 		world.addAtEmptyLocation(zombie, depth);
 		new ZombieAi(zombie, player);
 		zombie.equip(newLightArmor(-1));
 		return zombie;
 	}
 
-	public Creature newGoblin(int depth, Creature player){
-		Creature goblin = new Creature(world, 'g', 'M', AsciiPanel.brightGreen, "goblin", 66, "BLUNT");
+	/*public Creature newGoblin(int depth, Creature player){
+		Creature goblin = new Creature(world, 'g', 'M', AsciiPanel.brightGreen, "goblin", 66, "BLUNT", 1);
 		new GoblinAi(goblin, player);
 		goblin.equip(randomWeapon(depth));
 		goblin.equip(randomArmor(depth));
 		world.addAtEmptyLocation(goblin, depth);
 		return goblin;
-	}
+	}*/
 	
 	public Item newRock(int depth){
 		Item rock = new Item(ItemType.STATIC, ',', 'F', AsciiPanel.yellow, "roca", null);

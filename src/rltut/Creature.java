@@ -57,8 +57,11 @@ public class Creature {
 	private int food;
 	public int food() { return food; }
 	
-	private String damageType;
-	public String damageType() { return damageType; }
+	private Item intrinsicWeapon;
+	public Item intrinsicWeapon() { return intrinsicWeapon; }
+	
+	private Item intrinsicArmor;
+	public Item intrinsicArmor() { return intrinsicArmor; }
 	
 	private Item weapon;
 	public Item weapon() { return weapon; }
@@ -124,7 +127,7 @@ public class Creature {
 	public Screen shopScreen() { return shopScreen; }
 	public void setShopScreen(Screen shop) { this.shopScreen = shop; }
 	
-	public Creature(World world, char glyph, char gender, Color color, String name, int hp, String damageType){
+	public Creature(World world, char glyph, char gender, Color color, String name, int hp, Item weapon, Item armor){
 		this.world = world;
 		this.glyph = glyph;
 		this.color = color;
@@ -143,7 +146,8 @@ public class Creature {
 		this.regenManaPer1000 = 20;
 		this.job = name;
 		this.gender = gender;
-		this.damageType = damageType;
+		this.intrinsicWeapon = weapon;
+		this.intrinsicArmor = armor;
 	}
 	
 	/**
@@ -255,12 +259,12 @@ public class Creature {
 		Item defendingObject = null;	//Objeto con el que la criatura esta intentando defender el ataque
 		
 		//Elige el lugar donde se golpea, se toma en cuenta si el enemigo "dispara" un arco (no esta directamente al lado
-		//del objetivo del ataque
+		//del objetivo del ataque. Tambien se guarda el objeto con el cual el objetivo trata de defender el ataque
 		//
 		// 		 HEAD
-		//		  <-	>
+		//		  <-	<
 		//BACK	|  @	|	ARMS/CHEST
-		//		<  ->
+		//		>  ->
 		//	   LEGS/CHEST
 		//
 		if(x < other.x && y >= other.y){
@@ -276,39 +280,55 @@ public class Creature {
 			position = Math.random() < 0.4 ? "LEG" : "CHEST";
 			defendingObject = other.shield() != null ? other.shield() : other.armor();
 		}
-		
+	
 		if(damagingObject == null){
-			damageType = this.damageType;	//Si no tiene arma agarramos el "daño por defecto" TODO: Esto NO VA
-		}else{
-			//Comienza a recorrer todos los ataques posibles del objeto con el que se ataca
-			for(int i = 0; i < damagingObject.damageTypes().size(); i++){
-				int power = damagingObject.damageTypes().get(i).power();		//Guardamos el poder
-				String type = damagingObject.damageTypes().get(i).wondType();	//Guardamos el tipo
-				
-				//Comienza a recorrer todas las defensas posibles del objetivo TODO: Diferentes tipos de armadura!
-				for(int n = 0; n < defendingObject.damageTypes().size(); n++){
-					int defense_power = defendingObject.damageTypes().get(n).power();		//Guardamos el poder
-					String defense_type = defendingObject.damageTypes().get(n).wondType();	//Guardamos el tipo
-					
-					//Si es diferente el tipo no le prestemos atencion (BLUNT vs SLICE no hace nada)
-					if(type != defense_type)
-						continue;
-					
-					//Si el poder es menor que la defensa (teniendo en cuenta que es el mismo tipo de daño) no hace nada
-					//TODO: Efectos de overdefense! El arma rebota/se rompe/se cae
-					if(power <= defense_power){
-						System.out.println("DEFENDIDO");
-						continue;
-					}
-					//Si este es el mayor daño que encontramos, lo guardamos
-					if(damagePower < power){
-						damageType = type;
-						damagePower = power - defense_power < 0 ? 0 : power - defense_power;	//Por las dudas chequeamos negativos
-					}
-				}
-			}
+			damagingObject = intrinsicWeapon();
 		}
-
+		
+		if(defendingObject == null){
+			defendingObject = other.intrinsicArmor();
+		}
+				
+		//Comienza a recorrer todos los ataques posibles del objeto con el que se ataca
+		for(int i = 0; i < damagingObject.damageTypes().size(); i++){
+			int power = damagingObject.damageTypes().get(i).power();		//Guardamos el poder
+			String type = damagingObject.damageTypes().get(i).wondType();	//Guardamos el tipo
+			
+			damageType = type;
+			damagePower = power;
+			
+			//Comienza a recorrer todas las defensas posibles del objetivo
+			for(int n = 0; n < defendingObject.damageTypes().size(); n++){
+				int defense_power = defendingObject.damageTypes().get(n).power();		//Guardamos el poder
+				String defense_type = defendingObject.damageTypes().get(n).wondType();	//Guardamos el tipo
+				
+				//Las debilidades a ciertos tipos se resuelven con numeros negativos
+				if(defense_power < 0)
+					power += Math.abs(defense_power);
+				
+				//Si esta defendiendo con "la piel" no lo hace desde la cabeza
+				if(defendingObject.itemType() == ItemType.INTRINSIC &&
+						position == "HEAD")
+					defense_power = 0;
+				
+				//Si es diferente el tipo no le prestemos atencion (BLUNT vs SLICE no hace nada)
+				if(type != defense_type)
+					continue;
+				
+				//Si este es el mayor daño que encontramos, lo guardamos
+				if(damagePower < power){
+					damageType = type;
+					damagePower = power - defense_power < 0 ? 0 : power - defense_power;	//Por las dudas chequeamos negativos
+				}
+				
+				//Si el poder es menor que la defensa (teniendo en cuenta que es el mismo tipo de daño) no hace nada
+				//TODO: Efectos de overdefense! El arma rebota/se rompe/se cae
+				if(power <= defense_power){
+					other.doAction("resiste el ataque con %s %s", other.isPlayer() ? "tu" : "su", defendingObject.name());
+					return;
+				}
+			}			
+		}
 		other.addWound(new Wound(Wound.TYPES.get(damageType+"" + damagePower +"-"+position).setPosition(position)), this);
 	}
 
@@ -347,7 +367,7 @@ public class Creature {
 	public void update(){
 		//modifyFood(-1);
 		if(wounds.size() > 2){
-			modifyHp(-5, "AHA!");
+			modifyHp(1, "AHA!");
 		}
 		regenerateHealth();
 		regenerateMana();

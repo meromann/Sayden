@@ -13,6 +13,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import rltut.Item.ItemType;
 import rltut.ai.NpcAi;
 
 public class MapLoader {
@@ -210,7 +211,9 @@ public class MapLoader {
 			talkColor = npcColor;
 		}
 		
-		Creature npc = new Creature(world, gender, actualGlyph, npcColor, npcName, 10, "BLUNT");
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
+		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
+		Creature npc = new Creature(world, gender, actualGlyph, npcColor, npcName, 10, puños, piel);
 		new NpcAi(npc, npcJob, talkColor);
 		npc.x = startPosX;
 		npc.y = startPosY;

@@ -12,7 +12,8 @@ public class Item {
 		HELMENT,
 		STATIC,
 		EDIBLE,
-		READABLE
+		READABLE,
+		INTRINSIC
 	}
 	
 	private ItemType itemType;
@@ -58,6 +59,14 @@ public class Item {
 	
 	public void addWrittenSpell(String name, int manaCost, Effect effect){
 		writtenSpells.add(new Spell(name, manaCost, effect));
+	}
+	
+	//Constructor para los items intrinsecos (arma / armadura de la criatura, pelaje, puños, etc)
+	public Item(ItemType type, char gender, String name){
+		this.itemType = type;
+		this.gender = gender;
+		this.name = name;
+		this.damageTypes = new ArrayList<DamageType>();
 	}
 	
 	public Item(ItemType type, char glyph, char gender, Color color, String name, String appearance, int value){

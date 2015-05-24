@@ -21,10 +21,11 @@ public class FungusAi extends CreatureAi {
 
 	public void onUpdate(){
 		if (spreadcount < spreadlimit && Math.random() < 0.01)
-			spread();
+			return;
+			//spread();
 	}
 	
-	private void spread(){
+	/*private void spread(){
 		int x = creature.x + (int)(Math.random() * 11) - 5;
 		int y = creature.y + (int)(Math.random() * 11) - 5;
 		
@@ -38,5 +39,5 @@ public class FungusAi extends CreatureAi {
 		child.y = y;
 		child.z = creature.z;
 		spreadcount++;
-	}
+	}*/
 }
