@@ -210,7 +210,7 @@ public class MapLoader {
 			talkColor = npcColor;
 		}
 		
-		Creature npc = new Creature(world, gender, actualGlyph, npcColor, npcName, 10,1,1);
+		Creature npc = new Creature(world, gender, actualGlyph, npcColor, npcName, 10, "BLUNT");
 		new NpcAi(npc, npcJob, talkColor);
 		npc.x = startPosX;
 		npc.y = startPosY;

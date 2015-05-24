@@ -140,9 +140,9 @@ public class CreatureAi {
 		for (Item item : creature.inventory().getItems()){
 			if (item == null || creature.weapon() == item || creature.armor() == item)
 				continue;
-			
-			if (toThrow == null || item.thrownAttackValue() > toThrow.attackValue())
-				toThrow = item;
+			//TODO: Arraglar ESTO
+			//if (toThrow == null || item.thrownAttackValue() > toThrow.attackValue())
+				//toThrow = item;
 		}
 		
 		return toThrow;
@@ -169,6 +169,7 @@ public class CreatureAi {
 	}
 
 	protected boolean canUseBetterEquipment() {
+		/* TODO: Arreglar esto tambien
 		int currentWeaponRating = creature.weapon() == null ? 0 : creature.weapon().attackValue() + creature.weapon().rangedAttackValue();
 		int currentArmorRating = creature.armor() == null ? 0 : creature.armor().defenseValue();
 		
@@ -181,12 +182,13 @@ public class CreatureAi {
 			if (item.attackValue() + item.rangedAttackValue() > currentWeaponRating
 					|| isArmor && item.defenseValue() > currentArmorRating)
 				return true;
-		}
+		}*/
 		
 		return false;
 	}
 
 	protected void useBetterEquipment() {
+		/* TODO: Arreglar esto tambien e!
 		int currentWeaponRating = creature.weapon() == null ? 0 : creature.weapon().attackValue() + creature.weapon().rangedAttackValue();
 		int currentArmorRating = creature.armor() == null ? 0 : creature.armor().defenseValue();
 		
@@ -200,6 +202,6 @@ public class CreatureAi {
 					|| isArmor && item.defenseValue() > currentArmorRating) {
 				creature.equip(item);
 			}
-		}
+		}*/
 	}
 }

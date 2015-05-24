@@ -5,6 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Item {
+	public static enum ItemType{
+		SHIELD,
+		WEAPON,
+		ARMOR,
+		HELMENT,
+		STATIC,
+		EDIBLE,
+		READABLE
+	}
+	
+	private ItemType itemType;
+	public ItemType itemType() { return itemType; }
 	
 	private char gender;
 	public char gender() { return gender; }
@@ -17,25 +29,9 @@ public class Item {
 
 	private String name;
 	public String name() { return name; }
-
+	
 	private String appearance;
 	public String appearance() { return appearance; }
-	
-	private int foodValue;
-	public int foodValue() { return foodValue; }
-	public void modifyFoodValue(int amount) { foodValue += amount; }
-
-	private int attackValue;
-	public int attackValue() { return attackValue; }
-	public void modifyAttackValue(int amount) { attackValue += amount; }
-
-	private int defenseValue;
-	public int defenseValue() { return defenseValue; }
-	public void modifyDefenseValue(int amount) { defenseValue += amount; }
-
-	private int thrownAttackValue;
-	public int thrownAttackValue() { return thrownAttackValue; }
-	public void modifyThrownAttackValue(int amount) { thrownAttackValue += amount; }
 
 	private int rangedAttackValue;
 	public int rangedAttackValue() { return rangedAttackValue; }
@@ -64,28 +60,28 @@ public class Item {
 		writtenSpells.add(new Spell(name, manaCost, effect));
 	}
 	
-	public Item(char glyph, char gender, Color color, String name, String appearance, int value){
+	public Item(ItemType type, char glyph, char gender, Color color, String name, String appearance, int value){
 		this.glyph = glyph;
 		this.color = color;
 		this.name = name;
 		this.gender = gender;
 		this.appearance = appearance == null ? name : appearance;
-		this.thrownAttackValue = 1;
 		this.writtenSpells = new ArrayList<Spell>();
 		this.damageTypes = new ArrayList<DamageType>();
 		this.perceivedValue = value;
+		this.itemType = type;
 	}
 	
-	public Item(char glyph, char gender, Color color, String name, String appearance){
+	public Item(ItemType type, char glyph, char gender, Color color, String name, String appearance){
 		this.glyph = glyph;
 		this.color = color;
 		this.name = name;
 		this.gender = gender;
 		this.appearance = appearance == null ? name : appearance;
-		this.thrownAttackValue = 1;
 		this.writtenSpells = new ArrayList<Spell>();
 		this.damageTypes = new ArrayList<DamageType>();
 		this.perceivedValue = 0;
+		this.itemType = type;
 	}
 	
 	public String details() {

@@ -2,6 +2,7 @@ package rltut.screens;
 
 import rltut.Creature;
 import rltut.Item;
+import rltut.Item.ItemType;
 
 public class EquipScreen extends InventoryBasedScreen {
 
@@ -14,7 +15,10 @@ public class EquipScreen extends InventoryBasedScreen {
 	}
 
 	protected boolean isAcceptable(Item item) {
-		return item.attackValue() > 0 || item.defenseValue() > 0;
+		return item.itemType() == ItemType.ARMOR ||
+				item.itemType() == ItemType.HELMENT ||
+				item.itemType() == ItemType.SHIELD ||
+				item.itemType() == ItemType.WEAPON;
 	}
 
 	protected Screen use(Item item) {

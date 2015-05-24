@@ -8,7 +8,6 @@ public class LevelUpController {
 	private static LevelUpOption[] options = new LevelUpOption[] {
 			new LevelUpOption("Increased hit points") {
 				public void invoke(Creature creature) {
-					creature.modifyMaxHp(10);
 					creature.modifyHp(10, "Died from increaced hp level-up bonus?");
 					creature.doAction("look a lot healthier");
 				}
@@ -20,12 +19,10 @@ public class LevelUpController {
 				}
 			}, new LevelUpOption("Increased attack value") {
 				public void invoke(Creature creature) {
-					creature.modifyAttackValue(2);
 					creature.doAction("look stronger");
 				}
 			}, new LevelUpOption("Increased defense value") {
 				public void invoke(Creature creature) {
-					creature.modifyDefenseValue(1);
 					creature.doAction("look a little tougher");
 				}
 			}, new LevelUpOption("Increased vision") {

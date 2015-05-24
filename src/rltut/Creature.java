@@ -1,14 +1,10 @@
 package rltut;
 
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import rltut.Item.ItemType;
 import rltut.ai.CreatureAi;
 import rltut.screens.Screen;
 
@@ -42,29 +38,9 @@ public class Creature {
 	public String job() { return job; }
 	public void setJob(String job) { this.job = job; }
 	
-	private int maxHp;
-	public int maxHp() { return maxHp; }
-	public void modifyMaxHp(int amount) { maxHp += amount; }
-	
 	private int hp;
 	public int hp() { return hp; }
 	
-	private int attackValue;
-	public void modifyAttackValue(int value) { attackValue += value; }
-	public int attackValue() { 
-		return attackValue
-			+ (weapon == null ? 0 : weapon.attackValue())
-			+ (armor == null ? 0 : armor.attackValue());
-	}
-
-	private int defenseValue;
-	public void modifyDefenseValue(int value) { defenseValue += value; }
-	public int defenseValue() { 
-		return defenseValue
-			+ (weapon == null ? 0 : weapon.defenseValue())
-			+ (armor == null ? 0 : armor.defenseValue());
-	}
-
 	private int visionRadius;
 	public void modifyVisionRadius(int value) { visionRadius += value; }
 	public int visionRadius() { return visionRadius; }
@@ -81,11 +57,20 @@ public class Creature {
 	private int food;
 	public int food() { return food; }
 	
+	private String damageType;
+	public String damageType() { return damageType; }
+	
 	private Item weapon;
 	public Item weapon() { return weapon; }
 	
 	private Item armor;
 	public Item armor() { return armor; }
+	
+	private Item helment;
+	public Item helment() { return helment; }
+	
+	private Item shield;
+	public Item shield() { return shield; }
 	
 	private int xp;
 	public int xp() { return xp; }
@@ -114,8 +99,7 @@ public class Creature {
 	
 	private List<Wound> wounds;
 	public List<Wound> wounds() { return wounds; }
-	
-	public void addWound(Wound wound){ wounds.add(wound); wound.onApply(this); }
+	public void addWound(Wound wound, Creature applier){ wound.onApply(this, applier); wounds.add(wound); }
 	
 	private int maxMana;
 	public int maxMana() { return maxMana; }
@@ -140,14 +124,11 @@ public class Creature {
 	public Screen shopScreen() { return shopScreen; }
 	public void setShopScreen(Screen shop) { this.shopScreen = shop; }
 	
-	public Creature(World world, char glyph, char gender, Color color, String name, int maxHp, int attack, int defense){
+	public Creature(World world, char glyph, char gender, Color color, String name, int hp, String damageType){
 		this.world = world;
 		this.glyph = glyph;
 		this.color = color;
-		this.maxHp = maxHp;
-		this.hp = maxHp;
-		this.attackValue = attack;
-		this.defenseValue = defense;
+		this.hp = hp;
 		this.visionRadius = 9;
 		this.name = name;
 		this.inventory = new Inventory(20);
@@ -162,44 +143,7 @@ public class Creature {
 		this.regenManaPer1000 = 20;
 		this.job = name;
 		this.gender = gender;
-	}
-	
-	public void fetchWound(String woundType, String woundPlace, int woundSeverity, Creature enemy){
-		File file = new File("wounds/Wound"+woundType.toUpperCase()+".txt");
-		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
-			boolean woundPicked = false;
-			while(woundPicked == false){
-				for(String line; (line = br.readLine()) != null; ) {
-			        if(line.indexOf(woundPlace+woundSeverity) > -1){
-			        	String[] action = line.split("-");
-			        	doAction(action[1], 
-			        			this.isPlayer ? "la" : "tu", 
-			        					this.isPlayer ? ("de " + (enemy.gender() == 'M' ? "el " : "la ") + enemy.name()) : "");
-			        	
-			        	final String applyAction = line.substring(line.indexOf("APPLY(")+1,line.indexOf(")APPLY")).split(",")[1];
-			        	final float applyChance = Float.parseFloat(line.substring(line.indexOf("APPLY(")+6,line.indexOf(")APPLY")).split(",")[0]);
-			        	
-			        	enemy.addWound(new Wound(Integer.parseInt(action[3]), woundSeverity, action[2]){
-			    			public void onApply(Creature creature){ 
-			    				if(Math.random() < applyChance) { 
-			    					creature.notifyArround(applyAction, creature.isPlayer() ? " te" : "", creature.isPlayer() ? "" : "al " + creature.name()+""); 
-			    				} 
-			    			}
-			    			public void update(Creature creature){ super.update(creature); }
-			    			public void onFinish(Creature creature){}
-			    		});
-			        	
-			        	woundPicked = true;
-			        }else{
-			        	continue;
-			        }
-			    }
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		this.damageType = damageType;
 	}
 	
 	/**
@@ -281,61 +225,98 @@ public class Creature {
 			ai.onEnter(x+mx, y+my, z+mz, tile);
 		else
 			//other.ai.onTalkedTo(this);
-			meleeAttack(other);
+			meleeAttack(other, weapon);
 	}
 
-	public void meleeAttack(Creature other){
-		commonAttack(other, attackValue(), "ataca al %s golpeando por %d", other.name);
+	public void meleeAttack(Creature other, Item object){
+		commonAttack(other, object);
 	}
 
 	private void throwAttack(Item item, Creature other) {
-		commonAttack(other, attackValue / 2 + item.thrownAttackValue(), "arroja "+ checkGender(item.gender(), true) +" %s al %s golpeando por %d", nameOf(item), other.name);
-		other.addEffect(item.quaffEffect());
+		//commonAttack(other, attackValue / 2 + item.thrownAttackValue(), "arroja "+ checkGender(item.gender(), true) +" %s al %s golpeando por %d", nameOf(item), other.name);
+		//other.addEffect(item.quaffEffect());
 	}
 	
 	public void rangedWeaponAttack(Creature other){
-		commonAttack(other, attackValue / 2 + weapon.rangedAttackValue(), "dispara "+ checkGender(weapon.gender(), true) +" %s al %s golpeando por %d", nameOf(weapon), other.name);
+		//commonAttack(other, attackValue / 2 + weapon.rangedAttackValue(), "dispara "+ checkGender(weapon.gender(), true) +" %s al %s golpeando por %d", nameOf(weapon), other.name);
 	}
 	
-	private void commonAttack(Creature other, int attack, String action, Object ... params) {
-		modifyFood(-2);
+	/**
+	 * 
+	 * @param other				La criatura a la que se le efectua el golpe
+	 * @param damagingObject	El objeto con el que se golpea
+	 * 
+	 * Esta funcion maneja todos los tipos de ataque
+	 */
+	private void commonAttack(Creature other, Item damagingObject) {
+		String position = "NONE";		//Posicion del ataque
+		String damageType = "NONE";		//Tipo de daño inflinjido (BLUNT, SLICE, etc) Declarados en DamageType
+		int damagePower = 1;			//Poder del daño inflinjido (si el arma tiene varios tipos de ataque tomaria el mayor
+		Item defendingObject = null;	//Objeto con el que la criatura esta intentando defender el ataque
 		
-		int amount = Math.max(0, attack - other.defenseValue());
-		
-		amount = (int)(Math.random() * amount) + 1;
-		
-		Object[] params2 = new Object[params.length+1];
-		for (int i = 0; i < params.length; i++){
-			params2[i] = params[i];
+		//Elige el lugar donde se golpea, se toma en cuenta si el enemigo "dispara" un arco (no esta directamente al lado
+		//del objetivo del ataque
+		//
+		// 		 HEAD
+		//		  <-	>
+		//BACK	|  @	|	ARMS/CHEST
+		//		<  ->
+		//	   LEGS/CHEST
+		//
+		if(x < other.x && y >= other.y){
+			position = "BACK";
+			defendingObject = other.armor();
+		}else if(y < other.y && x <= other.x){
+			position = "HEAD";
+			defendingObject = other.helment();
+		}else if(x > other.x && y <= other.y){
+			position = Math.random() < 0.4 ? "ARM" : "CHEST";
+			defendingObject = other.shield() != null ? other.shield() : other.armor();
+		}else if(y > other.y && x >= other.x){
+			position = Math.random() < 0.4 ? "LEG" : "CHEST";
+			defendingObject = other.shield() != null ? other.shield() : other.armor();
 		}
-		params2[params2.length - 1] = amount;
 		
-		//doAction(action, params2);
-		fetchWound("BLUNT", "back", 1, other);
-		
-		other.modifyHp(-amount, "Asesinado por " + checkGender(gender, false) + " " + name);
-		
-		if (other.hp < 1)
-			gainXp(other);
-	}
-	
-	public void gainXp(Creature other){
-		int amount = other.maxHp 
-			+ other.attackValue() 
-			+ other.defenseValue()
-			- level;
-		
-		if (amount > 0)
-			modifyXp(amount);
+		if(damagingObject == null){
+			damageType = this.damageType;	//Si no tiene arma agarramos el "daño por defecto" TODO: Esto NO VA
+		}else{
+			//Comienza a recorrer todos los ataques posibles del objeto con el que se ataca
+			for(int i = 0; i < damagingObject.damageTypes().size(); i++){
+				int power = damagingObject.damageTypes().get(i).power();		//Guardamos el poder
+				String type = damagingObject.damageTypes().get(i).wondType();	//Guardamos el tipo
+				
+				//Comienza a recorrer todas las defensas posibles del objetivo TODO: Diferentes tipos de armadura!
+				for(int n = 0; n < defendingObject.damageTypes().size(); n++){
+					int defense_power = defendingObject.damageTypes().get(n).power();		//Guardamos el poder
+					String defense_type = defendingObject.damageTypes().get(n).wondType();	//Guardamos el tipo
+					
+					//Si es diferente el tipo no le prestemos atencion (BLUNT vs SLICE no hace nada)
+					if(type != defense_type)
+						continue;
+					
+					//Si el poder es menor que la defensa (teniendo en cuenta que es el mismo tipo de daño) no hace nada
+					//TODO: Efectos de overdefense! El arma rebota/se rompe/se cae
+					if(power <= defense_power){
+						System.out.println("DEFENDIDO");
+						continue;
+					}
+					//Si este es el mayor daño que encontramos, lo guardamos
+					if(damagePower < power){
+						damageType = type;
+						damagePower = power - defense_power < 0 ? 0 : power - defense_power;	//Por las dudas chequeamos negativos
+					}
+				}
+			}
+		}
+
+		other.addWound(new Wound(Wound.TYPES.get(damageType+"" + damagePower +"-"+position).setPosition(position)), this);
 	}
 
 	public void modifyHp(int amount, String causeOfDeath) { 
 		hp += amount;
 		this.causeOfDeath = causeOfDeath;
 		
-		if (hp > maxHp) {
-			hp = maxHp;
-		} else if (hp < 1) {
+		if (hp < 1) {
 			doAction("perece");
 			leaveCorpse();
 			world.remove(this);
@@ -343,8 +324,7 @@ public class Creature {
 	}
 	
 	private void leaveCorpse(){
-		Item corpse = new Item('%', 'M', color, "cadaver de " + name, null);
-		corpse.modifyFoodValue(maxHp * 5);
+		Item corpse = new Item(ItemType.STATIC, '%', 'M', color, "cadaver de " + name, null);
 		world.addAtEmptySpace(corpse, x, y, z);
 		for (Item item : inventory.getItems()){
 			if (item != null)
@@ -366,6 +346,9 @@ public class Creature {
 	
 	public void update(){
 		//modifyFood(-1);
+		if(wounds.size() > 2){
+			modifyHp(-5, "AHA!");
+		}
 		regenerateHealth();
 		regenerateMana();
 		updateEffects();
@@ -404,10 +387,6 @@ public class Creature {
 	private void regenerateHealth(){
 		regenHpCooldown -= regenHpPer1000;
 		if (regenHpCooldown < 0){
-			if (hp < maxHp){
-				modifyHp(1, "Mueres por curarte vida?");
-				modifyFood(-1);
-			}
 			regenHpCooldown += 1000;
 		}
 	}
@@ -592,12 +571,12 @@ public class Creature {
 	}
 	
 	private void consume(Item item){
-		if (item.foodValue() < 0)
+		if (item.itemType() != ItemType.EDIBLE)
 			notify("Asqueroso!");
 		
 		addEffect(item.quaffEffect());
 		
-		modifyFood(item.foodValue());
+		//modifyFood(item.foodValue());
 		getRidOf(item);
 	}
 	
@@ -632,6 +611,14 @@ public class Creature {
 			if (hp > 0) 
 				doAction("guarda " + checkGender(item.gender(), true) + " " + nameOf(item));
 			weapon = null;
+		} else if (item == shield) {
+			if (hp > 0) 
+				doAction("guarda " + checkGender(item.gender(), true) + " " + nameOf(item));
+			shield = null;
+		} else if (item == helment) {
+			if (hp > 0) 
+				doAction("guarda " + checkGender(item.gender(), true) + " " + nameOf(item));
+			helment = null;
 		}
 	}
 	
@@ -646,17 +633,28 @@ public class Creature {
 			}
 		}
 		
-		if (item.attackValue() == 0 && item.rangedAttackValue() == 0 && item.defenseValue() == 0)
+		if (item.itemType() != ItemType.ARMOR && 
+				item.itemType() != ItemType.HELMENT && 
+				item.itemType() != ItemType.SHIELD && 
+				item.itemType() != ItemType.WEAPON)
 			return;
 		
-		if (item.attackValue() + item.rangedAttackValue() >= item.defenseValue()){
+		if (item.itemType() == ItemType.WEAPON){
 			unequip(weapon);
 			doAction("empunia " +  checkGender(item.gender(), true) + " " + nameOf(item));
 			weapon = item;
-		} else {
+		} else if(item.itemType() == ItemType.ARMOR){
 			unequip(armor);
 			doAction("viste " +  checkGender(item.gender(), true) + " " + nameOf(item));
 			armor = item;
+		} else if(item.itemType() == ItemType.HELMENT){
+			unequip(helment);
+			doAction("coloca " +  checkGender(item.gender(), true) + " " + nameOf(item));
+			helment = item;
+		} else if(item.itemType() == ItemType.SHIELD){
+			unequip(shield);
+			doAction("alza " +  checkGender(item.gender(), true) + " " + nameOf(item));
+			shield = item;
 		}
 	}
 	
@@ -668,7 +666,8 @@ public class Creature {
 	}
 	
 	public String details() {
-		return String.format("  level:%d  attack:%d  defense:%d  hp:%d", level, attackValue(), defenseValue(), hp);
+		return "sarasa";
+		//return String.format("  level:%d  attack:%d  defense:%d  hp:%d", level, attackValue(), defenseValue(), hp);
 	}
 	
 	public void throwItem(Item item, int wx, int wy, int wz) {

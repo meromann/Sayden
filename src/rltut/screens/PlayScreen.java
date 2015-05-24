@@ -17,6 +17,7 @@ import rltut.Message;
 import rltut.StuffFactory;
 import rltut.Tile;
 import rltut.World;
+import rltut.Wound;
 
 public class PlayScreen implements Screen {
 	private Map<String, World> worldList;
@@ -35,6 +36,7 @@ public class PlayScreen implements Screen {
 		messages = new ArrayList<Message>();
 		worldList = new HashMap<String, World>();
 		
+		Wound.instantiateWounds();
 		createWorld();
 		
 		fov = new FieldOfView(world);
@@ -75,7 +77,7 @@ public class PlayScreen implements Screen {
 		displayTiles(terminal, left, top);
 		displayMessages(terminal, messages);
 		
-		String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.maxHp(), player.mana(), player.maxMana(), hunger());
+		String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.hp(), player.mana(), player.maxMana(), hunger());
 		terminal.write(stats, 1, ApplicationMain.MENU_OFFSET - 4);
 		
 		if (subscreen != null)
