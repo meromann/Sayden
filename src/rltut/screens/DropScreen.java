@@ -24,4 +24,9 @@ public class DropScreen extends InventoryBasedScreen {
 		player.drop(item); 
 		return null;
 	}
+
+	@Override
+	public String getScreenName() {
+		return "SOLTAR";
+	}
 }

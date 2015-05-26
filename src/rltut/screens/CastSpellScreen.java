@@ -14,4 +14,8 @@ public class CastSpellScreen extends TargetBasedScreen {
 	public void selectWorldCoordinate(int x, int y, int screenX, int screenY){
 		player.castSpell(spell, x, y);
 	}
+
+	public String getScreenName() {
+		return "CONJURAR";
+	}
 }

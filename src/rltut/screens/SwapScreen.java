@@ -39,4 +39,9 @@ public class SwapScreen extends InventoryBasedScreen {
 		
 		return null;
 	}
+
+	@Override
+	public String getScreenName() {
+		return "CANJEAR";
+	}
 }

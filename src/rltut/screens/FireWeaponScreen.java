@@ -30,4 +30,9 @@ public class FireWeaponScreen extends TargetBasedScreen {
 		else
 			player.rangedWeaponAttack(other);
 	}
+
+	@Override
+	public String getScreenName() {
+		return "DISPARAR";
+	}
 }

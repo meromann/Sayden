@@ -34,7 +34,7 @@ public abstract class TargetBasedScreen implements Screen {
 		terminal.clear(' ', 0, 23, 80, 1);
 		terminal.write(caption, 0, 23);
 	}
-
+	
 	@Override
 	public Screen respondToUserInput(KeyEvent key) {
 		int px = x;

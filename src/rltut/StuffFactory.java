@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import rltut.Item.ItemType;
-import rltut.ai.FungusAi;
-import rltut.ai.GoblinAi;
 import rltut.ai.PlayerAi;
 import rltut.ai.ZombieAi;
 import asciiPanel.AsciiPanel;
@@ -64,7 +62,7 @@ public class StuffFactory {
 		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
 		Item dientes = new Item(ItemType.INTRINSIC, 'M', "dientes").addDamageType(DamageType.SLICE, 1);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.BLUNT, 1);
-		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, Math.random() < 0.3 ? dientes : puños, piel);
+		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, Math.random() < 0.0 ? dientes : puños, piel);
 		world.addAtEmptyLocation(zombie, depth);
 		new ZombieAi(zombie, player);
 		zombie.equip(newLightArmor(-1));
@@ -387,7 +385,7 @@ public class StuffFactory {
 								|| creature.creature(nx, ny, creature.z) != null)
 							continue;
 						
-						Creature bat = null;
+						/*Creature bat = null;
 						
 						if (!bat.canEnter(nx, ny, creature.z)){
 							world.remove(bat);
@@ -398,7 +396,7 @@ public class StuffFactory {
 						bat.y = ny;
 						bat.z = creature.z;
 						
-						creature.summon(bat);
+						creature.summon(bat);*/
 					}
 				}
 			}

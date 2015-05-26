@@ -255,7 +255,8 @@ public class Creature {
 	private void commonAttack(Creature other, Item damagingObject) {
 		String position = "NONE";		//Posicion del ataque
 		String damageType = "NONE";		//Tipo de daño inflinjido (BLUNT, SLICE, etc) Declarados en DamageType
-		int damagePower = 1;			//Poder del daño inflinjido (si el arma tiene varios tipos de ataque tomaria el mayor
+		int damagePower = 0;			//Poder del daño inflinjido (si el arma tiene varios tipos de ataque tomaria el mayor
+		int defendingPower = 0;			//Poder de defensa contra el mayor daño, usado para chequear bloqueos
 		Item defendingObject = null;	//Objeto con el que la criatura esta intentando defender el ataque
 		
 		//Elige el lugar donde se golpea, se toma en cuenta si el enemigo "dispara" un arco (no esta directamente al lado
@@ -308,27 +309,31 @@ public class Creature {
 				
 				//Si esta defendiendo con "la piel" no lo hace desde la cabeza
 				if(defendingObject.itemType() == ItemType.INTRINSIC &&
-						position == "HEAD")
+						position == "HEAD"){
 					defense_power = 0;
+				}
 				
 				//Si es diferente el tipo no le prestemos atencion (BLUNT vs SLICE no hace nada)
 				if(type != defense_type)
 					continue;
-				
-				//Si este es el mayor daño que encontramos, lo guardamos
-				if(damagePower < power){
+
+				//Si este es el mayor daño que encontramos, lo guardamos (el = es para que se guarde tambien la defensa)
+				if(damagePower <= power){
 					damageType = type;
-					damagePower = power - defense_power < 0 ? 0 : power - defense_power;	//Por las dudas chequeamos negativos
-				}
-				
-				//Si el poder es menor que la defensa (teniendo en cuenta que es el mismo tipo de daño) no hace nada
-				//TODO: Efectos de overdefense! El arma rebota/se rompe/se cae
-				if(power <= defense_power){
-					other.doAction("resiste el ataque con %s %s", other.isPlayer() ? "tu" : "su", defendingObject.name());
-					return;
+					damagePower = power;
+					defendingPower = defense_power;
 				}
 			}			
 		}
+
+		//Si el poder es menor que la defensa (teniendo en cuenta que es el mismo tipo de daño) no hace nada
+		//TODO: Efectos de overdefense! El arma rebota/se rompe/se cae
+		if(damagePower <= defendingPower){
+			other.doAction("resiste el ataque"+ (defendingObject.itemType() != ItemType.INTRINSIC ?
+					" con %s %s" : ""), other.isPlayer() ? "tu" : "su", defendingObject.name());
+			return;
+		}
+		
 		other.addWound(new Wound(Wound.TYPES.get(damageType+"" + damagePower +"-"+position).setPosition(position)), this);
 	}
 
@@ -581,7 +586,7 @@ public class Creature {
 	public void makePlayer() { this.isPlayer = true; }
 	
 	public void eat(Item item){
-		doAction("come " + checkGender(item.gender(), true) + " " + nameOf(item));
+		doAction("consume " + checkGender(item.gender(), true) + " " + nameOf(item));
 		consume(item);
 	}
 	
@@ -596,7 +601,6 @@ public class Creature {
 		
 		addEffect(item.quaffEffect());
 		
-		//modifyFood(item.foodValue());
 		getRidOf(item);
 	}
 	
@@ -661,7 +665,7 @@ public class Creature {
 		
 		if (item.itemType() == ItemType.WEAPON){
 			unequip(weapon);
-			doAction("empunia " +  checkGender(item.gender(), true) + " " + nameOf(item));
+			doAction("sujeta " +  checkGender(item.gender(), true) + " " + nameOf(item));
 			weapon = item;
 		} else if(item.itemType() == ItemType.ARMOR){
 			unequip(armor);

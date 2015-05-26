@@ -8,11 +8,12 @@ public class EatScreen extends InventoryBasedScreen {
 
 	public EatScreen(Creature player) {
 		super(player);
+		leftScreen = this;
 	}
 
 	@Override
 	protected String getVerb() {
-		return "comer";
+		return "consumir";
 	}
 
 	@Override
@@ -24,5 +25,10 @@ public class EatScreen extends InventoryBasedScreen {
 	protected Screen use(Item item) {
 		player.eat(item);
 		return null;
+	}
+
+	@Override
+	public String getScreenName() {
+		return "CONSUMIR";
 	}
 }

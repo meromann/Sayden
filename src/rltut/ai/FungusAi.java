@@ -4,18 +4,18 @@ import rltut.Creature;
 import rltut.StuffFactory;
 
 public class FungusAi extends CreatureAi {
-	private StuffFactory factory;
+	//private StuffFactory factory;
 	private int spreadcount;
 	public int spreadlimit = 5;
 	
 	public FungusAi(Creature creature, StuffFactory factory) {
 		super(creature);
-		this.factory = factory;
+		//this.factory = factory;
 	}
 	
 	public FungusAi(Creature creature, StuffFactory factory, int spreadlimit) {
 		super(creature);
-		this.factory = factory;
+		//this.factory = factory;
 		this.spreadlimit = spreadlimit;
 	}
 

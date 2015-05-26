@@ -14,12 +14,12 @@ public class ApplicationMain extends JFrame implements KeyListener {
 	private Screen screen;
 	
 	public static final int SCREEN_WIDTH = 80;
-	public static final int SCREEN_HEIGHT = 30;
+	public static final int SCREEN_HEIGHT = 32;
 	
 	public static final int WORLD_WIDTH = 80;
 	public static final int WORLD_HEIGHT = 24;
 	
-	public static final int MENU_OFFSET = (int)(SCREEN_HEIGHT * .95f);
+	public static final int MENU_OFFSET = (int)(WORLD_HEIGHT);
 	
 	public static final String STARTING_MAP = "Pueblo";
 	
@@ -32,6 +32,7 @@ public class ApplicationMain extends JFrame implements KeyListener {
 		//La primer pantalla es la StartScreen
 		screen = new StartScreen();
 		addKeyListener(this);
+		setFocusTraversalKeysEnabled(false);
 		repaint();
 	}
 	

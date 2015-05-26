@@ -53,4 +53,9 @@ public class LevelUpScreen implements Screen {
 		else
 			return this;
 	}
+
+	@Override
+	public String getScreenName() {
+		return null;
+	}
 }

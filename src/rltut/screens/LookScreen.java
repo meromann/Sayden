@@ -26,4 +26,9 @@ public class LookScreen extends TargetBasedScreen {
 		Tile tile = player.tile(x, y, player.z);
 		caption = tile.glyph() + " " + tile.details();
 	}
+
+	@Override
+	public String getScreenName() {
+		return "OBSERVAR";
+	}
 }

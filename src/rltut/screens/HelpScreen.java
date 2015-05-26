@@ -1,6 +1,7 @@
 package rltut.screens;
 
 import java.awt.event.KeyEvent;
+
 import asciiPanel.AsciiPanel;
 
 public class HelpScreen implements Screen {
@@ -30,5 +31,10 @@ public class HelpScreen implements Screen {
 	@Override
 	public Screen respondToUserInput(KeyEvent key) {
 		return null;
+	}
+
+	@Override
+	public String getScreenName() {
+		return "Ayuda";
 	}
 }

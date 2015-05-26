@@ -38,4 +38,9 @@ public class ShopScreen extends OptionBasedScreen {
 		seller.getCreatureAi().onFarewell();
 		player.setShopScreen(null);
 	}
+
+	@Override
+	public String getScreenName() {
+		return "SHOP";
+	}
 }

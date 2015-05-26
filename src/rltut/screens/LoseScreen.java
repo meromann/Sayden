@@ -3,7 +3,6 @@ package rltut.screens;
 import java.awt.event.KeyEvent;
 
 import rltut.Creature;
-
 import asciiPanel.AsciiPanel;
 
 public class LoseScreen implements Screen {
@@ -23,5 +22,10 @@ public class LoseScreen implements Screen {
 	@Override
 	public Screen respondToUserInput(KeyEvent key) {
 		return key.getKeyCode() == KeyEvent.VK_ENTER ? new PlayScreen() : this;
+	}
+
+	@Override
+	public String getScreenName() {
+		return "Game Over";
 	}
 }

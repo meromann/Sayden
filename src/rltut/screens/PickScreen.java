@@ -24,4 +24,9 @@ public class PickScreen extends InventoryBasedScreen {
 		player.drop(item); 
 		return null;
 	}
+
+	@Override
+	public String getScreenName() {
+		return "ELEGIR";
+	}
 }

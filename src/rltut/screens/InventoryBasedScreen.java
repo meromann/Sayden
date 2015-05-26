@@ -2,12 +2,16 @@ package rltut.screens;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+
+import rltut.ApplicationMain;
 import rltut.Creature;
 import rltut.Item;
 import asciiPanel.AsciiPanel;
 
 public abstract class InventoryBasedScreen implements Screen {
 
+	protected Screen leftScreen;
+	protected Screen rightScreen;
 	protected Creature player;
 	private String letters;
 	
@@ -23,18 +27,16 @@ public abstract class InventoryBasedScreen implements Screen {
 	public void displayOutput(AsciiPanel terminal) {
 		ArrayList<String> lines = getList();
 		
-		int y = 23 - lines.size();
+		int y = ApplicationMain.MENU_OFFSET - lines.size();
 		int x = 4;
-
-		if (lines.size() > 0)
-			terminal.clear(' ', x, y, 20, lines.size());
 		
 		for (String line : lines){
 			terminal.write(line, x, y++);
 		}
 		
-		terminal.clear(' ', 0, 23, 80, 1);
-		terminal.write("Que quieres " + getVerb() + "?", 2, 23);
+		terminal.clear(' ', 0, ApplicationMain.MENU_OFFSET, 80, 1);
+		terminal.write("Que quieres " + getVerb() + "?", 2, ApplicationMain.MENU_OFFSET);
+		terminal.writeCenter(leftScreen.getScreenName() + "<--" + getVerb() + "-->", ApplicationMain.MENU_OFFSET + 1);
 		
 		terminal.repaint();
 	}
@@ -51,14 +53,15 @@ public abstract class InventoryBasedScreen implements Screen {
 			
 			String line = letters.charAt(i) + " - " + item.glyph() + " " + player.nameOf(item);
 			
-			if(item == player.weapon() || item == player.armor())
+			if(item == player.weapon() || item == player.armor() || item == player.helment()
+					|| item == player.shield())
 				line += " (equipado)";
 			
 			lines.add(line);
 		}
 		return lines;
 	}
-
+	
 	public Screen respondToUserInput(KeyEvent key) {
 		char c = key.getKeyChar();
 
@@ -71,6 +74,13 @@ public abstract class InventoryBasedScreen implements Screen {
 			return use(items[letters.indexOf(c)]);
 		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			return null;
+		} else if(key.getKeyCode() == KeyEvent.VK_LEFT){
+			return leftScreen;
+		} else if(key.getKeyCode() == KeyEvent.VK_RIGHT){
+			return rightScreen;
+		} else if(key.getKeyChar() >= '1' && key.getKeyChar() <= '9'){
+			System.out.println(this.toString());
+			return this;
 		} else {
 			return this;
 		}

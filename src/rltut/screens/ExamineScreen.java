@@ -25,4 +25,9 @@ public class ExamineScreen extends InventoryBasedScreen {
 		player.notify("Es " + article + " " + player.nameOf(item) + "." + item.details());
 		return null;
 	}
+
+	@Override
+	public String getScreenName() {
+		return "EXAMINAR";
+	}
 }

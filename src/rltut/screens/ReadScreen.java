@@ -29,4 +29,9 @@ public class ReadScreen extends InventoryBasedScreen {
 		return new ReadSpellScreen(player, sx, sy, item);
 	}
 
+	@Override
+	public String getScreenName() {
+		return "LEER";
+	}
+
 }

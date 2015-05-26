@@ -76,29 +76,30 @@ public class PlayScreen implements Screen {
 		
 		displayTiles(terminal, left, top);
 		displayMessages(terminal, messages);
-		
-		String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.hp(), player.mana(), player.maxMana(), hunger());
-		terminal.write(stats, 1, ApplicationMain.MENU_OFFSET - 4);
-		
+		displayWounds(terminal, player.wounds());
+				
 		if (subscreen != null)
 			subscreen.displayOutput(terminal);
 	}
-	
-	private String hunger(){
-		if (player.food() < player.maxFood() * 0.10)
-			return "Starving";
-		else if (player.food() < player.maxFood() * 0.25)
-			return "Hungry";
-		else if (player.food() > player.maxFood() * 0.90)
-			return "Stuffed";
-		else if (player.food() > player.maxFood() * 0.75)
-			return "Full";
-		else
-			return "";
+		
+	private void displayWounds(AsciiPanel terminal, List<Wound> wounds){
+		for(int i = 0; i < wounds.size(); i++){
+			Color[] arrayColor = new Color[]{	
+					Color.ORANGE,
+					new Color(249,120,0),
+					new Color(200, 80, 0),
+					new Color(211,0,0),
+					new Color(255,0,0)
+			};
+
+			terminal.write(wounds.get(i).severity() + " ", (i*2)+1, ApplicationMain.MENU_OFFSET, arrayColor[wounds.get(i).severity() - 1 >= arrayColor.length ? arrayColor.length : wounds.get(i).severity() - 1]);
+		}
+		//String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.hp(), player.mana(), player.maxMana(), hunger());
+		//terminal.write(stats, 1, ApplicationMain.MENU_OFFSET);
 	}
 
 	private void displayMessages(AsciiPanel terminal, List<Message> messages) {
-		int top = ApplicationMain.MENU_OFFSET - messages.size();
+		int top = ApplicationMain.MENU_OFFSET + 2;
 		for (int i = 0; i < messages.size(); i++){
 			terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
 		}
@@ -131,21 +132,15 @@ public class PlayScreen implements Screen {
 		} else {
 			switch (key.getKeyCode()){
 			case KeyEvent.VK_LEFT:
-			case KeyEvent.VK_H: player.moveBy(-1, 0, 0); break;
-			case KeyEvent.VK_RIGHT: player.moveBy( 1, 0, 0); break;
+			case KeyEvent.VK_A: player.moveBy(-1, 0, 0); break;
+			case KeyEvent.VK_RIGHT:
+			case KeyEvent.VK_D: player.moveBy( 1, 0, 0); break;
 			case KeyEvent.VK_UP:
-			case KeyEvent.VK_K: player.moveBy( 0,-1, 0); break;
+			case KeyEvent.VK_W: player.moveBy( 0,-1, 0); break;
 			case KeyEvent.VK_DOWN:
-			case KeyEvent.VK_J: player.moveBy( 0, 1, 0); break;
-			case KeyEvent.VK_Y: player.moveBy(-1,-1, 0); break;
-			case KeyEvent.VK_U: player.moveBy( 1,-1, 0); break;
-			case KeyEvent.VK_B: player.moveBy(-1, 1, 0); break;
-			case KeyEvent.VK_N: player.moveBy( 1, 1, 0); break;
-			case KeyEvent.VK_D: subscreen = new DropScreen(player); break;
-			case KeyEvent.VK_E: subscreen = new EatScreen(player); break;
-			case KeyEvent.VK_W: subscreen = new EquipScreen(player); break;
-			case KeyEvent.VK_X: subscreen = new ExamineScreen(player); break;
-			case KeyEvent.VK_L: subscreen = new LookScreen(player, "Observando", 
+			case KeyEvent.VK_S: player.moveBy( 0, 1, 0); break;
+			case KeyEvent.VK_TAB: subscreen = new EquipScreen(player, new DropScreen(player), new ExamineScreen(player)); break;
+			/*case KeyEvent.VK_L: subscreen = new LookScreen(player, "Observando", 
 					player.x - getScrollX(), 
 					player.y - getScrollY()); break;
 			case KeyEvent.VK_T: subscreen = new ThrowScreen(player,
@@ -157,11 +152,10 @@ public class PlayScreen implements Screen {
 				else
 					subscreen = new FireWeaponScreen(player,
 						player.x - getScrollX(), 
-						player.y - getScrollY()); break;
-			case KeyEvent.VK_Q: subscreen = new QuaffScreen(player); break;
-			case KeyEvent.VK_R: subscreen = new ReadScreen(player,
+						player.y - getScrollY()); break;*/
+			/*case KeyEvent.VK_R: subscreen = new ReadScreen(player,
 						player.x - getScrollX(), 
-						player.y - getScrollY()); break;
+						player.y - getScrollY()); break;*/
 			}
 			
 			switch (key.getKeyChar()){
@@ -219,5 +213,10 @@ public class PlayScreen implements Screen {
 		}
 		player.modifyHp(0, "Died while cowardly fleeing the caves.");
 		return new LoseScreen(player);
+	}
+
+	@Override
+	public String getScreenName() {
+		return null;
 	}
 }

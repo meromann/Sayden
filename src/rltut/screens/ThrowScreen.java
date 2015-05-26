@@ -27,4 +27,9 @@ public class ThrowScreen extends InventoryBasedScreen {
 	protected Screen use(Item item) {
 		return new ThrowAtScreen(player, sx, sy, item);
 	}
+
+	@Override
+	public String getScreenName() {
+		return "ARROJAR";
+	}
 }

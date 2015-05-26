@@ -28,4 +28,9 @@ public class ThrowAtScreen extends TargetBasedScreen {
 	public void selectWorldCoordinate(int x, int y, int screenX, int screenY){
 		player.throwItem(item, x, y, player.z);
 	}
+
+	@Override
+	public String getScreenName() {
+		return "ARROJAR";
+	}
 }
