@@ -65,10 +65,6 @@ public class PlayScreen implements Screen {
 					.preBuild(ApplicationMain.STARTING_MAP);
 	}
 	
-	public int getScrollX() { return Math.max(0, Math.min(player.x - screenWidth / 2, world.width() - screenWidth)); }
-	
-	public int getScrollY() { return Math.max(0, Math.min(player.y - screenHeight / 2, world.height() - screenHeight)); }
-	
 	@Override
 	public void displayOutput(AsciiPanel terminal) {
 		int left = getScrollX();
@@ -123,6 +119,10 @@ public class PlayScreen implements Screen {
 		}
 	}
 	
+	public int getScrollX() { return Math.max(0, Math.min(player.x - screenWidth / 2, world.width() - screenWidth)); }
+	
+	public int getScrollY() { return Math.max(0, Math.min(player.y - screenHeight / 2, world.height() - screenHeight)); }
+	
 	@Override
 	public Screen respondToUserInput(KeyEvent key) {
 		int level = player.level();
@@ -139,7 +139,8 @@ public class PlayScreen implements Screen {
 			case KeyEvent.VK_W: player.moveBy( 0,-1, 0); break;
 			case KeyEvent.VK_DOWN:
 			case KeyEvent.VK_S: player.moveBy( 0, 1, 0); break;
-			case KeyEvent.VK_TAB: subscreen = new EquipScreen(player, new DropScreen(player), new ExamineScreen(player)); break;
+			case KeyEvent.VK_TAB: subscreen = new EquipScreen(player); break;
+			
 			/*case KeyEvent.VK_L: subscreen = new LookScreen(player, "Observando", 
 					player.x - getScrollX(), 
 					player.y - getScrollY()); break;
@@ -157,6 +158,13 @@ public class PlayScreen implements Screen {
 						player.x - getScrollX(), 
 						player.y - getScrollY()); break;*/
 			}
+			
+			if(key.getKeyChar() >= '1' && key.getKeyChar() <= '9'){
+				int mappedKey = Integer.parseInt(key.getKeyChar()+"") - 1;
+				if(keyMap[mappedKey] != null){
+					subscreen = keyMap[mappedKey];
+				}
+			} 
 			
 			switch (key.getKeyChar()){
 			case 'g':

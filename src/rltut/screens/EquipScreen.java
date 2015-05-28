@@ -5,11 +5,19 @@ import rltut.Item;
 import rltut.Item.ItemType;
 
 public class EquipScreen extends InventoryBasedScreen {
-
-	public EquipScreen(Creature player, Screen left, Screen right) {
+	
+	@Override
+	protected Screen leftScreen(){
+		return new DropScreen(player);
+	}
+	
+	@Override
+	protected Screen rightScreen(){
+		return new ExamineScreen(player);
+	}
+	
+	public EquipScreen(Creature player) {
 		super(player);
-		super.leftScreen = left;
-		super.rightScreen = right;
 	}
 
 	protected String getVerb() {

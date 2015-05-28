@@ -10,8 +10,8 @@ import asciiPanel.AsciiPanel;
 
 public abstract class InventoryBasedScreen implements Screen {
 
-	protected Screen leftScreen;
-	protected Screen rightScreen;
+	protected Screen leftScreen(){ return this; }
+	protected Screen rightScreen(){ return this; }
 	protected Creature player;
 	private String letters;
 	
@@ -36,7 +36,7 @@ public abstract class InventoryBasedScreen implements Screen {
 		
 		terminal.clear(' ', 0, ApplicationMain.MENU_OFFSET, 80, 1);
 		terminal.write("Que quieres " + getVerb() + "?", 2, ApplicationMain.MENU_OFFSET);
-		terminal.writeCenter(leftScreen.getScreenName() + "<--" + getVerb() + "-->", ApplicationMain.MENU_OFFSET + 1);
+		terminal.writeCenter(leftScreen().getScreenName() + " <--" + this.getScreenName() + "--> " + rightScreen().getScreenName(), ApplicationMain.MENU_OFFSET + 1);
 		
 		terminal.repaint();
 	}
@@ -75,11 +75,17 @@ public abstract class InventoryBasedScreen implements Screen {
 		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			return null;
 		} else if(key.getKeyCode() == KeyEvent.VK_LEFT){
-			return leftScreen;
+			return leftScreen();
 		} else if(key.getKeyCode() == KeyEvent.VK_RIGHT){
-			return rightScreen;
+			return rightScreen();
 		} else if(key.getKeyChar() >= '1' && key.getKeyChar() <= '9'){
-			System.out.println(this.toString());
+			int mappedKey = Integer.parseInt(key.getKeyChar()+"") - 1;
+			for(int i = 0; i < keyMap.length; i++){
+				if(keyMap[i] == this){
+					keyMap[i] = null;
+				}
+			}
+			keyMap[mappedKey] = this;
 			return this;
 		} else {
 			return this;

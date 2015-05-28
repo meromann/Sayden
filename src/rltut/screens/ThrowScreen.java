@@ -7,6 +7,16 @@ public class ThrowScreen extends InventoryBasedScreen {
 	private int sx;
 	private int sy;
 	
+	@Override
+	protected Screen leftScreen(){
+		return new EatScreen(player);
+	}
+	
+	@Override
+	protected Screen rightScreen(){
+		return new DropScreen(player);
+	}
+	
 	public ThrowScreen(Creature player, int sx, int sy) {
 		super(player);
 		this.sx = sx;

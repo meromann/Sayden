@@ -5,7 +5,7 @@ import rltut.Item;
 import rltut.Tile;
 
 public class LookScreen extends TargetBasedScreen {
-
+	
 	public LookScreen(Creature player, String caption, int sx, int sy) {
 		super(player, caption, sx, sy);
 	}
@@ -26,7 +26,7 @@ public class LookScreen extends TargetBasedScreen {
 		Tile tile = player.tile(x, y, player.z);
 		caption = tile.glyph() + " " + tile.details();
 	}
-
+	
 	@Override
 	public String getScreenName() {
 		return "OBSERVAR";

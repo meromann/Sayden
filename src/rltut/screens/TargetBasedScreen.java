@@ -1,6 +1,7 @@
 package rltut.screens;
 
 import java.awt.event.KeyEvent;
+
 import rltut.Creature;
 import rltut.Line;
 import rltut.Point;
@@ -8,6 +9,8 @@ import asciiPanel.AsciiPanel;
 
 public abstract class TargetBasedScreen implements Screen {
 
+	protected Screen leftScreen(){ return this; }
+	protected Screen rightScreen(){ return this; }
 	protected Creature player;
 	protected String caption;
 	private int sx;
@@ -54,7 +57,19 @@ public abstract class TargetBasedScreen implements Screen {
 		case KeyEvent.VK_B: x--; y++; break;
 		case KeyEvent.VK_N: x++; y++; break;
 		case KeyEvent.VK_ENTER: selectWorldCoordinate(player.x + x, player.y + y, sx + x, sy + y); return null; 
-		case KeyEvent.VK_ESCAPE: return null;
+		case KeyEvent.VK_ESCAPE: return this.getScreenName() == "OBSERVAR" ? new PreLookScreen(player, "", x, y) : null;
+		}
+		
+		if(key.getKeyChar() >= '1' && key.getKeyChar() <= '9'){
+			int mappedKey = Integer.parseInt(key.getKeyChar()+"") - 1;
+
+			for(int i = 0; i < keyMap.length; i++){
+				if(keyMap[i] == this){
+					keyMap[i] = null;
+				}
+			}
+			keyMap[mappedKey] = this;
+			return this;
 		}
 		
 		if (!isAcceptable(player.x + x, player.y + y)){

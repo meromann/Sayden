@@ -5,7 +5,7 @@ import java.awt.event.KeyEvent;
 import asciiPanel.AsciiPanel;
 
 public interface Screen {
-	public Screen[] keyMap = new Screen[9];
+	public Screen[] keyMap = new Screen[8];
 	
 	public String getScreenName();	
 	
