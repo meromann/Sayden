@@ -125,7 +125,6 @@ public class PlayScreen implements Screen {
 	
 	@Override
 	public Screen respondToUserInput(KeyEvent key) {
-		int level = player.level();
 		
 		if (subscreen != null) {
 			subscreen = subscreen.respondToUserInput(key);
@@ -194,9 +193,6 @@ public class PlayScreen implements Screen {
 			fov.updateWorld(world);
 			player.getCreatureAi().updateFow(fov);
 		}
-		
-		if (player.level() > level)
-			subscreen = new LevelUpScreen(player, player.level() - level);
 		
 		if(player.shopScreen() != null && subscreen == null)
 			subscreen = player.shopScreen();

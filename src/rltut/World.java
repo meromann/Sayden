@@ -36,6 +36,13 @@ public class World {
 		this.name = name;
 	}
 
+	public void modifyActionPoints(int ap){
+		for (Creature c : creatures){
+			if (!c.isPlayer())
+				c.modifyActionPoints(ap);
+		}
+	}
+	
 	public Creature creature(int x, int y, int z){
 		for (Creature c : creatures){
 			if (c.x == x && c.y == y && c.z == z)

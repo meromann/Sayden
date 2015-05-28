@@ -13,8 +13,6 @@ public class LevelUpController {
 				}
 			}, new LevelUpOption("Increased mana") {
 				public void invoke(Creature creature) {
-					creature.modifyMaxMana(5);
-					creature.modifyMana(5);
 					creature.doAction("look more magical");
 				}
 			}, new LevelUpOption("Increased attack value") {
@@ -32,12 +30,10 @@ public class LevelUpController {
 				}
 			}, new LevelUpOption("Increased hp regeneration") {
 				public void invoke(Creature creature) {
-					creature.modifyRegenHpPer1000(10);
 					creature.doAction("look a little less bruised");
 				}
 			}, new LevelUpOption("Increased mana regeneration") {
 				public void invoke(Creature creature) {
-					creature.modifyRegenManaPer1000(10);
 					creature.doAction("look a little less tired");
 				}
 			} };

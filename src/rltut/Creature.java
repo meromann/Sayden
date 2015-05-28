@@ -50,12 +50,6 @@ public class Creature {
 
 	private Inventory inventory;
 	public Inventory inventory() { return inventory; }
-
-	private int maxFood;
-	public int maxFood() { return maxFood; }
-	
-	private int food;
-	public int food() { return food; }
 	
 	private Item intrinsicWeapon;
 	public Item intrinsicWeapon() { return intrinsicWeapon; }
@@ -75,28 +69,6 @@ public class Creature {
 	private Item shield;
 	public Item shield() { return shield; }
 	
-	private int xp;
-	public int xp() { return xp; }
-	public void modifyXp(int amount) { 
-		xp += amount;
-		
-		notify("%s %d puntos de xp.", amount < 0 ? "Obtienes" : "Pierdes", amount);
-		
-		while (xp > (int)(Math.pow(level, 1.75) * 25)) {
-			level++;
-			doAction("avanza al nivel %d", level);
-			ai.onGainLevel();
-			modifyHp(level * 2, "Muerte por tenes un nivel negativo?");
-		}
-	}
-	
-	private int level;
-	public int level() { return level; }
-	
-	private int regenHpCooldown;
-	private int regenHpPer1000;
-	public void modifyRegenHpPer1000(int amount) { regenHpPer1000 += amount; }
-	
 	private List<Effect> effects;
 	public List<Effect> effects(){ return effects; }
 	
@@ -104,17 +76,12 @@ public class Creature {
 	public List<Wound> wounds() { return wounds; }
 	public void addWound(Wound wound, Creature applier){ wound.onApply(this, applier); wounds.add(wound); }
 	
-	private int maxMana;
-	public int maxMana() { return maxMana; }
-	public void modifyMaxMana(int amount) { maxMana += amount; }
+	private int movementSpeed;
+	public int movementSpeed() { return movementSpeed; }
 	
-	private int mana;
-	public int mana() { return mana; }
-	public void modifyMana(int amount) { mana = Math.max(0, Math.min(mana+amount, maxMana)); }
-	
-	private int regenManaCooldown;
-	private int regenManaPer1000;
-	public void modifyRegenManaPer1000(int amount) { regenManaPer1000 += amount; }
+	public int attackSpeed;
+	public int attackSpeed() { return attackSpeed; }
+	public void modifyAttackSpeed(int amount) { this.attackSpeed += amount; }
 	
 	private int actionPoints;
 	public int getActionPoints() { return actionPoints; }
@@ -127,6 +94,10 @@ public class Creature {
 	public Screen shopScreen() { return shopScreen; }
 	public void setShopScreen(Screen shop) { this.shopScreen = shop; }
 	
+	private boolean isPlayer;
+	public boolean isPlayer(){ return isPlayer; }
+	public void makePlayer() { this.isPlayer = true; }
+	
 	public Creature(World world, char glyph, char gender, Color color, String name, int hp, Item weapon, Item armor){
 		this.world = world;
 		this.glyph = glyph;
@@ -135,19 +106,14 @@ public class Creature {
 		this.visionRadius = 9;
 		this.name = name;
 		this.inventory = new Inventory(20);
-		this.maxFood = 1000;
-		this.food = maxFood / 3 * 2;
-		this.level = 1;
-		this.regenHpPer1000 = 10;
 		this.effects = new ArrayList<Effect>();
 		this.wounds = new ArrayList<Wound>();
-		this.maxMana = 5;
-		this.mana = maxMana;
-		this.regenManaPer1000 = 20;
 		this.job = name;
 		this.gender = gender;
 		this.intrinsicWeapon = weapon;
 		this.intrinsicArmor = armor;
+		this.attackSpeed = 100;
+		this.movementSpeed = 100;
 	}
 	
 	/**
@@ -192,7 +158,8 @@ public class Creature {
 		}
 		
 		if(tile.getPortalTo() != null &&
-				!tile.getPortalTo().isEmpty()){
+				!tile.getPortalTo().isEmpty()
+					&& isPlayer){
 			doAction("mueve a un nuevo mapa: %s", tile.getPortalTo().toLowerCase());
 
 			this.world = new MapLoader()
@@ -216,20 +183,27 @@ public class Creature {
 			return;
 		}
 		
-		/*if(tile.isClosedDoor()){
-			open(x+mx, y+my, z+mz);
-			return;
-		}*/
-		
 		Creature other = world.creature(x+mx, y+my, z+mz);
-		
-		modifyFood(-1);
-		
-		if (other == null)
+				
+		if (other == null){
+			if(isPlayer){
+				world.modifyActionPoints(movementSpeed);
+			}else if(actionPoints < movementSpeed){
+				return;
+			}
 			ai.onEnter(x+mx, y+my, z+mz, tile);
-		else
+		}else{
+			if(isPlayer){
+				world.modifyActionPoints(attackSpeed);
+			}else if(actionPoints <= (attackSpeed * .5f)){
+				System.out.println("OOOOZOOO");
+				return;
+			}else if(actionPoints < attackSpeed){
+				return;
+			}
 			//other.ai.onTalkedTo(this);
 			meleeAttack(other, weapon);
+		}
 	}
 
 	public void meleeAttack(Creature other, Item object){
@@ -358,24 +332,19 @@ public class Creature {
 	}
 	
 	public void open(int wx, int wy, int wz) {
-		modifyFood(-10);
 		//world.useDoor(wx, wy, wz);
 		doAction("abre la puerta");
 	}
 	
 	public void dig(int wx, int wy, int wz) {
-		modifyFood(-10);
 		//world.dig(wx, wy, wz);
 		doAction("cava");
 	}
 	
 	public void update(){
-		//modifyFood(-1);
 		if(wounds.size() > 2){
 			modifyHp(1, "AHA!");
 		}
-		regenerateHealth();
-		regenerateMana();
 		updateEffects();
 		updateWounds();
 		ai.onUpdate();
@@ -407,24 +376,6 @@ public class Creature {
 		}
 		
 		effects.removeAll(done);
-	}
-	
-	private void regenerateHealth(){
-		regenHpCooldown -= regenHpPer1000;
-		if (regenHpCooldown < 0){
-			regenHpCooldown += 1000;
-		}
-	}
-
-	private void regenerateMana(){
-		regenManaCooldown -= regenManaPer1000;
-		if (regenManaCooldown < 0){
-			if (mana < maxMana) {
-				modifyMana(1);
-				modifyFood(-1);
-			}
-			regenManaCooldown += 1000;
-		}
 	}
 	
 	public boolean canEnter(int wx, int wy, int wz) {
@@ -567,23 +518,6 @@ public class Creature {
 			notify("No hay lugar donde soltar"+ checkGender(item.gender(), true) +" %s.", nameOf(item));
 		}
 	}
-	
-	public void modifyFood(int amount) { 
-		food += amount;
-		
-		if (food > maxFood) {
-			maxFood = (maxFood + food) / 2;
-			food = maxFood;
-			notify("No puedes creer que tu estomago soporte tanto!");
-			modifyHp(-1, "Muerte por comer demasiado.");
-		} else if (food < 1 && isPlayer()) {
-			modifyHp(-1000, "Muerto de hambre.");
-		}
-	}
-	
-	private boolean isPlayer;
-	public boolean isPlayer(){ return isPlayer; }
-	public void makePlayer() { this.isPlayer = true; }
 	
 	public void eat(Item item){
 		doAction("consume " + checkGender(item.gender(), true) + " " + nameOf(item));
@@ -728,17 +662,10 @@ public class Creature {
 	
 	public void castSpell(Spell spell, int x2, int y2) {
 		Creature other = creature(x2, y2, z);
-		
-		if (spell.manaCost() > mana){
-			doAction("apunta y murmulla pero nada ocurre");
-			return;
-		} else if (other == null) {
-			doAction("apunta y murmulla a la nada");
-			return;
-		}
+
+		doAction("apunta y murmulla a la nada");
 		
 		other.addEffect(spell.effect());
-		modifyMana(-spell.manaCost());
 	}
 	
 	public String nameOf(Item item){

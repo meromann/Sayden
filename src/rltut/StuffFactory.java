@@ -65,6 +65,7 @@ public class StuffFactory {
 		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, Math.random() < 0.0 ? dientes : puños, piel);
 		world.addAtEmptyLocation(zombie, depth);
 		new ZombieAi(zombie, player);
+		zombie.modifyAttackSpeed(100);
 		zombie.equip(newLightArmor(-1));
 		return zombie;
 	}
@@ -185,10 +186,7 @@ public class StuffFactory {
 		final Item item = new Item(ItemType.EDIBLE, '!', 'F', potionColors.get(appearance), "pocion de mana", appearance);
 		item.setQuaffEffect(new Effect(1){
 			public void start(Creature creature){
-				if (creature.mana() == creature.maxMana())
-					return;
 				
-				creature.modifyMana(10);
 				creature.doAction(item, "ve restaurado");
 			}
 		});
@@ -273,7 +271,6 @@ public class StuffFactory {
 		item.setQuaffEffect(new Effect(20){
 			public void start(Creature creature){
 				creature.doAction(item, "ve mucho mas sabio");
-				creature.modifyXp(creature.level() * 5);
 			}
 		});
 		
@@ -323,8 +320,6 @@ public class StuffFactory {
 		item.addWrittenSpell("fuerza", 16, new Effect(50){
 			public void start(Creature creature){
 				creature.modifyVisionRadius(1);
-				creature.modifyRegenHpPer1000(10);
-				creature.modifyRegenManaPer1000(-10);
 				creature.doAction("parece brillar con omnipotencia!");
 			}
 			public void update(Creature creature){
@@ -334,8 +329,6 @@ public class StuffFactory {
 			}
 			public void end(Creature creature){
 				creature.modifyVisionRadius(-1);
-				creature.modifyRegenHpPer1000(-10);
-				creature.modifyRegenManaPer1000(10);
 			}
 		});
 		
@@ -348,9 +341,7 @@ public class StuffFactory {
 
 		item.addWrittenSpell("sangre por mana", 1, new Effect(1){
 			public void start(Creature creature){
-				int amount = Math.min(creature.hp() - 1, creature.maxMana() - creature.mana());
-				creature.modifyHp(-amount, "Killed by a blood to mana spell.");
-				creature.modifyMana(amount);
+				creature.modifyHp(-10, "Killed by a blood to mana spell.");
 			}
 		});
 		
