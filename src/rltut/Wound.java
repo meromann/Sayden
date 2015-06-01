@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Wound {
+	private static int LVL1_DURATION = 20;
+	private static int LVL2_DURATION = 38;
+	
 	protected int duration;
 	
 	public boolean isHealed() { return duration < 1; }
@@ -14,6 +17,12 @@ public class Wound {
 	private String name;
 	public String name() { return name; }
 	
+	private static String genderizePosition(String position, String additive){
+		if(position == "brazo" || position =="pecho") 
+			return (additive == "de" ? "del " : "el ") + position;
+		else
+			return (additive == "de" ? "de la " : "la ") + position;
+	}
 	private String position;
 	public String position() { return position; }
 	public Wound setPosition(String position) { this.position = position; return this; }
@@ -25,114 +34,41 @@ public class Wound {
 	public static void instantiateWounds(){
 		TYPES = new HashMap<String, Wound>();
 		//******************BLUNT 1**************************************
-		TYPES.put("BLUNT1-ARM",new Wound(12,1,"moreton"){
+		TYPES.put("BLUNT1-ANY",new Wound(12,LVL1_DURATION,"moreton"){
 			public void onApply(Creature creature, Creature applier){
-				applier.doAction("golpea inflingiendo un moreton en el brazo");
+				applier.doAction("golpea inflingiendo un moreton en "+genderizePosition(this.position(), null));
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}
 		});
-		TYPES.put("BLUNT1-LEG",new Wound(12,1,"moreton"){
+		//******************BLUNT 2**************************************
+		TYPES.put("BLUNT2-ANY",new Wound(12,LVL2_DURATION,"contusion"){
 			public void onApply(Creature creature, Creature applier){
-				applier.doAction("golpea inflingiendo un moreton en la pierna");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("BLUNT1-HEAD",new Wound(12,1,"moreton"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("golpea inflingiendo un moreton en la cabeza");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("BLUNT1-BACK",new Wound(12,1,"moreton"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("golpea inflingiendo un moreton en la espalda");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("BLUNT1-CHEST",new Wound(12,1,"moreton"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("golpea inflingiendo un moreton en el pecho");
+				applier.doAction("golpea generando una contusion en "+genderizePosition(this.position(), null));
+				if(Math.random() < 0.8){
+					System.out.println(creature.getActionPoints());
+					creature.modifyActionPoints(-100);
+					System.out.println(creature.getActionPoints());
+					creature.notifyArround("El impacto "+ (creature.isPlayer() ? "te aturde" : "aturde ") + 
+							(creature.gender() == 'M' ? "al " : "a la ") + creature.name(), creature);
+				}
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}
 		});
 		//******************SLICE 1**************************************
-		TYPES.put("SLICE1-CHEST",new Wound(12,1,"raspadura"){
+		TYPES.put("SLICE1-ANY",new Wound(12,LVL1_DURATION,"raspadura"){
 			public void onApply(Creature creature, Creature applier){
-				applier.doAction("logra causar una ligera raspadura en el pecho");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("SLICE1-BACK",new Wound(12,1,"raspadura"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("logra causar una ligera raspadura en la espalda");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("SLICE1-ARM",new Wound(12,1,"raspadura"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("logra causar una raspadura ligera en el brazo");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("SLICE1-LEG",new Wound(12,1,"raspadura"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("logra causar una raspadura ligera en la pierna");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("SLICE1-HEAD",new Wound(12,1,"raspadura"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("logra causar una raspadura ligera en la cabeza");
+				applier.doAction("logra causar una ligera raspadura en "+genderizePosition(this.position(), null));
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}
 		});
 		//******************PIERCING 1**************************************
-		TYPES.put("PIERCING1-HEAD",new Wound(12,1,"pinchazo"){
+		TYPES.put("PIERCING1-ANY",new Wound(12,LVL1_DURATION,"tajo"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("roza " + (creature.intrinsicArmor().gender() == 'M' ? "el " : "la ") +
-						creature.intrinsicArmor().name() + " cerca de la cabeza");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("PIERCING1-ARM",new Wound(12,1,"pinchazo"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("roza " + (creature.intrinsicArmor().gender() == 'M' ? "el " : "la ") +
-						creature.intrinsicArmor().name() + " del brazo");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("PIERCING1-LEG",new Wound(12,1,"pinchazo"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("roza " + (creature.intrinsicArmor().gender() == 'M' ? "el " : "la ") +
-						creature.intrinsicArmor().name() + " de la pierna");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("PIERCING1-CHEST",new Wound(12,1,"pinchazo"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("roza " + (creature.intrinsicArmor().gender() == 'M' ? "el " : "la ") +
-						creature.intrinsicArmor().name() + " del pecho");
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		TYPES.put("PIERCING1-BACK",new Wound(12,1,"pinchazo"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("roza " + (creature.intrinsicArmor().gender() == 'M' ? "el " : "la ") +
-						creature.intrinsicArmor().name() + " de la espalda");
+						creature.intrinsicArmor().name() + " "+genderizePosition(this.position(), "de"));
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}

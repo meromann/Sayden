@@ -3,6 +3,7 @@ package rltut.screens;
 import rltut.ApplicationMain;
 import rltut.Creature;
 import rltut.Item;
+import rltut.StringUtils;
 
 public class ExamineScreen extends InventoryBasedScreen {
 
@@ -34,7 +35,7 @@ public class ExamineScreen extends InventoryBasedScreen {
 
 	@Override
 	protected Screen use(Item item) {
-		String article = player.checkGender(item.gender(), false);
+		String article = StringUtils.checkGender(item.gender(), false, player.isPlayer());
 		player.notify("Es " + article + " " + player.nameOf(item) + "." + item.details());
 		return null;
 	}

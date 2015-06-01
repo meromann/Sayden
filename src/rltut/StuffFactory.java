@@ -40,7 +40,7 @@ public class StuffFactory {
 	}
 	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.PIERCING, 1);
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 2);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
 		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 10, puños, piel);
 		world.addAtEmptyLocation(player, 0);

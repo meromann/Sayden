@@ -4,12 +4,13 @@ import rltut.Creature;
 import rltut.Item;
 import rltut.Line;
 import rltut.Point;
+import rltut.StringUtils;
 
 public class ThrowAtScreen extends TargetBasedScreen {
 	private Item item;
 	
 	public ThrowAtScreen(Creature player, int sx, int sy, Item item) {
-		super(player, "Donde arrojas " + player.checkGender(item.gender(), true) + " " + player.nameOf(item) + "?", sx, sy);
+		super(player, "Donde arrojas " + StringUtils.checkGender(item.gender(), true, player.isPlayer()) + " " + player.nameOf(item) + "?", sx, sy);
 		this.item = item;
 	}
 

@@ -23,6 +23,9 @@ public class Creature {
 	private char glyph;
 	public char glyph() { return glyph; }
 	
+	private Color originalColor;
+	public Color originalColor() { return originalColor; }
+	
 	private Color color;
 	public Color color() { return color; }
 
@@ -102,6 +105,7 @@ public class Creature {
 		this.world = world;
 		this.glyph = glyph;
 		this.color = color;
+		this.originalColor = color;
 		this.hp = hp;
 		this.visionRadius = 9;
 		this.name = name;
@@ -114,27 +118,6 @@ public class Creature {
 		this.intrinsicArmor = armor;
 		this.attackSpeed = 100;
 		this.movementSpeed = 100;
-	}
-	
-	/**
-	 * 
-	 * @param g (el genero en char, puede ser 'M' o 'F', mayuscula o minuscula)
-	 * @param knowsObject (si false devuelve apersonales un - una)
-	 * @return Devuelve el articulo correspondiente al genero, si la accion
-	 * ocurre en una criatura en lugar del player devuelve el posesivo "su".
-	 */
-	public String checkGender(char g, boolean knowsObject){
-		g = Character.toUpperCase(g);
-		
-		if(knowsObject){
-			if(this.isPlayer){
-				return (g == 'M' ? "el" : "la");
-			}else{
-				return "su";
-			}
-		}else{
-			return (g == 'M' ? "un" : "una");
-		}
 	}
 	
 	public void moveBy(int mx, int my, int mz){
@@ -243,16 +226,16 @@ public class Creature {
 		//	   LEGS/CHEST
 		//
 		if(x < other.x && y >= other.y){
-			position = "BACK";
+			position = "espalda";
 			defendingObject = other.armor();
 		}else if(y < other.y && x <= other.x){
-			position = "HEAD";
+			position = "cabeza";
 			defendingObject = other.helment();
 		}else if(x > other.x && y <= other.y){
-			position = Math.random() < 0.4 ? "ARM" : "CHEST";
+			position = Math.random() < 0.4 ? "brazo" : "pecho";
 			defendingObject = other.shield() != null ? other.shield() : other.armor();
 		}else if(y > other.y && x >= other.x){
-			position = Math.random() < 0.4 ? "LEG" : "CHEST";
+			position = Math.random() < 0.4 ? "pierna" : "pecho";
 			defendingObject = other.shield() != null ? other.shield() : other.armor();
 		}
 	
@@ -283,7 +266,7 @@ public class Creature {
 				
 				//Si esta defendiendo con "la piel" no lo hace desde la cabeza
 				if(defendingObject.itemType() == ItemType.INTRINSIC &&
-						position == "HEAD"){
+						position == "cabeza"){
 					defense_power = 0;
 				}
 				
@@ -308,7 +291,15 @@ public class Creature {
 			return;
 		}
 		
-		other.addWound(new Wound(Wound.TYPES.get(damageType+"" + damagePower +"-"+position).setPosition(position)), this);
+		Wound wound_to_apply = null;
+
+		if(Wound.TYPES.get(damageType+""+damagePower+"-"+position) != null){
+			wound_to_apply = Wound.TYPES.get(damageType+""+damagePower+"-"+position).setPosition(position);
+		}else if(Wound.TYPES.get(damageType+""+damagePower+"-ANY") != null){
+			wound_to_apply = Wound.TYPES.get(damageType+""+damagePower+"-ANY").setPosition(position);
+		}
+		
+		other.addWound(new Wound(wound_to_apply), this);
 	}
 
 	public void modifyHp(int amount, String causeOfDeath) { 
@@ -401,7 +392,7 @@ public class Creature {
 	public void talkAction(Color color, String message, Object ... params){
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify(color, makeSecondPerson(message, false) + ".", params);
+				other.notify(color, StringUtils.makeSecondPerson(message, false) + ".", params);
 			} else {
 				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " : "La " + name);
 				other.notify(color, String.format("%s %s.", nombre, message), params);
@@ -412,7 +403,7 @@ public class Creature {
 	public void doAction(String message, Object ... params){
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify(makeSecondPerson(message, true) + ".", params);
+				other.notify(StringUtils.makeSecondPerson(message, true) + ".", params);
 			} else {
 				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
 				other.notify(String.format("%s %s.", nombre, message), params);
@@ -426,7 +417,7 @@ public class Creature {
 		
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify(makeSecondPerson(message, false) + ".", params);
+				other.notify(StringUtils.makeSecondPerson(message, false) + ".", params);
 			} else {
 				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " : "La " + name);
 				other.notify(String.format("%s %s.", nombre, message), params);
@@ -453,27 +444,7 @@ public class Creature {
 		}
 		return others;
 	}
-	
-	private String capitalize(String text){
-		return Character.toUpperCase(text.charAt(0))+""+text.substring(1);
-	}
-	
-	private String makeSecondPerson(String text, boolean capitalize){
-		String[] words = text.split(" ");
-		words[0] = words[0] + "s";
 		
-		if(capitalize)
-			words[0] = capitalize(words[0]);
-		
-		StringBuilder builder = new StringBuilder();
-		for (String word : words){
-			builder.append(" ");
-			builder.append(word);
-		}
-		
-		return builder.toString().trim();
-	}
-	
 	public boolean canSee(int wx, int wy, int wz){
 		return (detectCreatures > 0 && world.creature(wx, wy, wz) != null
 				|| ai.canSee(wx, wy, wz));
@@ -503,7 +474,7 @@ public class Creature {
 		if (inventory.isFull() || item == null){
 			doAction("agarra la nada");
 		} else {
-			doAction("levanta "+ checkGender(item.gender(), false) +" %s", nameOf(item));
+			doAction("levanta "+ StringUtils.checkGender(item.gender(), false, this.isPlayer()) +" %s", nameOf(item));
 			world.remove(x, y, z);
 			inventory.add(item);
 		}
@@ -511,21 +482,21 @@ public class Creature {
 	
 	public void drop(Item item){
 		if (world.addAtEmptySpace(item, x, y, z)){
-			doAction("suelta "+ checkGender(item.gender(), true) +" %s", nameOf(item));
+			doAction("suelta "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s", nameOf(item));
 			inventory.remove(item);
 			unequip(item);
 		} else {
-			notify("No hay lugar donde soltar"+ checkGender(item.gender(), true) +" %s.", nameOf(item));
+			notify("No hay lugar donde soltar"+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s.", nameOf(item));
 		}
 	}
 	
 	public void eat(Item item){
-		doAction("consume " + checkGender(item.gender(), true) + " " + nameOf(item));
+		doAction("consume " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 		consume(item);
 	}
 	
 	public void quaff(Item item){
-		doAction("bebe " + checkGender(item.gender(), true) + " " + nameOf(item));
+		doAction("bebe " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 		consume(item);
 	}
 	
@@ -563,19 +534,19 @@ public class Creature {
 		
 		if (item == armor){
 			if (hp > 0)
-				doAction("remueve " + checkGender(item.gender(), true) + " " + nameOf(item));
+				doAction("remueve " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			armor = null;
 		} else if (item == weapon) {
 			if (hp > 0) 
-				doAction("guarda " + checkGender(item.gender(), true) + " " + nameOf(item));
+				doAction("guarda " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			weapon = null;
 		} else if (item == shield) {
 			if (hp > 0) 
-				doAction("guarda " + checkGender(item.gender(), true) + " " + nameOf(item));
+				doAction("guarda " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			shield = null;
 		} else if (item == helment) {
 			if (hp > 0) 
-				doAction("guarda " + checkGender(item.gender(), true) + " " + nameOf(item));
+				doAction("guarda " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			helment = null;
 		}
 	}
@@ -583,7 +554,7 @@ public class Creature {
 	public void equip(Item item){
 		if (!inventory.contains(item)) {
 			if (inventory.isFull()) {
-				notify("No puedes equipar "+ checkGender(item.gender(), true) + " %s ya que el inventario esta lleno!", nameOf(item));
+				notify("No puedes equipar "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " %s ya que el inventario esta lleno!", nameOf(item));
 				return;
 			} else {
 				world.remove(item);
@@ -599,19 +570,19 @@ public class Creature {
 		
 		if (item.itemType() == ItemType.WEAPON){
 			unequip(weapon);
-			doAction("sujeta " +  checkGender(item.gender(), true) + " " + nameOf(item));
+			doAction("sujeta " +  StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			weapon = item;
 		} else if(item.itemType() == ItemType.ARMOR){
 			unequip(armor);
-			doAction("viste " +  checkGender(item.gender(), true) + " " + nameOf(item));
+			doAction("viste " +  StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			armor = item;
 		} else if(item.itemType() == ItemType.HELMENT){
 			unequip(helment);
-			doAction("coloca " +  checkGender(item.gender(), true) + " " + nameOf(item));
+			doAction("coloca " +  StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			helment = item;
 		} else if(item.itemType() == ItemType.SHIELD){
 			unequip(shield);
-			doAction("alza " +  checkGender(item.gender(), true) + " " + nameOf(item));
+			doAction("alza " +  StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			shield = item;
 		}
 	}
@@ -645,7 +616,7 @@ public class Creature {
 		if (c != null)
 			throwAttack(item, c);				
 		else
-			doAction("arroja "+ checkGender(item.gender(), true) +" %s", nameOf(item));
+			doAction("arroja "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s", nameOf(item));
 		
 		if (item.quaffEffect() != null && c != null)
 			getRidOf(item);
@@ -673,7 +644,8 @@ public class Creature {
 	}
 	
 	public void learnName(Item item){
-		notify(capitalize(checkGender(item.gender(), true)) + item.appearance() + " es " + checkGender(item.gender(), false) + " " + item.name() + "!");
+		notify(StringUtils.capitalize(StringUtils.checkGender(item.gender(), true, this.isPlayer())) + item.appearance() + " es " 
+					+ StringUtils.checkGender(item.gender(), false, this.isPlayer()) + " " + item.name() + "!");
 		ai.setName(item, item.name());
 	}
 }

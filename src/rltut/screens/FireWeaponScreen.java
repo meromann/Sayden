@@ -3,11 +3,12 @@ package rltut.screens;
 import rltut.Creature;
 import rltut.Line;
 import rltut.Point;
+import rltut.StringUtils;
 
 public class FireWeaponScreen extends TargetBasedScreen {
 
 	public FireWeaponScreen(Creature player, int sx, int sy) {
-		super(player, "Donde disparas " + player.checkGender(player.weapon().gender(), true) + " " + player.nameOf(player.weapon()) + "?", sx, sy);
+		super(player, "Donde disparas " + StringUtils.checkGender(player.weapon().gender(), true, player.isPlayer()) + " " + player.nameOf(player.weapon()) + "?", sx, sy);
 	}
 
 	public boolean isAcceptable(int x, int y) {
