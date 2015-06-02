@@ -165,6 +165,14 @@ public class CreatureAi {
 		int mx = points.get(0).x - creature.x;
 		int my = points.get(0).y - creature.y;
 		
+		if(mx != 0 && my != 0){
+			if(Math.random() > 0.5f){
+				mx = 0;
+			}else{
+				my = 0;
+			}
+		}
+		
 		creature.moveBy(mx, my, 0);
 	}
 
