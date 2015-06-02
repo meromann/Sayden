@@ -13,9 +13,6 @@ public class ZombieAi extends CreatureAi {
 	}
 
 	public void onUpdate(){
-		if (Math.random() < 0.4)
-			return;
-		
 		if (creature.canSee(player.x, player.y, player.z))
 			hunt(player);
 		else

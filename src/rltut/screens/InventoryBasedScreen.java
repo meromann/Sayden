@@ -3,7 +3,7 @@ package rltut.screens;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
-import rltut.ApplicationMain;
+import rltut.Constants;
 import rltut.Creature;
 import rltut.Item;
 import asciiPanel.AsciiPanel;
@@ -27,16 +27,16 @@ public abstract class InventoryBasedScreen implements Screen {
 	public void displayOutput(AsciiPanel terminal) {
 		ArrayList<String> lines = getList();
 		
-		int y = ApplicationMain.MENU_OFFSET - lines.size();
+		int y = Constants.MENU_OFFSET - lines.size();
 		int x = 4;
 		
 		for (String line : lines){
 			terminal.write(line, x, y++);
 		}
 		
-		terminal.clear(' ', 0, ApplicationMain.MENU_OFFSET, 80, 1);
-		terminal.write("Que quieres " + getVerb() + "?", 2, ApplicationMain.MENU_OFFSET);
-		terminal.writeCenter(leftScreen().getScreenName() + " <--" + this.getScreenName() + "--> " + rightScreen().getScreenName(), ApplicationMain.MENU_OFFSET + 1);
+		terminal.clear(' ', 0, Constants.MENU_OFFSET, 80, 1);
+		terminal.write("Que quieres " + getVerb() + "?", 2, Constants.MENU_OFFSET);
+		terminal.writeCenter(leftScreen().getScreenName() + " <--" + this.getScreenName() + "--> " + rightScreen().getScreenName(), Constants.MENU_OFFSET + 1);
 		
 		terminal.repaint();
 	}

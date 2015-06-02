@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import asciiPanel.AsciiPanel;
-import rltut.ApplicationMain;
+import rltut.Constants;
 import rltut.Creature;
 import rltut.Item;
 import rltut.MapLoader;
@@ -30,8 +30,8 @@ public class PlayScreen implements Screen {
 	private Screen subscreen;
 		
 	public PlayScreen(){
-		screenWidth = ApplicationMain.WORLD_WIDTH;
-		screenHeight = ApplicationMain.WORLD_HEIGHT;
+		screenWidth = Constants.WORLD_WIDTH;
+		screenHeight = Constants.WORLD_HEIGHT;
 		
 		messages = new ArrayList<Message>();
 		worldList = new HashMap<String, World>();
@@ -46,7 +46,7 @@ public class PlayScreen implements Screen {
 		createCreatures(factory);
 		createRocks(factory);
 		
-		worldList.put(ApplicationMain.STARTING_MAP, world);
+		worldList.put(Constants.STARTING_MAP, world);
 	}
 
 	private void createCreatures(StuffFactory factory){
@@ -62,7 +62,7 @@ public class PlayScreen implements Screen {
 	
 	private void createWorld(){
 		world = new MapLoader()
-					.preBuild(ApplicationMain.STARTING_MAP);
+					.preBuild(Constants.STARTING_MAP);
 	}
 	
 	@Override
@@ -87,15 +87,14 @@ public class PlayScreen implements Screen {
 					new Color(211,0,0),
 					new Color(255,0,0)
 			};
-
-			terminal.write(wounds.get(i).severity() + " ", (i*2)+1, ApplicationMain.MENU_OFFSET, arrayColor[wounds.get(i).severity() - 1 >= arrayColor.length ? arrayColor.length : wounds.get(i).severity() - 1]);
+			terminal.write(wounds.get(i).severity() + " ", (i*2)+1, Constants.MENU_OFFSET, arrayColor[wounds.get(i).severity() - 1 >= arrayColor.length ? arrayColor.length : wounds.get(i).severity() - 1]);
 		}
 		//String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.hp(), player.mana(), player.maxMana(), hunger());
 		//terminal.write(stats, 1, ApplicationMain.MENU_OFFSET);
 	}
 
 	private void displayMessages(AsciiPanel terminal, List<Message> messages) {
-		int top = ApplicationMain.MENU_OFFSET + 2;
+		int top = Constants.MENU_OFFSET + 2;
 		for (int i = 0; i < messages.size(); i++){
 			terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
 		}
@@ -130,6 +129,7 @@ public class PlayScreen implements Screen {
 			subscreen = subscreen.respondToUserInput(key);
 		} else {
 			switch (key.getKeyCode()){
+			case KeyEvent.VK_SPACE: player.moveBy(0, 0, 0); break;
 			case KeyEvent.VK_LEFT:
 			case KeyEvent.VK_A: player.moveBy(-1, 0, 0); break;
 			case KeyEvent.VK_RIGHT:

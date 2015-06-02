@@ -59,13 +59,12 @@ public class StuffFactory {
 	}*/
 	
 	public Creature newZombie(int depth, Creature player){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 2);
 		Item dientes = new Item(ItemType.INTRINSIC, 'M', "dientes").addDamageType(DamageType.SLICE, 1);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.BLUNT, 1);
-		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, Math.random() < 0.0 ? dientes : puños, piel);
+		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, Math.random() > 1 ? dientes : puños, piel);
 		world.addAtEmptyLocation(zombie, depth);
 		new ZombieAi(zombie, player);
-		zombie.modifyAttackSpeed(100);
 		zombie.equip(newLightArmor(-1));
 		return zombie;
 	}

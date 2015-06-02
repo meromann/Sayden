@@ -3,7 +3,7 @@ package rltut.screens;
 import java.awt.event.KeyEvent;
 
 import asciiPanel.AsciiPanel;
-import rltut.ApplicationMain;
+import rltut.Constants;
 import rltut.Creature;
 
 public class PreLookScreen extends TargetBasedScreen {
@@ -21,8 +21,8 @@ public class PreLookScreen extends TargetBasedScreen {
 	@Override
 	public void displayOutput(AsciiPanel terminal) {
 		terminal.clear(' ', 0, 23, 80, 1);
-		terminal.write("Presiona enter para observar", 2, ApplicationMain.MENU_OFFSET);
-		terminal.writeCenter(leftScreen().getScreenName() + " <--" + this.getScreenName() + "--> " + rightScreen().getScreenName(), ApplicationMain.MENU_OFFSET + 1);
+		terminal.write("Presiona enter para observar", 2, Constants.MENU_OFFSET);
+		terminal.writeCenter(leftScreen().getScreenName() + " <--" + this.getScreenName() + "--> " + rightScreen().getScreenName(), Constants.MENU_OFFSET + 1);
 	}	
 	
 	public PreLookScreen(Creature player, String caption, int sx, int sy) {
@@ -31,8 +31,8 @@ public class PreLookScreen extends TargetBasedScreen {
 
 	@Override
 	public Screen respondToUserInput(KeyEvent key) {
-		int scrollX = Math.max(0, Math.min(player.x - ApplicationMain.WORLD_WIDTH / 2, player.getWorld().width() - ApplicationMain.WORLD_WIDTH));
-		int scrollY = Math.max(0, Math.min(player.y - ApplicationMain.WORLD_HEIGHT / 2, player.getWorld().height() - ApplicationMain.WORLD_HEIGHT));
+		int scrollX = Math.max(0, Math.min(player.x - Constants.WORLD_WIDTH / 2, player.getWorld().width() - Constants.WORLD_WIDTH));
+		int scrollY = Math.max(0, Math.min(player.y - Constants.WORLD_HEIGHT / 2, player.getWorld().height() - Constants.WORLD_HEIGHT));
 
 		switch (key.getKeyCode()){
 		case KeyEvent.VK_LEFT: return leftScreen();

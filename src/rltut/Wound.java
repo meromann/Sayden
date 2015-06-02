@@ -34,7 +34,7 @@ public class Wound {
 	public static void instantiateWounds(){
 		TYPES = new HashMap<String, Wound>();
 		//******************BLUNT 1**************************************
-		TYPES.put("BLUNT1-ANY",new Wound(12,LVL1_DURATION,"moreton"){
+		TYPES.put("BLUNT1-ANY",new Wound(LVL1_DURATION,1,"moreton"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("golpea inflingiendo un moreton en "+genderizePosition(this.position(), null));
 			}
@@ -42,22 +42,21 @@ public class Wound {
 			public void onFinish(Creature creature){}
 		});
 		//******************BLUNT 2**************************************
-		TYPES.put("BLUNT2-ANY",new Wound(12,LVL2_DURATION,"contusion"){
+		TYPES.put("BLUNT2-ANY",new Wound(LVL2_DURATION,2,"contusion"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("golpea generando una contusion en "+genderizePosition(this.position(), null));
-				if(Math.random() < 0.8){
-					System.out.println(creature.getActionPoints());
-					creature.modifyActionPoints(-100);
-					System.out.println(creature.getActionPoints());
-					creature.notifyArround("El impacto "+ (creature.isPlayer() ? "te aturde" : "aturde ") + 
-							(creature.gender() == 'M' ? "al " : "a la ") + creature.name(), creature);
+				if(Math.random() < 0.3){
+					creature.modifyActionPoints(-100, "aturdido");
+					creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
+					creature.notifyArround(Constants.MESSAGE_STATUS_EFFECT_COLOR, "El impacto "+ (creature.isPlayer() ? "te aturde" : 
+						("aturde " + (creature.gender() == 'M' ? "al " : "a la ") + creature.name())), creature);
 				}
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}
 		});
 		//******************SLICE 1**************************************
-		TYPES.put("SLICE1-ANY",new Wound(12,LVL1_DURATION,"raspadura"){
+		TYPES.put("SLICE1-ANY",new Wound(LVL1_DURATION,1,"raspadura"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("logra causar una ligera raspadura en "+genderizePosition(this.position(), null));
 			}
@@ -65,7 +64,7 @@ public class Wound {
 			public void onFinish(Creature creature){}
 		});
 		//******************PIERCING 1**************************************
-		TYPES.put("PIERCING1-ANY",new Wound(12,LVL1_DURATION,"tajo"){
+		TYPES.put("PIERCING1-ANY",new Wound(LVL1_DURATION,1,"tajo"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("roza " + (creature.intrinsicArmor().gender() == 'M' ? "el " : "la ") +
 						creature.intrinsicArmor().name() + " "+genderizePosition(this.position(), "de"));

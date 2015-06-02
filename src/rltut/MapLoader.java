@@ -39,8 +39,8 @@ public class MapLoader {
 			String[] lines = mapReference.split("\n");
 			
 			//En caso de que el mapa sea mas chico que el mundo soportado
-			mapHeight = lines.length < ApplicationMain.WORLD_HEIGHT ? ApplicationMain.WORLD_HEIGHT : lines.length;
-			mapWidth = lines[0].length() < ApplicationMain.WORLD_HEIGHT ? ApplicationMain.WORLD_HEIGHT : lines[0].length();
+			mapHeight = lines.length < Constants.WORLD_HEIGHT ? Constants.WORLD_HEIGHT : lines.length;
+			mapWidth = lines[0].length() < Constants.WORLD_HEIGHT ? Constants.WORLD_HEIGHT : lines[0].length();
 			
 			//TODO: Resolver z_index!!
 			tiles = new Tile[mapWidth][mapHeight][1];

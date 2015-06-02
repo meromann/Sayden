@@ -13,20 +13,10 @@ public class ApplicationMain extends JFrame implements KeyListener {
 	private AsciiPanel terminal;
 	private Screen screen;
 	
-	public static final int SCREEN_WIDTH = 80;
-	public static final int SCREEN_HEIGHT = 32;
-	
-	public static final int WORLD_WIDTH = 80;
-	public static final int WORLD_HEIGHT = 24;
-	
-	public static final int MENU_OFFSET = (int)(WORLD_HEIGHT);
-	
-	public static final String STARTING_MAP = "Pueblo";
-	
 	public ApplicationMain(){
 		super();
 		//Instanciamos el panel de texto
-		terminal = new AsciiPanel(SCREEN_WIDTH, SCREEN_HEIGHT);
+		terminal = new AsciiPanel(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
 		add(terminal);
 		pack();
 		//La primer pantalla es la StartScreen

@@ -28,7 +28,8 @@ public class Creature {
 	
 	private Color color;
 	public Color color() { return color; }
-
+	public void modifyColor(Color newColor) { this.color = newColor; }
+	
 	private Color statusColor;
 	public Color statusColor() { return statusColor; }
 	public void modifyStatusColor(Color newColor) { this.statusColor = newColor; }
@@ -81,15 +82,22 @@ public class Creature {
 	
 	private int movementSpeed;
 	public int movementSpeed() { return movementSpeed; }
+	public void modifyMovementSpeed(int amount) { this.movementSpeed += amount; }
 	
 	public int attackSpeed;
 	public int attackSpeed() { return attackSpeed; }
 	public void modifyAttackSpeed(int amount) { this.attackSpeed += amount; }
 	
+	private Point attackQue = null;
+	
+	private String statusEffect;
+	public String statusEffect() { return statusEffect; }
+	
 	private int actionPoints;
 	public int getActionPoints() { return actionPoints; }
 	public void modifyActionPoints(int actionPoints) { this.actionPoints += actionPoints; }
-	
+	public void modifyActionPoints(int actionPoints, String status) { this.statusEffect = status; this.actionPoints += actionPoints; }
+
 	private String causeOfDeath;
 	public String causeOfDeath() { return causeOfDeath; }
 	
@@ -107,22 +115,47 @@ public class Creature {
 		this.color = color;
 		this.originalColor = color;
 		this.hp = hp;
-		this.visionRadius = 9;
+		this.visionRadius = Constants.STARTING_VISION_RADIUS;
 		this.name = name;
-		this.inventory = new Inventory(20);
+		this.inventory = new Inventory(Constants.INVENTORY_SIZE);
 		this.effects = new ArrayList<Effect>();
 		this.wounds = new ArrayList<Wound>();
 		this.job = name;
 		this.gender = gender;
 		this.intrinsicWeapon = weapon;
 		this.intrinsicArmor = armor;
-		this.attackSpeed = 100;
-		this.movementSpeed = 100;
+		this.attackSpeed = Constants.STARTING_ATTACK_SPEED;
+		this.movementSpeed = Constants.STARTING_MOVE_SPEED;
 	}
 	
 	public void moveBy(int mx, int my, int mz){
-		if (mx==0 && my==0 && mz==0)
+		if (mx==0 && my==0 && mz==0 || (isPlayer && actionPoints < 0)){
+			if(isPlayer){
+				if(actionPoints < 0){
+					doAction(Constants.MESSAGE_STATUS_EFFECT_COLOR, "esta " + statusEffect()); 
+					modifyActionPoints(100);
+				}
+				world.modifyActionPoints(100);
+			}
 			return;
+		}
+		
+		if(statusEffect != null && (actionPoints > 0 || isPlayer)){
+			statusEffect = null;
+			modifyStatusColor(null);
+		}
+		
+		if(attackQue != null && actionPoints >= attackSpeed){
+			Creature queCreature = world.creature(attackQue.x, attackQue.y, attackQue.z);
+			if(queCreature == null){
+				doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_DODGE);
+			}else{
+				meleeAttack(queCreature, weapon);
+			}
+			modifyActionPoints(-attackSpeed);
+			attackQue = null;
+			return;
+		}
 		
 		Tile tile = world.tile(x+mx, y+my, z+mz);
 		
@@ -167,22 +200,27 @@ public class Creature {
 		}
 		
 		Creature other = world.creature(x+mx, y+my, z+mz);
-				
+		
 		if (other == null){
 			if(isPlayer){
 				world.modifyActionPoints(movementSpeed);
 			}else if(actionPoints < movementSpeed){
 				return;
+			}else{
+				modifyActionPoints(-movementSpeed);
 			}
 			ai.onEnter(x+mx, y+my, z+mz, tile);
 		}else{
 			if(isPlayer){
 				world.modifyActionPoints(attackSpeed);
-			}else if(actionPoints <= (attackSpeed * .5f)){
-				System.out.println("OOOOZOOO");
+			}else if(actionPoints <= (attackSpeed * 0.5f) && actionPoints > 0){
+				doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_DODGE_WARNING);
+				attackQue = new Point(x+mx, y+my, z+mz);
 				return;
 			}else if(actionPoints < attackSpeed){
 				return;
+			}else{
+				modifyActionPoints(-attackSpeed);
 			}
 			//other.ai.onTalkedTo(this);
 			meleeAttack(other, weapon);
@@ -333,12 +371,14 @@ public class Creature {
 	}
 	
 	public void update(){
-		if(wounds.size() > 2){
-			modifyHp(1, "AHA!");
-		}
-		updateEffects();
-		updateWounds();
-		ai.onUpdate();
+		do{
+			if(wounds.size() > 2){
+				modifyHp(1, "AHA!");
+			}
+			updateEffects();
+			updateWounds();
+			ai.onUpdate();
+		}while(getActionPoints() > 100);
 	}
 	
 	private void updateWounds(){
@@ -389,6 +429,12 @@ public class Creature {
 		}
 	}
 	
+	public void notifyArround(Color color, String message, Object ... params){
+		for (Creature other : getCreaturesWhoSeeMe()){
+			other.notify(color, message, params);
+		}
+	}
+	
 	public void talkAction(Color color, String message, Object ... params){
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
@@ -407,6 +453,17 @@ public class Creature {
 			} else {
 				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
 				other.notify(String.format("%s %s.", nombre, message), params);
+			}
+		}
+	}
+	
+	public void doAction(Color actionColor, String message, Object ... params){
+		for (Creature other : getCreaturesWhoSeeMe()){
+			if (other == this){
+				other.notify(actionColor, StringUtils.makeSecondPerson(message, true) + ".", params);
+			} else {
+				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
+				other.notify(actionColor, String.format("%s %s.", nombre, message), params);
 			}
 		}
 	}
