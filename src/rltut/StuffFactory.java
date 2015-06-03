@@ -40,7 +40,7 @@ public class StuffFactory {
 	}
 	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 2);
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 5);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
 		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 10, puños, piel);
 		world.addAtEmptyLocation(player, 0);
@@ -59,13 +59,14 @@ public class StuffFactory {
 	}*/
 	
 	public Creature newZombie(int depth, Creature player){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 5);
 		Item dientes = new Item(ItemType.INTRINSIC, 'M', "dientes").addDamageType(DamageType.SLICE, 1);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.BLUNT, 1);
-		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, Math.random() > 0.5 ? dientes : puños, piel);
+		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, Math.random() > 1 ? dientes : puños, piel);
 		world.addAtEmptyLocation(zombie, depth);
 		new ZombieAi(zombie, player);
 		zombie.equip(newLightArmor(-1));
+		zombie.modifyAttackSpeed(-50);
 		return zombie;
 	}
 

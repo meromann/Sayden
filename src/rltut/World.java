@@ -82,7 +82,7 @@ public class World {
 	
 	public Color backgroundColor(int x, int y, int z){
 		Creature creature = creature(x, y, z);
-		if (creature != null)
+		if (creature != null && creature.statusColor() != null)
 			return creature.statusColor();
 				
 		return tile(x, y, z).backgroundColor();
@@ -198,8 +198,49 @@ public class World {
 			if (items[p.x][p.y][p.z] == null){
 				items[p.x][p.y][p.z] = item;
 				Creature c = this.creature(p.x, p.y, p.z);
+				
 				if (c != null)
 					c.notify((item.gender() == 'M' ? "Un" : "Una") + " %s cae entre tus pies.", c.nameOf(item));
+				
+				return true;
+			} else {
+				List<Point> neighbors = p.neighbors8();
+				neighbors.removeAll(checked);
+				points.addAll(neighbors);
+			}
+		}
+		return false;
+	}
+	
+	public boolean changeAtEmptySpace(Color effectColor, int x, int y, int z){
+		if (effectColor == null)
+			return true;
+		
+		List<Point> points = new ArrayList<Point>();
+		List<Point> checked = new ArrayList<Point>();
+		
+		points.add(new Point(x, y, z));
+		
+		while (!points.isEmpty()){
+			Point p = points.remove(0);
+			checked.add(p);
+			
+			if (!tile(p.x, p.y, p.z).isGround())
+				continue;
+				
+			if (tiles[p.x][p.y][p.z].backgroundColor() != effectColor){
+				Creature c = this.creature(p.x, p.y, p.z);
+				
+				if (c != null){
+					c.notify("Sangre salpica sobre tu cuerpo, empapandote.");
+				}
+				
+				Tile bloodyTile = new Tile(tiles[p.x][p.y][p.z]);
+				
+				bloodyTile.setBackgroundColor(Constants.BLOOD_COLOR);
+				bloodyTile.setDetails(bloodyTile.details() + " Hay un charco de sangre.");
+				changeTile(p.x, p.y, p.z, bloodyTile);
+
 				return true;
 			} else {
 				List<Point> neighbors = p.neighbors8();

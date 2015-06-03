@@ -125,6 +125,9 @@ public class PlayScreen implements Screen {
 	@Override
 	public Screen respondToUserInput(KeyEvent key) {
 		
+		if (player.hp() < 1)
+			return new LoseScreen(player);
+		
 		if (subscreen != null) {
 			subscreen = subscreen.respondToUserInput(key);
 		} else {
@@ -199,9 +202,6 @@ public class PlayScreen implements Screen {
 		
 		if (subscreen == null)
 			world.update();
-				
-		if (player.hp() < 1)
-			return new LoseScreen(player);
 				
 		return this;
 	}

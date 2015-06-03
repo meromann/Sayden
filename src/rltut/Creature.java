@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import asciiPanel.AsciiPanel;
 import rltut.Item.ItemType;
 import rltut.ai.CreatureAi;
 import rltut.screens.Screen;
@@ -96,6 +97,12 @@ public class Creature {
 	private int actionPoints;
 	public int getActionPoints() { return actionPoints; }
 	public void modifyActionPoints(int actionPoints) { this.actionPoints += actionPoints; }
+	/** @param actionPoints Puntos de accion que añadir o sustraer
+	 *  @param status El nombre del estado de la criatura
+	 *  
+	 *  De ser negativo se sustraen los puntos y se muerstra "esta "+ status (Ej: "esta bajo gran dolor", "esta aturdido")
+	 *  cada turno hasta que el efecto se disipe
+	 * */
 	public void modifyActionPoints(int actionPoints, String status) { this.statusEffect = status; this.actionPoints += actionPoints; }
 
 	private String causeOfDeath;
@@ -204,7 +211,7 @@ public class Creature {
 		if (other == null){
 			if(isPlayer){
 				world.modifyActionPoints(movementSpeed);
-			}else if(actionPoints < movementSpeed){
+			}else if(actionPoints <= movementSpeed){
 				return;
 			}else{
 				modifyActionPoints(-movementSpeed);
@@ -217,7 +224,7 @@ public class Creature {
 				doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_DODGE_WARNING);
 				attackQue = new Point(x+mx, y+my, z+mz);
 				return;
-			}else if(actionPoints < attackSpeed){
+			}else if(actionPoints <= attackSpeed){
 				return;
 			}else{
 				modifyActionPoints(-attackSpeed);
@@ -227,7 +234,7 @@ public class Creature {
 		}
 	}
 
-	public void meleeAttack(Creature other, Item object){
+	public void meleeAttack(Creature other, Item object){		
 		commonAttack(other, object);
 	}
 
@@ -253,6 +260,9 @@ public class Creature {
 		int damagePower = 0;			//Poder del daño inflinjido (si el arma tiene varios tipos de ataque tomaria el mayor
 		int defendingPower = 0;			//Poder de defensa contra el mayor daño, usado para chequear bloqueos
 		Item defendingObject = null;	//Objeto con el que la criatura esta intentando defender el ataque
+		
+		if(other.hp() < 0)
+			return;
 		
 		//Elige el lugar donde se golpea, se toma en cuenta si el enemigo "dispara" un arco (no esta directamente al lado
 		//del objetivo del ataque. Tambien se guarda el objeto con el cual el objetivo trata de defender el ataque
@@ -351,12 +361,36 @@ public class Creature {
 		}
 	}
 	
+	public void kill(String causeOfDeath, String action){
+		this.causeOfDeath = causeOfDeath;
+		
+		if(action != null)
+			doAction(action);
+		
+		hp = -1;
+		
+		if(!isPlayer){
+			leaveCorpse();
+			world.remove(this);
+		}
+	}
+	
+	public void bleed(int intensity){
+		int start = 0;
+		do{
+			start++;
+			world.changeAtEmptySpace(AsciiPanel.red, x, y, z);
+		}while(start < intensity);
+	}
+	
 	private void leaveCorpse(){
 		Item corpse = new Item(ItemType.STATIC, '%', 'M', color, "cadaver de " + name, null);
 		world.addAtEmptySpace(corpse, x, y, z);
 		for (Item item : inventory.getItems()){
-			if (item != null)
-				drop(item);
+			if (item != null){
+				inventory.remove(item);
+				unequip(item, "deja caer ");
+			}
 		}
 	}
 	
@@ -458,12 +492,13 @@ public class Creature {
 	}
 	
 	public void doAction(Color actionColor, String message, Object ... params){
+		boolean hasPunctuation = message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?");
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify(actionColor, StringUtils.makeSecondPerson(message, true) + ".", params);
+				other.notify(actionColor, StringUtils.makeSecondPerson(message, true) + (hasPunctuation ? "" : "."), params);
 			} else {
 				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
-				other.notify(actionColor, String.format("%s %s.", nombre, message), params);
+				other.notify(actionColor, String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 		}
 	}
@@ -472,12 +507,14 @@ public class Creature {
 		if (hp < 1)
 			return;
 		
+		boolean hasPunctuation = message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?");
+		
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify(StringUtils.makeSecondPerson(message, false) + ".", params);
+				other.notify(StringUtils.makeSecondPerson(message, false) + (hasPunctuation ? "" : "."), params);
 			} else {
 				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " : "La " + name);
-				other.notify(String.format("%s %s.", nombre, message), params);
+				other.notify(String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 			other.learnName(item);
 		}
@@ -537,6 +574,13 @@ public class Creature {
 		}
 	}
 	
+	public void force_drop(Item item){
+		if (world.addAtEmptySpace(item, x, y, z)){
+			inventory.remove(item);
+			unequip(item);
+		}
+	}
+	
 	public void drop(Item item){
 		if (world.addAtEmptySpace(item, x, y, z)){
 			doAction("suelta "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s", nameOf(item));
@@ -586,24 +630,28 @@ public class Creature {
 	}
 	
 	public void unequip(Item item){
+		unequip(item, null);
+	}
+	
+	public void unequip(Item item, String action){
 		if (item == null)
 			return;
 		
 		if (item == armor){
 			if (hp > 0)
-				doAction("remueve " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+				doAction(action == null ? "remueve " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			armor = null;
 		} else if (item == weapon) {
 			if (hp > 0) 
-				doAction("guarda " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			weapon = null;
 		} else if (item == shield) {
 			if (hp > 0) 
-				doAction("guarda " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			shield = null;
 		} else if (item == helment) {
 			if (hp > 0) 
-				doAction("guarda " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			helment = null;
 		}
 	}

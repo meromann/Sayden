@@ -107,7 +107,7 @@ public class Tile {
 	Tile(char glyph, Color color, String details, boolean seeTrough, boolean isGround){
 		this.glyph = glyph;
 		this.color = color;
-		this.backgroundColor = Color.black;
+		this.backgroundColor = Constants.BACKGROUND_COLOR;
 		this.details = details;
 		this.seeTrough = seeTrough;
 		this.isGround = isGround;
@@ -118,7 +118,7 @@ public class Tile {
 	Tile(char glyph, Color color, String details, boolean seeTrough){
 		this.glyph = glyph;
 		this.color = color;
-		this.backgroundColor = Color.black;
+		this.backgroundColor = Constants.BACKGROUND_COLOR;
 		this.details = details;
 		this.seeTrough = seeTrough;
 		this.portal_to = null;
@@ -126,10 +126,21 @@ public class Tile {
 		this.change_to = new Tile();
 	}
 	
+	Tile(Tile clone){
+		this.glyph = clone.glyph();
+		this.color = clone.color();
+		this.backgroundColor = clone.backgroundColor();
+		this.details = clone.details();
+		this.seeTrough = clone.seeTrough();
+		this.isGround = clone.isGround();
+		this.portal_to = clone.getPortalTo();
+		this.change_to = clone.change_to();
+	}
+	
 	Tile(){
 		this.glyph = '?';
 		this.color = Color.PINK;
-		this.backgroundColor = Color.black;
+		this.backgroundColor = Constants.BACKGROUND_COLOR;
 		this.details = "INITIALIZE_ERROR";
 		this.seeTrough = false;
 		this.isGround = true;

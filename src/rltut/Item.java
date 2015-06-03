@@ -61,7 +61,7 @@ public class Item {
 		writtenSpells.add(new Spell(name, manaCost, effect));
 	}
 	
-	//Constructor para los items intrinsecos (arma / armadura de la criatura, pelaje, puños, etc)
+	/**Constructor para los items intrinsecos (arma / armadura de la criatura, pelaje, puños, etc)*/
 	public Item(ItemType type, char gender, String name){
 		this.itemType = type;
 		this.gender = gender;

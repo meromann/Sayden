@@ -3,6 +3,33 @@ package rltut;
 public class StringUtils {
 	
 	/**
+	 * @param position El texto con la posiscion del brazo
+	 * @param additive Si "true" añade "de" al genero (de el, del / de la, la)
+	 * 
+	 * Entregas una posicion del cuerpo y le añade un posesivo y el genero
+	 * */
+	public static String genderizeBodyPosition(String position, String additive){
+		if(position == "brazo" || position =="pecho") 
+			return (additive == "de" ? "del " : "el ") + position;
+		else
+			return (additive == "de" ? "de la " : "la ") + position;
+	}
+	
+	/**
+	 * @param gender El genero de la palabra
+	 * @param text Texto a genderizar (de el, del / de la, la)
+	 * @param possesive Añade un posesivo (de)
+	 * 
+	 * Entregas un texto y le agrega posesivo y genero
+	 * */
+	public static String genderizeCreature(char gender, String text, boolean possesive){
+		if(gender == 'M') 
+			return (possesive ? "del " : "el ") + text;
+		else
+			return (possesive ? "de la " : "la ") + text;
+	}
+	
+	/**
 	 * @param text Texto a convertir
 	 * @param capitalize Si true devuelve en mayuscula
 	 * 

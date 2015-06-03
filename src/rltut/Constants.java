@@ -5,6 +5,8 @@ import java.awt.Color;
 import asciiPanel.AsciiPanel;
 
 public class Constants {
+	public static final Color BACKGROUND_COLOR = AsciiPanel.black;
+	
 	public static final int SCREEN_WIDTH = 80;
 	public static final int SCREEN_HEIGHT = 32;
 	
@@ -25,5 +27,13 @@ public class Constants {
 	public static final String MESSAGE_DODGE_WARNING = "prepara para atacar";	//doAction(MESSAGE_DODGE_WARNING)
 	
 	public static final int STARTING_VISION_RADIUS = 9;
+	
+	public static final int LVL1_DURATION = 20;
+	public static final int LVL2_DURATION = 42;
+	public static final int LVL3_DURATION = 80;
+	public static final int INCURABLE = -1;
+	
+	protected static final Color MESSAGE_KILL_COLOR = AsciiPanel.brightRed;
+	protected static final Color BLOOD_COLOR = AsciiPanel.red;
 
 }
