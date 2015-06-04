@@ -13,7 +13,8 @@ public class Item {
 		STATIC,
 		EDIBLE,
 		READABLE,
-		INTRINSIC
+		INTRINSIC,
+		UNEQUIPPABLE
 	}
 	
 	private ItemType itemType;

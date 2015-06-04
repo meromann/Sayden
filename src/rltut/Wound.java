@@ -31,19 +31,19 @@ public class Wound {
 			public void onFinish(Creature creature){}
 		});
 		//******************BLUNT 3**************************************
-			TYPES.put("BLUNT3-ANY",new Wound(Constants.LVL3_DURATION,3,"fisura"){
-				public void onApply(Creature creature, Creature applier){
-					applier.doAction("golpea generando una severa fisura en "+StringUtils.genderizeBodyPosition(this.position(), null));
-					if(Math.random() < 0.4){
-						creature.modifyActionPoints(-150, "bajo gran dolor");
-						creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
-						creature.notifyArround(Constants.MESSAGE_STATUS_EFFECT_COLOR, "El dolor "+ (creature.isPlayer() ? "es muy intenso" : 
-							((creature.gender() == 'M' ? "del " : "de la ") + creature.name() + " es muy intenso")), creature);
-					}
+		TYPES.put("BLUNT3-ANY",new Wound(Constants.LVL3_DURATION,3,"fisura"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("golpea generando una severa fisura en "+StringUtils.genderizeBodyPosition(this.position(), null));
+				if(Math.random() < 0.4){
+					creature.modifyActionPoints(-150, "bajo gran dolor");
+					creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
+					creature.notifyArround(Constants.MESSAGE_STATUS_EFFECT_COLOR, "El dolor "+ (creature.isPlayer() ? "es muy intenso" : 
+						((creature.gender() == 'M' ? "del " : "de la ") + creature.name() + " es muy intenso")), creature);
 				}
-				public void update(Creature creature){}
-				public void onFinish(Creature creature){}
-			});
+			}
+			public void update(Creature creature){}
+			public void onFinish(Creature creature){}
+		});
 		//******************BLUNT 4**************************************
 		TYPES.put("BLUNT4-ANY",new Wound(Constants.INCURABLE,4,"fractura expuesta"){
 			public void onApply(Creature creature, Creature applier){
@@ -77,10 +77,26 @@ public class Wound {
 			}
 			public void update(Creature creature){
 				creature.getCreatureAi().wander();
-				creature.doAction("trastabilla, oprimiendo "+(creature.isPlayer() ? "tu": "su") + " corazon");
+				creature.doAction("trastabilla, oprimiendo "+(creature.isPlayer() ? "tu": "su") + " pecho");
 			}
 			public void onFinish(Creature creature){
 				creature.kill("corazon detenido", "muere en agonia, oprimiendo su corazon");
+			}
+		});
+		//******************BLUNT 5 KO BACK******************************
+		TYPES.put("BLUNT5-espalda",new Wound(6,5,"columna destrozada"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction(Constants.MESSAGE_KILL_COLOR, "impacta con fuerza en el centro de la columna " + 
+						(creature.isPlayer() ? "dejandote paralitico " : "paralizando "+ (creature.gender() == 'M' ? "al " : "a la ") + creature.name() )
+							 +"!!!");
+				creature.modifyActionPoints(-9999, "completamente paralitico");
+			}
+			public void update(Creature creature){
+				if(Math.random() > 0.6)
+					creature.doAction("grita en completa agonia!");
+			}
+			public void onFinish(Creature creature){
+				creature.kill("paralisis", "perece por el insoportable dolor");
 			}
 		});
 		//******************SLICE 1**************************************

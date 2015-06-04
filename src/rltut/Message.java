@@ -6,6 +6,7 @@ import asciiPanel.AsciiPanel;
 public class Message {
 	private String message;
 	public String message() { return message; }
+	public void modifyMessage(String message) { this.message = message; }
 	
 	private Color color;
 	public Color color() { return color; }

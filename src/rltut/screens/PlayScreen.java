@@ -14,6 +14,7 @@ import rltut.Item;
 import rltut.MapLoader;
 import rltut.FieldOfView;
 import rltut.Message;
+import rltut.StringUtils;
 import rltut.StuffFactory;
 import rltut.Tile;
 import rltut.World;
@@ -92,12 +93,21 @@ public class PlayScreen implements Screen {
 		//String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.hp(), player.mana(), player.maxMana(), hunger());
 		//terminal.write(stats, 1, ApplicationMain.MENU_OFFSET);
 	}
-
+	
 	private void displayMessages(AsciiPanel terminal, List<Message> messages) {
 		int top = Constants.MENU_OFFSET + 2;
+		
 		for (int i = 0; i < messages.size(); i++){
-			terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
+			if(messages.get(i).message().length() >= Constants.SCREEN_WIDTH){
+				ArrayList<Message> toAdd = StringUtils.splitPhraseByLimit(messages.get(i), Constants.SCREEN_WIDTH);
+				messages.remove(i);
+				messages.addAll(i, toAdd);
+				terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
+			}else{
+				terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
+			}
 		}
+		
 		if (subscreen == null || player.shopScreen() != null)
 			messages.clear();
 	}

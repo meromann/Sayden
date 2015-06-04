@@ -64,15 +64,19 @@ public class Creature {
 	
 	private Item weapon;
 	public Item weapon() { return weapon; }
+	public void setWeapon(Item weapon) { this.weapon = weapon; }
 	
 	private Item armor;
 	public Item armor() { return armor; }
+	public void setArmor(Item armor) { this.armor = armor; }
 	
 	private Item helment;
 	public Item helment() { return helment; }
+	public void setHelment(Item helment) { this.helment = helment; }
 	
 	private Item shield;
 	public Item shield() { return shield; }
+	public void setShield(Item shield) { this.shield = shield; }
 	
 	private List<Effect> effects;
 	public List<Effect> effects(){ return effects; }
@@ -470,23 +474,25 @@ public class Creature {
 	}
 	
 	public void talkAction(Color color, String message, Object ... params){
+		boolean hasPunctuation = message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?");
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify(color, StringUtils.makeSecondPerson(message, false) + ".", params);
+				other.notify(color, StringUtils.makeSecondPerson(message, false) + (hasPunctuation ? "" : "."), params);
 			} else {
 				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " : "La " + name);
-				other.notify(color, String.format("%s %s.", nombre, message), params);
+				other.notify(color, String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 		}
 	}
 	
 	public void doAction(String message, Object ... params){
+		boolean hasPunctuation = message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?");
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
-				other.notify(StringUtils.makeSecondPerson(message, true) + ".", params);
+				other.notify(StringUtils.makeSecondPerson(message, true) + (hasPunctuation ? "" : "."), params);
 			} else {
 				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
-				other.notify(String.format("%s %s.", nombre, message), params);
+				other.notify(String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 		}
 	}

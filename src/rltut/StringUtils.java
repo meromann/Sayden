@@ -1,6 +1,23 @@
 package rltut;
 
+import java.util.ArrayList;
+
 public class StringUtils {
+	
+	public static ArrayList<Message> splitPhraseByLimit(Message text, int limit){
+		String[] words = text.message().split(" ");
+		ArrayList<Message> array = new ArrayList<Message>();
+		int i = 0;
+		while (words.length > i) {
+		    String line = "";
+		    while ( words.length > i && line.length() + words[i].length() < limit ) {
+		        line += " "+words[i];
+		        i++;
+		    }
+		    array.add(new Message(line, text.color()));
+		}
+		return array;
+	}
 	
 	/**
 	 * @param position El texto con la posiscion del brazo
@@ -37,7 +54,12 @@ public class StringUtils {
 	 * */
 	public static String makeSecondPerson(String text, boolean capitalize){
 		String[] words = text.split(" ");
-		words[0] = words[0] + "s";
+		
+		if(words[0].endsWith(",")){
+			words[0] = words[0].substring(0, words[0].length()-1) + "s,";
+		}else{
+			words[0] = words[0] + "s";
+		}
 		
 		if(capitalize)
 			words[0] = capitalize(words[0]);
