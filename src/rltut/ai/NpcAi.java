@@ -89,6 +89,8 @@ public class NpcAi extends CreatureAi {
 			}else{
 				wander();
 			}
+		}else{
+			creature.moveBy(0, 0, 0);
 		}
 	}
 }

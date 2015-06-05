@@ -147,6 +147,8 @@ public class Creature {
 					modifyActionPoints(100);
 				}
 				world.modifyActionPoints(100);
+			}else{
+				modifyActionPoints(-100);
 			}
 			return;
 		}
