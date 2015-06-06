@@ -102,10 +102,15 @@ public class PlayScreen implements Screen {
 				ArrayList<Message> toAdd = StringUtils.splitPhraseByLimit(messages.get(i), Constants.SCREEN_WIDTH);
 				messages.remove(i);
 				messages.addAll(i, toAdd);
-				terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
-			}else{
-				terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
 			}
+		}
+
+		if(top + messages.size() >= Constants.SCREEN_HEIGHT - 1){
+			top -= ((top + messages.size() + 1) - Constants.SCREEN_HEIGHT);
+		}
+		
+		for (int i = 0; i < messages.size(); i++){
+			terminal.writeCenter(messages.get(i).message(), top + i, messages.get(i).color());
 		}
 		
 		if (subscreen == null || player.shopScreen() != null)
@@ -152,7 +157,7 @@ public class PlayScreen implements Screen {
 			case KeyEvent.VK_DOWN:
 			case KeyEvent.VK_S: player.moveBy( 0, 1, 0); break;
 			case KeyEvent.VK_TAB: subscreen = new EquipScreen(player); break;
-			
+			}
 			/*case KeyEvent.VK_L: subscreen = new LookScreen(player, "Observando", 
 					player.x - getScrollX(), 
 					player.y - getScrollY()); break;
@@ -169,7 +174,6 @@ public class PlayScreen implements Screen {
 			/*case KeyEvent.VK_R: subscreen = new ReadScreen(player,
 						player.x - getScrollX(), 
 						player.y - getScrollY()); break;*/
-			}
 			
 			if(key.getKeyChar() >= '1' && key.getKeyChar() <= '9'){
 				int mappedKey = Integer.parseInt(key.getKeyChar()+"") - 1;

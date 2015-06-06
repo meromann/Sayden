@@ -39,6 +39,43 @@ public class StuffFactory {
 		Collections.shuffle(potionAppearances);
 	}
 	
+	private Creature makeBiped(Creature base){
+		base.addBodyPart(
+				new BodyPart("brazo derecho", "brazo"){
+					public void onRemove(Creature creature) {
+							creature.drop(creature.shield());
+							creature.setShield(
+								new Item(ItemType.UNEQUIPPABLE, 'M', "brazo inhabilitado").addDamageType(DamageType.BLUNT, 1)
+							);
+					}
+				});
+		base.addBodyPart(
+				new BodyPart("brazo izquierdo", "brazo"){
+					public void onRemove(Creature creature) {
+						creature.drop(creature.weapon());
+						creature.setWeapon(
+							new Item(ItemType.UNEQUIPPABLE, 'M', "brazo inhabilitado").addDamageType(DamageType.BLUNT, 1)
+						);
+					}
+				});
+		base.addBodyPart(
+				new BodyPart("pierna derecha", "pierna"){
+					public void onRemove(Creature creature) {
+						//creature.force_drop(new Item(ItemType.STATIC,(char)192, 'F', creature.color(), "pierna separada", null));
+						creature.modifyMovementSpeed(Constants.SEV_LEG_PENALTY);
+					}
+				});
+		base.addBodyPart(
+				new BodyPart("pierna izquierda", "pierna"){
+					public void onRemove(Creature creature) {
+						//creature.force_drop(new Item(ItemType.STATIC,(char)192, 'F', creature.color(), "pierna separada", null));
+						creature.modifyMovementSpeed(Constants.SEV_LEG_PENALTY);
+					}
+				});
+		
+		return base;
+	}
+	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
 		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 5);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
@@ -48,6 +85,8 @@ public class StuffFactory {
 		player.makePlayer();
 		player.inventory().add(newDagger(-1));
 		player.inventory().add(newOPDagger(-1));
+		player = makeBiped(player);
+
 		return player;
 	}
 	
@@ -67,6 +106,8 @@ public class StuffFactory {
 		new ZombieAi(zombie, player);
 		zombie.equip(newLightArmor(-1));
 		zombie.modifyAttackSpeed(-50);
+		zombie = makeBiped(zombie);
+		
 		return zombie;
 	}
 

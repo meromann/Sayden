@@ -99,6 +99,32 @@ public class Wound {
 				creature.kill("paralisis", "perece por el insoportable dolor");
 			}
 		});
+		//******************BLUNT 5 KO ARM*******************************
+		TYPES.put("BLUNT5-brazo",new Wound(Constants.INCURABLE,5,"brazo fracturado"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction(Constants.MESSAGE_KILL_COLOR, "impacta con fuerza en el brazo fracturandolo y exponiendo el hueso!!!");
+				creature.removeBodyPart("brazo");
+				creature.bleed(1);
+				creature.resetActionPoints();
+			}
+			public void update(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.doAction("observa incredulo el milagro...");
+			}
+		});
+		//******************BLUNT 5 KO LEG*******************************
+		TYPES.put("BLUNT5-pierna",new Wound(Constants.INCURABLE,5,"pierna fracturada"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction(Constants.MESSAGE_KILL_COLOR, "impacta con fuerza en la rodilla, exponiendo el hueso de la pierna!!!");
+				creature.removeBodyPart("pierna");
+				creature.bleed(1);
+				creature.resetActionPoints();
+			}
+			public void update(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.doAction("observa incredulo el milagro...");
+			}
+		});
 		//******************SLICE 1**************************************
 		TYPES.put("SLICE1-ANY",new Wound(Constants.LVL1_DURATION,1,"raspadura"){
 			public void onApply(Creature creature, Creature applier){
@@ -121,7 +147,7 @@ public class Wound {
 	protected int duration;
 	protected int orignalDuration;
 	
-	public boolean isHealed() { return duration < 1; }
+	public boolean isHealed() { return duration < 0 ? false : duration < 1; }
 	
 	private int severity;
 	public int severity() { return severity; }

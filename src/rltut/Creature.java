@@ -101,6 +101,8 @@ public class Creature {
 	private int actionPoints;
 	public int getActionPoints() { return actionPoints; }
 	public void modifyActionPoints(int actionPoints) { this.actionPoints += actionPoints; }
+	public void resetActionPoints() { actionPoints = 0; }
+	
 	/** @param actionPoints Puntos de accion que añadir o sustraer
 	 *  @param status El nombre del estado de la criatura
 	 *  
@@ -120,6 +122,39 @@ public class Creature {
 	public boolean isPlayer(){ return isPlayer; }
 	public void makePlayer() { this.isPlayer = true; }
 	
+	private List<BodyPart> limbs;
+	public List<BodyPart> limbs() { return limbs; }
+	public void addBodyPart(BodyPart bodyPart){ this.limbs.add(bodyPart); }
+	public void removeBodyPart(BodyPart bodyPart) { limbs.remove(bodyPart); }
+	public void removeBodyPart(String bodyPart){
+		for(int i = 0; i < limbs.size(); i++){
+			if(limbs.get(i).position().indexOf(bodyPart) != -1){
+				limbs.get(i).onRemove(this);
+				limbs.remove(limbs.get(i));
+				dismembered = true;
+				return;
+			}
+		}
+	}
+	public BodyPart getBodyPart(String bodyPart){
+		for(int i = 0; i < limbs.size(); i++){
+			if(limbs.get(i).position().indexOf(bodyPart) != -1){
+				return limbs.get(i);
+			}
+		}
+		return null;
+	}
+	public boolean hasBodyPart(String bodyPart){
+		for(int i = 0; i < limbs.size(); i++){
+			if(limbs.get(i).position().indexOf(bodyPart) != -1){
+				return true;
+			}
+		}
+		return false;
+	}
+	private boolean dismembered;
+	public boolean dismembered() { return dismembered; }
+	
 	public Creature(World world, char glyph, char gender, Color color, String name, int hp, Item weapon, Item armor){
 		this.world = world;
 		this.glyph = glyph;
@@ -131,12 +166,14 @@ public class Creature {
 		this.inventory = new Inventory(Constants.INVENTORY_SIZE);
 		this.effects = new ArrayList<Effect>();
 		this.wounds = new ArrayList<Wound>();
+		this.limbs = new ArrayList<BodyPart>();
 		this.job = name;
 		this.gender = gender;
 		this.intrinsicWeapon = weapon;
 		this.intrinsicArmor = armor;
 		this.attackSpeed = Constants.STARTING_ATTACK_SPEED;
 		this.movementSpeed = Constants.STARTING_MOVE_SPEED;
+		this.dismembered = false;
 	}
 	
 	public void moveBy(int mx, int my, int mz){
@@ -217,7 +254,7 @@ public class Creature {
 		if (other == null){
 			if(isPlayer){
 				world.modifyActionPoints(movementSpeed);
-			}else if(actionPoints <= movementSpeed){
+			}else if(actionPoints < movementSpeed){
 				return;
 			}else{
 				modifyActionPoints(-movementSpeed);
@@ -230,7 +267,7 @@ public class Creature {
 				doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_DODGE_WARNING);
 				attackQue = new Point(x+mx, y+my, z+mz);
 				return;
-			}else if(actionPoints <= attackSpeed){
+			}else if(actionPoints < attackSpeed){
 				return;
 			}else{
 				modifyActionPoints(-attackSpeed);
@@ -286,11 +323,21 @@ public class Creature {
 			position = "cabeza";
 			defendingObject = other.helment();
 		}else if(x > other.x && y <= other.y){
-			position = Math.random() < 0.4 ? "brazo" : "pecho";
-			defendingObject = other.shield() != null ? other.shield() : other.armor();
+			if(other.hasBodyPart("brazo")){
+				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? "brazo" : "pecho") : "brazo");
+				defendingObject = (position == "pecho" ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
+			}else{
+				position = "pecho";
+				defendingObject = other.armor();
+			}
 		}else if(y > other.y && x >= other.x){
-			position = Math.random() < 0.4 ? "pierna" : "pecho";
-			defendingObject = other.shield() != null ? other.shield() : other.armor();
+			if(other.hasBodyPart("pierna")){
+				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? "pierna" : "pecho") : "pierna");
+				defendingObject = (position == "pecho" ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
+			}else{
+				position = "pecho";
+				defendingObject = other.armor();
+			}
 		}
 	
 		if(damagingObject == null){
@@ -418,7 +465,7 @@ public class Creature {
 			updateEffects();
 			updateWounds();
 			ai.onUpdate();
-		}while(getActionPoints() > 100);
+		}while(actionPoints >= 100 && actionPoints < 100);
 	}
 	
 	private void updateWounds(){
@@ -582,7 +629,13 @@ public class Creature {
 		}
 	}
 	
+	/** 
+	 * Force drop remueve el item del inventario y no dice nada
+	 * */
 	public void force_drop(Item item){
+		if(item == null)
+			return;
+		
 		if (world.addAtEmptySpace(item, x, y, z)){
 			inventory.remove(item);
 			unequip(item);
@@ -590,6 +643,9 @@ public class Creature {
 	}
 	
 	public void drop(Item item){
+		if(item == null)
+			return;
+		
 		if (world.addAtEmptySpace(item, x, y, z)){
 			doAction("suelta "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s", nameOf(item));
 			inventory.remove(item);

@@ -35,5 +35,8 @@ public class Constants {
 	
 	protected static final Color MESSAGE_KILL_COLOR = AsciiPanel.brightRed;
 	protected static final Color BLOOD_COLOR = AsciiPanel.red;
+	
+	public static final int SEV_LEG_PENALTY = 100;
+	public static final float DISMEMBER_CHANCE_LIMB_OVER_KILL = 0.70f;			//brazo < chance
 
 }
