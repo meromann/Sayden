@@ -11,7 +11,7 @@ public class Wound {
 		//******************BLUNT 1**************************************
 		TYPES.put("BLUNT1-ANY",new Wound(Constants.LVL1_DURATION,1,"moreton"){
 			public void onApply(Creature creature, Creature applier){
-				applier.doAction("golpea inflingiendo un moreton en "+StringUtils.genderizeBodyPosition(this.position(), null));
+				applier.doAction("golpea inflingiendo un moreton en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}
@@ -19,7 +19,7 @@ public class Wound {
 		//******************BLUNT 2**************************************
 		TYPES.put("BLUNT2-ANY",new Wound(Constants.LVL2_DURATION,2,"contusion"){
 			public void onApply(Creature creature, Creature applier){
-				applier.doAction("golpea generando una contusion en "+StringUtils.genderizeBodyPosition(this.position(), null));
+				applier.doAction("golpea generando una contusion en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
 				if(Math.random() < 0.1){
 					creature.modifyActionPoints(-100, "aturdido");
 					creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
@@ -33,9 +33,9 @@ public class Wound {
 		//******************BLUNT 3**************************************
 		TYPES.put("BLUNT3-ANY",new Wound(Constants.LVL3_DURATION,3,"fisura"){
 			public void onApply(Creature creature, Creature applier){
-				applier.doAction("golpea generando una severa fisura en "+StringUtils.genderizeBodyPosition(this.position(), null));
+				applier.doAction("golpea generando una severa fisura en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
 				if(Math.random() < 0.4){
-					creature.modifyActionPoints(-150, "bajo gran dolor");
+					creature.modifyActionPoints(-200, "bajo gran dolor");
 					creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
 					creature.notifyArround(Constants.MESSAGE_STATUS_EFFECT_COLOR, "El dolor "+ (creature.isPlayer() ? "es muy intenso" : 
 						((creature.gender() == 'M' ? "del " : "de la ") + creature.name() + " es muy intenso")), creature);
@@ -44,23 +44,54 @@ public class Wound {
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}
 		});
-		//******************BLUNT 4**************************************
-		TYPES.put("BLUNT4-ANY",new Wound(Constants.INCURABLE,4,"fractura expuesta"){
+		//******************BLUNT 4 ARM**********************************
+		TYPES.put("BLUNT4-brazo",new Wound(Constants.INCURABLE,4,"fractura expuesta"){
 			public void onApply(Creature creature, Creature applier){
-				applier.doAction("impacta con fuerza, fracturando horriblemente "+StringUtils.genderizeBodyPosition(this.position(), null));
-				creature.modifyActionPoints(-150, "bajo gran dolor");
-				creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
-				creature.notifyArround(Constants.MESSAGE_STATUS_EFFECT_COLOR, "El dolor "+ (creature.isPlayer() ? "es muy intenso" : 
-					((creature.gender() == 'M' ? "del " : "de la ") + creature.name() + " es muy intenso")), creature);
+				Item itemToDrop = bodyPart().name().indexOf("derecho") != -1 ? creature.shield() : creature.weapon();
+				applier.doAction("impacta con fuerza, fracturando horriblemente "+
+						(creature.isPlayer() ? "tu brazo" : 
+							StringUtils.genderizeBodyPosition(this.bodyPart().position(), null) + " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true)));
+				creature.drop(itemToDrop, "");
+				creature.resetActionPoints();
 			}
-			public void update(Creature creature){}
+			public void update(Creature creature){
+				Item itemToDrop = bodyPart().name().indexOf("derecho") != -1 ? creature.shield() : creature.weapon();
+				if(itemToDrop != null){
+					if(Math.random() < 0.2){
+						creature.notifyArround((creature.isPlayer() ? "Tu" : "El") +
+							"brazo fracturado "+ (creature.isPlayer() ? "" : StringUtils.genderizeCreature(creature.gender(), creature.name(), false))
+								+"no soporta el peso "+(StringUtils.genderizeCreature(itemToDrop.gender(), itemToDrop.name(), true)));
+						creature.drop(itemToDrop, "");
+					}
+				}
+			}
 			public void onFinish(Creature creature){}
 		});
+		//******************BLUNT 4 LEG**********************************
+				TYPES.put("BLUNT4-pierna",new Wound(Constants.INCURABLE,4,"fractura expuesta"){
+					public void onApply(Creature creature, Creature applier){
+						applier.doAction("impacta con fuerza, fracturando "+
+								(creature.isPlayer() ? "tu pierna" : 
+									StringUtils.genderizeBodyPosition(this.bodyPart().position(), null) + " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true)) + ", exponiendo un hueso ensangrentado");
+					}
+					public void update(Creature creature){
+						Item itemToDrop = bodyPart().name().indexOf("derecho") != -1 ? creature.shield() : creature.weapon();
+						if(itemToDrop != null){
+							if(Math.random() < 0.2){
+								creature.notifyArround((creature.isPlayer() ? "Tu" : "El") +
+									"brazo fracturado "+ (creature.isPlayer() ? "" : StringUtils.genderizeCreature(creature.gender(), creature.name(), false))
+										+"no soporta el peso "+(StringUtils.genderizeCreature(itemToDrop.gender(), itemToDrop.name(), true)));
+								creature.drop(itemToDrop, "");
+							}
+						}
+					}
+					public void onFinish(Creature creature){}
+				});
 		//******************BLUNT 5 KO HEAD******************************
-		TYPES.put("BLUNT5-cabeza",new Wound(Constants.INCURABLE,5,"aplasta cabeza"){
+		TYPES.put("BLUNT5-cabeza",new Wound(Constants.INCURABLE,5,"craneo destrozado"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction(Constants.MESSAGE_KILL_COLOR, "destruye " + 
-			(applier.isPlayer() ? StringUtils.genderizeBodyPosition(this.position(), null)+ " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true) : "tu cabeza") + " con el impacto!!!");
+			(applier.isPlayer() ? StringUtils.genderizeBodyPosition(this.bodyPart().position(), null)+ " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true) : "tu cabeza") + " con el impacto!!!");
 				creature.kill("cabeza aplastada", "muere instantaneamente, con "+(creature.isPlayer() ? "tu" : "su") +" craneo destrozado");
 				//creature.force_drop(new Item(ItemType.STATIC, (char)248, 'F', creature.color(), "cabeza de "+creature.name()+"", null));
 				creature.bleed(2);
@@ -96,6 +127,7 @@ public class Wound {
 					creature.doAction("grita en completa agonia!");
 			}
 			public void onFinish(Creature creature){
+				creature.resetActionPoints();
 				creature.kill("paralisis", "perece por el insoportable dolor");
 			}
 		});
@@ -128,7 +160,7 @@ public class Wound {
 		//******************SLICE 1**************************************
 		TYPES.put("SLICE1-ANY",new Wound(Constants.LVL1_DURATION,1,"raspadura"){
 			public void onApply(Creature creature, Creature applier){
-				applier.doAction("logra causar una ligera raspadura en "+StringUtils.genderizeBodyPosition(this.position(), null));
+				applier.doAction("logra causar una ligera raspadura en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}
@@ -137,7 +169,7 @@ public class Wound {
 		TYPES.put("PIERCING1-ANY",new Wound(Constants.LVL1_DURATION,1,"tajo"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("roza " + (creature.intrinsicArmor().gender() == 'M' ? "el " : "la ") +
-						creature.intrinsicArmor().name() + " "+StringUtils.genderizeBodyPosition(this.position(), "de"));
+						creature.intrinsicArmor().name() + " "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), "de"));
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}
@@ -145,6 +177,7 @@ public class Wound {
 	}
 	
 	protected int duration;
+	public int duration() { return duration; }
 	protected int orignalDuration;
 	
 	public boolean isHealed() { return duration < 0 ? false : duration < 1; }
@@ -155,9 +188,9 @@ public class Wound {
 	private String name;
 	public String name() { return name; }
 	
-	private String position;
-	public String position() { return position; }
-	public Wound setPosition(String position) { this.position = position; return this; }
+	private BodyPart bodyPart;
+	public BodyPart bodyPart() { return bodyPart; }
+	public Wound setBodyPart(BodyPart position) { this.bodyPart = position; return this; }
 	
 	private Wound reference;
 	
@@ -168,10 +201,10 @@ public class Wound {
 	}
 	
 	public Wound(Wound other){
-		this.duration = other.duration; 
-		this.name = other.name;
-		this.severity = other.severity;
-		this.position = other.position;
+		this.duration = other.duration();
+		this.name = other.name();
+		this.severity = other.severity();
+		this.bodyPart = other.bodyPart();
 		this.reference = other;
 	}
 	
@@ -182,6 +215,8 @@ public class Wound {
 		if(reference != null)
 			reference.update(creature);
 	}
+
+	public void onAffect(Creature creature){}
 	
 	public void onApply(Creature creature, Creature applier){
 		if(reference != null)

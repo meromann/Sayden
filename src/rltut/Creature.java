@@ -81,10 +81,6 @@ public class Creature {
 	private List<Effect> effects;
 	public List<Effect> effects(){ return effects; }
 	
-	private List<Wound> wounds;
-	public List<Wound> wounds() { return wounds; }
-	public void addWound(Wound wound, Creature applier){ wound.onApply(this, applier); wounds.add(wound); }
-	
 	private int movementSpeed;
 	public int movementSpeed() { return movementSpeed; }
 	public void modifyMovementSpeed(int amount) { this.movementSpeed += amount; }
@@ -122,8 +118,13 @@ public class Creature {
 	public boolean isPlayer(){ return isPlayer; }
 	public void makePlayer() { this.isPlayer = true; }
 	
+	private List<Wound> wounds;
+	public List<Wound> wounds() { return wounds; }
+	public void addWound(Wound wound, Creature applier){ wound.onApply(this, applier); wounds.add(wound); }
+
 	private List<BodyPart> limbs;
 	public List<BodyPart> limbs() { return limbs; }
+	
 	public void addBodyPart(BodyPart bodyPart){ this.limbs.add(bodyPart); }
 	public void removeBodyPart(BodyPart bodyPart) { limbs.remove(bodyPart); }
 	public void removeBodyPart(String bodyPart){
@@ -165,8 +166,8 @@ public class Creature {
 		this.name = name;
 		this.inventory = new Inventory(Constants.INVENTORY_SIZE);
 		this.effects = new ArrayList<Effect>();
-		this.wounds = new ArrayList<Wound>();
 		this.limbs = new ArrayList<BodyPart>();
+		this.wounds = new ArrayList<Wound>();
 		this.job = name;
 		this.gender = gender;
 		this.intrinsicWeapon = weapon;
@@ -395,9 +396,9 @@ public class Creature {
 		Wound wound_to_apply = null;
 
 		if(Wound.TYPES.get(damageType+""+damagePower+"-"+position) != null){
-			wound_to_apply = Wound.TYPES.get(damageType+""+damagePower+"-"+position).setPosition(position);
+			wound_to_apply = Wound.TYPES.get(damageType+""+damagePower+"-"+position).setBodyPart(getBodyPart(position));
 		}else if(Wound.TYPES.get(damageType+""+damagePower+"-ANY") != null){
-			wound_to_apply = Wound.TYPES.get(damageType+""+damagePower+"-ANY").setPosition(position);
+			wound_to_apply = Wound.TYPES.get(damageType+""+damagePower+"-ANY").setBodyPart(getBodyPart(position));
 		}
 		
 		other.addWound(new Wound(wound_to_apply), this);
@@ -459,9 +460,6 @@ public class Creature {
 	
 	public void update(){
 		do{
-			if(wounds.size() > 2){
-				modifyHp(1, "AHA!");
-			}
 			updateEffects();
 			updateWounds();
 			ai.onUpdate();
@@ -655,6 +653,19 @@ public class Creature {
 		}
 	}
 	
+	public void drop(Item item, String action){
+		if(item == null)
+			return;
+		
+		if (world.addAtEmptySpace(item, x, y, z)){
+			doAction("suelta "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s", nameOf(item));
+			inventory.remove(item);
+			unequip(item, action);
+		} else {
+			notify("No hay lugar donde soltar"+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s.", nameOf(item));
+		}
+	}
+	
 	public void eat(Item item){
 		doAction("consume " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 		consume(item);
@@ -702,20 +713,24 @@ public class Creature {
 			return;
 		
 		if (item == armor){
-			if (hp > 0)
+			if (hp > 0 && !action.isEmpty())
 				doAction(action == null ? "remueve " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+			
 			armor = null;
 		} else if (item == weapon) {
-			if (hp > 0) 
+			if (hp > 0 && !action.isEmpty()) 
 				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+			
 			weapon = null;
 		} else if (item == shield) {
-			if (hp > 0) 
+			if (hp > 0 && !action.isEmpty()) 
 				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+			
 			shield = null;
 		} else if (item == helment) {
-			if (hp > 0) 
+			if (hp > 0 && !action.isEmpty()) 
 				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+			
 			helment = null;
 		}
 	}

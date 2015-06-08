@@ -1,8 +1,7 @@
 package rltut;
 
 public class BodyPart {
-	//				creature.force_drop(new Item(ItemType.STATIC,(char)191, 'M', creature.color(), "brazo separado", null));
-
+	//creature.force_drop(new Item(ItemType.STATIC,(char)191, 'M', creature.color(), "brazo separado", null));
 	private String name;
 	public String name() { return name; }
 	public void modifyName(String newName) { this.name = newName; }

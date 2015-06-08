@@ -72,12 +72,14 @@ public class StuffFactory {
 						creature.modifyMovementSpeed(Constants.SEV_LEG_PENALTY);
 					}
 				});
+		base.addBodyPart(new BodyPart("cabeza", "cabeza"));
+		base.addBodyPart(new BodyPart("torso", "pecho"));
 		
 		return base;
 	}
 	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 5);
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 4);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
 		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 10, puños, piel);
 		world.addAtEmptyLocation(player, 0);
@@ -98,13 +100,15 @@ public class StuffFactory {
 	}*/
 	
 	public Creature newZombie(int depth, Creature player){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 5);
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
 		Item dientes = new Item(ItemType.INTRINSIC, 'M', "dientes").addDamageType(DamageType.SLICE, 1);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.BLUNT, 1);
 		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, Math.random() > 1 ? dientes : puños, piel);
 		world.addAtEmptyLocation(zombie, depth);
 		new ZombieAi(zombie, player);
 		zombie.equip(newLightArmor(-1));
+		zombie.equip(newWoodenShield(-1));
+		zombie.equip(newSword(-1));
 		zombie.modifyAttackSpeed(-50);
 		zombie = makeBiped(zombie);
 		
@@ -154,6 +158,13 @@ public class StuffFactory {
 	
 	public Item newSword(int depth){
 		Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.brightWhite, "espada", null);
+		world.addAtEmptyLocation(item, depth);
+		return item;
+	}
+	
+	public Item newWoodenShield(int depth){
+		Item item = new Item(ItemType.SHIELD, '0', 'M', AsciiPanel.brightWhite, "escudo", null);
+		item.addDamageType(DamageType.BLUNT, 1);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
