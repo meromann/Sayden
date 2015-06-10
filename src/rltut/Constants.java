@@ -37,6 +37,12 @@ public class Constants {
 	protected static final Color BLOOD_COLOR = AsciiPanel.red;
 	
 	public static final int SEV_LEG_PENALTY = 100;
+	public static final int BROKEN_LEG_PENALTY = 50;
+	public static final int BROKEN_ARM_PENALTY = 50;
+	public static final int BACK_TRAUMA_PENALTY = 100;
+	public static final float BROKEN_ARM_DROP_CHANCE = 0.3f;	
+	public static final float HEAD_TRAUMA_WANDER_CHANCE = 0.3f;
+	public static final float BACK_TRAUMA_SKIP_CHANCE = 0.3f;
 	public static final float DISMEMBER_CHANCE_LIMB_OVER_KILL = 0.70f;			//brazo < chance
 
 }

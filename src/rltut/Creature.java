@@ -118,10 +118,22 @@ public class Creature {
 	public boolean isPlayer(){ return isPlayer; }
 	public void makePlayer() { this.isPlayer = true; }
 	
+	private boolean inmaculado = true;
+	public boolean inmaculado() { return inmaculado; }
+	private int woundSeverity;
+	public int woundSeverity() { return woundSeverity; }
 	private List<Wound> wounds;
 	public List<Wound> wounds() { return wounds; }
-	public void addWound(Wound wound, Creature applier){ wound.onApply(this, applier); wounds.add(wound); }
-
+	public void addWound(Wound wound, Creature applier){ inmaculado = false; woundSeverity += wound.severity(); wound.onApply(this, applier); wounds.add(wound); }
+	public int getWorstWound(){
+		int bigger = 0;
+		for(Wound wound : wounds){
+			if(wound.severity() > bigger)
+				bigger = wound.severity();
+		}
+		return bigger;
+	}
+	
 	private List<BodyPart> limbs;
 	public List<BodyPart> limbs() { return limbs; }
 	
@@ -474,6 +486,7 @@ public class Creature {
 			if (wound.isHealed()) {
 				wound.onFinish(this);
 				done.add(wound);
+				woundSeverity -= wound.severity();
 			}
 		}
 		

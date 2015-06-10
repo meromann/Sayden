@@ -47,17 +47,18 @@ public class Wound {
 		//******************BLUNT 4 ARM**********************************
 		TYPES.put("BLUNT4-brazo",new Wound(Constants.INCURABLE,4,"fractura expuesta"){
 			public void onApply(Creature creature, Creature applier){
-				Item itemToDrop = bodyPart().name().indexOf("derecho") != -1 ? creature.shield() : creature.weapon();
+				Item itemToDrop = creature.shield();
 				applier.doAction("impacta con fuerza, fracturando horriblemente "+
 						(creature.isPlayer() ? "tu brazo" : 
 							StringUtils.genderizeBodyPosition(this.bodyPart().position(), null) + " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true)));
 				creature.drop(itemToDrop, "");
 				creature.resetActionPoints();
+				creature.modifyAttackSpeed(Constants.BROKEN_ARM_PENALTY);
 			}
 			public void update(Creature creature){
-				Item itemToDrop = bodyPart().name().indexOf("derecho") != -1 ? creature.shield() : creature.weapon();
+				Item itemToDrop = creature.shield();
 				if(itemToDrop != null){
-					if(Math.random() < 0.2){
+					if(Math.random() < Constants.BROKEN_ARM_DROP_CHANCE){
 						creature.notifyArround((creature.isPlayer() ? "Tu" : "El") +
 							"brazo fracturado "+ (creature.isPlayer() ? "" : StringUtils.genderizeCreature(creature.gender(), creature.name(), false))
 								+"no soporta el peso "+(StringUtils.genderizeCreature(itemToDrop.gender(), itemToDrop.name(), true)));
@@ -65,28 +66,52 @@ public class Wound {
 					}
 				}
 			}
-			public void onFinish(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.modifyAttackSpeed(-Constants.BROKEN_ARM_PENALTY);
+			}
 		});
 		//******************BLUNT 4 LEG**********************************
-				TYPES.put("BLUNT4-pierna",new Wound(Constants.INCURABLE,4,"fractura expuesta"){
-					public void onApply(Creature creature, Creature applier){
-						applier.doAction("impacta con fuerza, fracturando "+
-								(creature.isPlayer() ? "tu pierna" : 
-									StringUtils.genderizeBodyPosition(this.bodyPart().position(), null) + " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true)) + ", exponiendo un hueso ensangrentado");
-					}
-					public void update(Creature creature){
-						Item itemToDrop = bodyPart().name().indexOf("derecho") != -1 ? creature.shield() : creature.weapon();
-						if(itemToDrop != null){
-							if(Math.random() < 0.2){
-								creature.notifyArround((creature.isPlayer() ? "Tu" : "El") +
-									"brazo fracturado "+ (creature.isPlayer() ? "" : StringUtils.genderizeCreature(creature.gender(), creature.name(), false))
-										+"no soporta el peso "+(StringUtils.genderizeCreature(itemToDrop.gender(), itemToDrop.name(), true)));
-								creature.drop(itemToDrop, "");
-							}
-						}
-					}
-					public void onFinish(Creature creature){}
-				});
+		TYPES.put("BLUNT4-pierna",new Wound(Constants.INCURABLE,4,"fractura expuesta"){
+			public void onApply(Creature creature, Creature applier){
+				creature.modifyMovementSpeed(Constants.BROKEN_LEG_PENALTY);
+				applier.doAction("impacta con fuerza, fracturando "+
+						(creature.isPlayer() ? "tu pierna" : 
+							StringUtils.genderizeBodyPosition(this.bodyPart().position(), null) + " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true)) + ", exponiendo un hueso ensangrentado");
+			}
+			public void update(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.modifyMovementSpeed(-Constants.BROKEN_LEG_PENALTY);
+			}
+		});
+		//******************BLUNT 4 HEAD*********************************
+		TYPES.put("BLUNT4-cabeza",new Wound(Constants.INCURABLE,4,"traumatismo"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("impacta con fuerza en " + 
+						(creature.isPlayer() ? "tu cabeza" : "la cabeza " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true))
+						+ " generando un severo traumatismo");
+			}
+			public void update(Creature creature){
+				if(Math.random() > Constants.HEAD_TRAUMA_WANDER_CHANCE){
+					creature.getCreatureAi().wander();
+					creature.doAction("esta deshorientado");
+				}
+			}
+			public void onFinish(Creature creature){}
+		});
+		//******************BLUNT 4 BACK*********************************
+		TYPES.put("BLUNT4-espalda",new Wound(Constants.INCURABLE,4,"fractura vertebral"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("logra golpear con fuerza "+
+						(creature.isPlayer() ? "tu espalda" : 
+							"la espalda " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true)) + ", fracturando algunos huesos");
+			}
+			public void update(Creature creature){
+				if(Math.random() > Constants.BACK_TRAUMA_SKIP_CHANCE){
+					creature.modifyActionPoints(-Constants.BACK_TRAUMA_PENALTY, "muy adolorido por sus fracturas en la espalda");
+				}
+			}
+			public void onFinish(Creature creature){}
+		});
 		//******************BLUNT 5 KO HEAD******************************
 		TYPES.put("BLUNT5-cabeza",new Wound(Constants.INCURABLE,5,"craneo destrozado"){
 			public void onApply(Creature creature, Creature applier){
@@ -124,7 +149,7 @@ public class Wound {
 			}
 			public void update(Creature creature){
 				if(Math.random() > 0.6)
-					creature.doAction("grita en completa agonia!");
+					creature.doAction("grita paralizado en completa agonia!");
 			}
 			public void onFinish(Creature creature){
 				creature.resetActionPoints();
@@ -215,8 +240,6 @@ public class Wound {
 		if(reference != null)
 			reference.update(creature);
 	}
-
-	public void onAffect(Creature creature){}
 	
 	public void onApply(Creature creature, Creature applier){
 		if(reference != null)

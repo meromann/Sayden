@@ -4,6 +4,48 @@ import java.util.ArrayList;
 
 public class StringUtils {
 	
+	public static String woundsToString(Creature creature){
+		if(creature.hp() < creature.woundSeverity() && creature.getWorstWound() >= 3)
+			return "Muerto";
+		
+		if(creature.woundSeverity() == 0)
+			return creature.inmaculado() ? "Inmaculado" : "Sano";
+		
+		if(creature.hp() * 0.5f >= creature.woundSeverity() && creature.getWorstWound() <= 2)
+			return "Lastimado";
+		
+		if(creature.hp() * 0.5f >= creature.woundSeverity() && creature.getWorstWound() <= 4 && creature.getWorstWound() > 2)
+			return "Malherido";
+		
+		if(creature.hp() >= creature.woundSeverity() && creature.hp() * 0.5f < creature.woundSeverity()
+				&& creature.getWorstWound() <= 4 && creature.getWorstWound() > 2)
+			return "Moribundo";
+		
+		return "Sano";
+	}
+	
+	public static String speedToString(int speed){
+		if(speed <= 0)
+			return "inmovil";
+		
+		if(speed > 0 && speed <= 50)
+			return "atletico";
+		
+		if(speed > 50 && speed <= 100)
+			return "rapido";
+		
+		if(speed > 100 && speed <= 200)
+			return "normal";
+		
+		if(speed > 200 && speed <= 300)
+			return "lento";
+		
+		if(speed > 300)
+			return "muy lento";
+		
+		return "inmovil";
+	}
+	
 	public static ArrayList<Message> splitPhraseByLimit(Message text, int limit){
 		String[] words = text.message().split(" ");
 		ArrayList<Message> array = new ArrayList<Message>();

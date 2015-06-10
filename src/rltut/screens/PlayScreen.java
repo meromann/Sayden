@@ -78,7 +78,7 @@ public class PlayScreen implements Screen {
 		if (subscreen != null)
 			subscreen.displayOutput(terminal);
 	}
-		
+	
 	private void displayWounds(AsciiPanel terminal, List<Wound> wounds){
 		for(int i = 0; i < wounds.size(); i++){
 			Color[] arrayColor = new Color[]{	
@@ -90,8 +90,9 @@ public class PlayScreen implements Screen {
 			};
 			terminal.write(wounds.get(i).severity() + " ", (i*2)+1, Constants.MENU_OFFSET, arrayColor[wounds.get(i).severity() - 1 >= arrayColor.length ? arrayColor.length : wounds.get(i).severity() - 1]);
 		}
+		String stats = String.format("Mov %s (%3d) Ataq %s (%3d) %s", StringUtils.speedToString(player.movementSpeed()), player.movementSpeed(), StringUtils.speedToString(player.attackSpeed()), player.attackSpeed(), StringUtils.woundsToString(player));
 		//String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.hp(), player.mana(), player.maxMana(), hunger());
-		//terminal.write(stats, 1, ApplicationMain.MENU_OFFSET);
+		terminal.write(stats, 1, Constants.SCREEN_HEIGHT - 1);
 	}
 	
 	private void displayMessages(AsciiPanel terminal, List<Message> messages) {
