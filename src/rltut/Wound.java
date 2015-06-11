@@ -45,7 +45,7 @@ public class Wound {
 			public void onFinish(Creature creature){}
 		});
 		//******************BLUNT 4 ARM**********************************
-		TYPES.put("BLUNT4-brazo",new Wound(Constants.INCURABLE,4,"fractura expuesta"){
+		TYPES.put("BLUNT4-"+BodyPart.ARMS,new Wound(Constants.INCURABLE,4,"fractura expuesta"){
 			public void onApply(Creature creature, Creature applier){
 				Item itemToDrop = creature.shield();
 				applier.doAction("impacta con fuerza, fracturando horriblemente "+
@@ -71,7 +71,7 @@ public class Wound {
 			}
 		});
 		//******************BLUNT 4 LEG**********************************
-		TYPES.put("BLUNT4-pierna",new Wound(Constants.INCURABLE,4,"fractura expuesta"){
+		TYPES.put("BLUNT4-"+BodyPart.LEGS,new Wound(Constants.INCURABLE,4,"fractura expuesta"){
 			public void onApply(Creature creature, Creature applier){
 				creature.modifyMovementSpeed(Constants.BROKEN_LEG_PENALTY);
 				applier.doAction("impacta con fuerza, fracturando "+
@@ -84,7 +84,7 @@ public class Wound {
 			}
 		});
 		//******************BLUNT 4 HEAD*********************************
-		TYPES.put("BLUNT4-cabeza",new Wound(Constants.INCURABLE,4,"traumatismo"){
+		TYPES.put("BLUNT4-"+BodyPart.HEAD,new Wound(Constants.INCURABLE,4,"traumatismo"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("impacta con fuerza en " + 
 						(creature.isPlayer() ? "tu cabeza" : "la cabeza " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true))
@@ -99,7 +99,7 @@ public class Wound {
 			public void onFinish(Creature creature){}
 		});
 		//******************BLUNT 4 BACK*********************************
-		TYPES.put("BLUNT4-espalda",new Wound(Constants.INCURABLE,4,"fractura vertebral"){
+		TYPES.put("BLUNT4-"+BodyPart.BACK,new Wound(Constants.INCURABLE,4,"fractura vertebral"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("logra golpear con fuerza "+
 						(creature.isPlayer() ? "tu espalda" : 
@@ -113,7 +113,7 @@ public class Wound {
 			public void onFinish(Creature creature){}
 		});
 		//******************BLUNT 5 KO HEAD******************************
-		TYPES.put("BLUNT5-cabeza",new Wound(Constants.INCURABLE,5,"craneo destrozado"){
+		TYPES.put("BLUNT5-"+BodyPart.HEAD,new Wound(Constants.INCURABLE,5,"craneo destrozado"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction(Constants.MESSAGE_KILL_COLOR, "destruye " + 
 			(applier.isPlayer() ? StringUtils.genderizeBodyPosition(this.bodyPart().position(), null)+ " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true) : "tu cabeza") + " con el impacto!!!");
@@ -125,7 +125,7 @@ public class Wound {
 			public void onFinish(Creature creature){}
 		});
 		//******************BLUNT 5 KO CHEST*****************************
-		TYPES.put("BLUNT5-pecho",new Wound(3,5,"corazon detenido"){
+		TYPES.put("BLUNT5-"+BodyPart.CHEST,new Wound(3,5,"corazon detenido"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction(Constants.MESSAGE_KILL_COLOR, "golpea con presicion en el pecho " + 
 						(!creature.isPlayer() ? StringUtils.genderizeCreature(creature.gender(), creature.name(), true) : "") + ", deteniendo "
@@ -140,7 +140,7 @@ public class Wound {
 			}
 		});
 		//******************BLUNT 5 KO BACK******************************
-		TYPES.put("BLUNT5-espalda",new Wound(6,5,"columna destrozada"){
+		TYPES.put("BLUNT5-"+BodyPart.BACK,new Wound(6,5,"columna destrozada"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction(Constants.MESSAGE_KILL_COLOR, "impacta con fuerza en el centro de la columna " + 
 						(creature.isPlayer() ? "dejandote paralitico " : "paralizando "+ (creature.gender() == 'M' ? "al " : "a la ") + creature.name() )
@@ -157,7 +157,7 @@ public class Wound {
 			}
 		});
 		//******************BLUNT 5 KO ARM*******************************
-		TYPES.put("BLUNT5-brazo",new Wound(Constants.INCURABLE,5,"brazo fracturado"){
+		TYPES.put("BLUNT5-"+BodyPart.ARMS,new Wound(Constants.INCURABLE,5,"brazo fracturado"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction(Constants.MESSAGE_KILL_COLOR, "impacta con fuerza en el brazo fracturandolo y exponiendo el hueso!!!");
 				creature.removeBodyPart("brazo");
@@ -170,7 +170,7 @@ public class Wound {
 			}
 		});
 		//******************BLUNT 5 KO LEG*******************************
-		TYPES.put("BLUNT5-pierna",new Wound(Constants.INCURABLE,5,"pierna fracturada"){
+		TYPES.put("BLUNT5-"+BodyPart.LEGS,new Wound(Constants.INCURABLE,5,"pierna fracturada"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction(Constants.MESSAGE_KILL_COLOR, "impacta con fuerza en la rodilla, exponiendo el hueso de la pierna!!!");
 				creature.removeBodyPart("pierna");
@@ -186,6 +186,21 @@ public class Wound {
 		TYPES.put("SLICE1-ANY",new Wound(Constants.LVL1_DURATION,1,"raspadura"){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("logra causar una ligera raspadura en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
+			}
+			public void update(Creature creature){}
+			public void onFinish(Creature creature){}
+		});
+		//******************SLICE 2**************************************
+		TYPES.put("SLICE2-ANY",new Wound(Constants.LVL2_DURATION,2,"corte"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("logra inflingir un corte en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), creature.isPlayer() ? "tu" : null)
+						+ (creature.isPlayer() ? "" : " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true)));
+				if(Math.random() < 0.1){
+					creature.modifyActionPoints(-100, "aturdido");
+					creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
+					creature.notifyArround(Constants.MESSAGE_STATUS_EFFECT_COLOR, "El impacto "+ (creature.isPlayer() ? "te aturde" : 
+						("aturde " + (creature.gender() == 'M' ? "al " : "a la ") + creature.name())), creature);
+				}
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}

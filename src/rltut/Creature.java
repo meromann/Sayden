@@ -330,25 +330,25 @@ public class Creature {
 		//	   LEGS/CHEST
 		//
 		if(x < other.x && y >= other.y){
-			position = "espalda";
+			position = BodyPart.BACK;
 			defendingObject = other.armor();
 		}else if(y < other.y && x <= other.x){
-			position = "cabeza";
+			position = BodyPart.HEAD;
 			defendingObject = other.helment();
 		}else if(x > other.x && y <= other.y){
-			if(other.hasBodyPart("brazo")){
-				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? "brazo" : "pecho") : "brazo");
-				defendingObject = (position == "pecho" ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
+			if(other.hasBodyPart(BodyPart.ARMS)){
+				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? BodyPart.ARMS : BodyPart.CHEST) : BodyPart.ARMS);
+				defendingObject = (position == BodyPart.CHEST ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
 			}else{
-				position = "pecho";
+				position = BodyPart.CHEST;
 				defendingObject = other.armor();
 			}
 		}else if(y > other.y && x >= other.x){
-			if(other.hasBodyPart("pierna")){
-				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? "pierna" : "pecho") : "pierna");
-				defendingObject = (position == "pecho" ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
+			if(other.hasBodyPart(BodyPart.LEGS)){
+				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? BodyPart.LEGS : BodyPart.CHEST) : BodyPart.LEGS);
+				defendingObject = (position == BodyPart.CHEST ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
 			}else{
-				position = "pecho";
+				position = BodyPart.CHEST;
 				defendingObject = other.armor();
 			}
 		}
@@ -380,7 +380,7 @@ public class Creature {
 				
 				//Si esta defendiendo con "la piel" no lo hace desde la cabeza
 				if(defendingObject.itemType() == ItemType.INTRINSIC &&
-						position == "cabeza"){
+						position == BodyPart.HEAD){
 					defense_power = 0;
 				}
 				

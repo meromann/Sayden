@@ -41,7 +41,7 @@ public class StuffFactory {
 	
 	private Creature makeBiped(Creature base){
 		base.addBodyPart(
-				new BodyPart("brazo derecho", "brazo"){
+				new BodyPart("brazo derecho", BodyPart.ARMS){
 					public void onRemove(Creature creature) {
 							creature.drop(creature.shield());
 							creature.setShield(
@@ -50,7 +50,7 @@ public class StuffFactory {
 					}
 				});
 		base.addBodyPart(
-				new BodyPart("brazo izquierdo", "brazo"){
+				new BodyPart("brazo izquierdo", BodyPart.ARMS){
 					public void onRemove(Creature creature) {
 						creature.drop(creature.weapon());
 						creature.setWeapon(
@@ -59,27 +59,28 @@ public class StuffFactory {
 					}
 				});
 		base.addBodyPart(
-				new BodyPart("pierna derecha", "pierna"){
+				new BodyPart("pierna derecha", BodyPart.LEGS){
 					public void onRemove(Creature creature) {
 						//creature.force_drop(new Item(ItemType.STATIC,(char)192, 'F', creature.color(), "pierna separada", null));
 						creature.modifyMovementSpeed(Constants.SEV_LEG_PENALTY);
 					}
 				});
 		base.addBodyPart(
-				new BodyPart("pierna izquierda", "pierna"){
+				new BodyPart("pierna izquierda", BodyPart.LEGS){
 					public void onRemove(Creature creature) {
 						//creature.force_drop(new Item(ItemType.STATIC,(char)192, 'F', creature.color(), "pierna separada", null));
 						creature.modifyMovementSpeed(Constants.SEV_LEG_PENALTY);
 					}
 				});
-		base.addBodyPart(new BodyPart("cabeza", "cabeza"));
-		base.addBodyPart(new BodyPart("torso", "pecho"));
+		base.addBodyPart(new BodyPart("cabeza", BodyPart.HEAD));
+		base.addBodyPart(new BodyPart("torso", BodyPart.CHEST));
+		base.addBodyPart(new BodyPart("espalda", BodyPart.BACK));
 		
 		return base;
 	}
 	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 4);
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.SLICE, 2);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
 		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 10, puños, piel);
 		world.addAtEmptyLocation(player, 0);

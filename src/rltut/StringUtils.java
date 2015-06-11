@@ -68,10 +68,11 @@ public class StringUtils {
 	 * Entregas una posicion del cuerpo y le añade un posesivo y el genero
 	 * */
 	public static String genderizeBodyPosition(String position, String additive){
-		if(position == "brazo" || position =="pecho") 
-			return (additive == "de" ? "del " : "el ") + position;
-		else
-			return (additive == "de" ? "de la " : "la ") + position;
+		if(position == "brazo" || position =="pecho") {
+			return (additive == "tu" ? "tu " : additive == "de" ? "del " : "el ") + position;
+		}else{
+			return (additive == "tu" ? "tu " : additive == "de" ? "de la " : "la ") + position;
+		}
 	}
 	
 	/**
