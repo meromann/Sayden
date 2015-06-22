@@ -17,7 +17,7 @@ public class ApplicationMain extends JFrame implements KeyListener {
 	private Screen screen;
 	
 	public ApplicationMain(){
-		super("Sayden");
+		super("Sayden");		
 		//Instanciamos el panel de texto
 		terminal = new AsciiPanel(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
 		add(terminal);
@@ -54,6 +54,5 @@ public class ApplicationMain extends JFrame implements KeyListener {
 		app.setVisible(true);
 		app.setResizable(false);
 		app.setSize(Constants.SCREEN_WIDTH * 9 + 1, Constants.SCREEN_HEIGHT * 16 + 29);
-		//app.setBackground(AsciiPanel.black);
 	}
 }

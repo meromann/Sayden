@@ -5,19 +5,58 @@ import java.util.Map;
 
 public class Wound {
 	public static Map<String, Wound> TYPES;
-		
+	
+	private static Wound BLEED = new Wound(Constants.INCURABLE, 0, "desangre",
+			"La perdida de sangre no es cosa leve, de continuar sufres el severo de morir desangrado"){
+		public void onApply(Creature creature, Creature applier){
+			creature.bleed(this.severity());
+		}
+	};
+	private static Wound INFECTED = new Wound(Constants.INCURABLE, 0, "infeccion",
+			"Una infeccion es siempre algo de temer, puede causar mareos, cansancio y en el peor de los casos simplemente la muerte"){
+		public void onApply(Creature creature, Creature applier){
+			creature.doAction(Constants.SICK_COLOR, "Tu herida comienza a arder, te sientes ligeramente febril...");
+		}
+	};
+	
 	public static void instantiateWounds(){
 		TYPES = new HashMap<String, Wound>();
 		//******************BLUNT 1**************************************
-		TYPES.put("BLUNT1-ANY",new Wound(Constants.LVL1_DURATION,1,"moreton"){
+		TYPES.put("BLUNT1-ANY",new Wound(Constants.LVL1_DURATION,1,"moreton",
+				"Un leve moreton en tu %s, esta herida no tiene importancia aunque no es recomendable aplicarle presion..."){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("golpea inflingiendo un moreton en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
 			}
 			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.notify("El moreton de tu "+this.bodyPart().position()+" ya no es una molestia");
+			}
+		});
+		//******************SLICE 1**************************************
+		TYPES.put("SLICE1-ANY",new Wound(Constants.LVL1_DURATION,1,"raspadura",
+				"Una ligera raspadura en tu $s. Aparte de un ligero ardor no causa mayor molestia"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("logra causar una ligera raspadura en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
+			}
+			public void update(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.notify("La raspadura de tu "+this.bodyPart().position()+" cicatriza");
+			}
+		});
+		//******************PIERCING 1***********************************
+		TYPES.put("PIERCING1-ANY",new Wound(Constants.LVL1_DURATION,1,"tajo",
+				"Un leve tajo en tu %s, molesto pero sin importancia"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("roza " + (creature.isPlayer() ? "tu piel" : "la carne "+StringUtils.genderizeCreature(creature.gender(), creature.name(), true)));
+			}
+			public void update(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.notify("El tajo de tu "+this.bodyPart().position()+" cicatriza");
+			}
 		});
 		//******************BLUNT 2**************************************
-		TYPES.put("BLUNT2-ANY",new Wound(Constants.LVL2_DURATION,2,"contusion"){
+		TYPES.put("BLUNT2-ANY",new Wound(Constants.LVL2_DURATION,2,"contusion",
+				"Una contusion morada y sanguiolienta en tu %s. De no ser cuidadoso podria tornarse en algo mas severo..."){
 			public void onApply(Creature creature, Creature applier){
 				applier.doAction("golpea generando una contusion en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
 				if(Math.random() < 0.1){
@@ -28,23 +67,101 @@ public class Wound {
 				}
 			}
 			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.notify("La contusion de tu "+this.bodyPart().position()+" se desinflama");
+			}
 		});
-		//******************BLUNT 3**************************************
-		TYPES.put("BLUNT3-ANY",new Wound(Constants.LVL3_DURATION,3,"fisura"){
+		//******************SLICE 2**************************************
+		TYPES.put("SLICE2-ANY",new Wound(Constants.LVL2_DURATION,2,"raspadura",
+				"Un corte abierto pero no profundo en tu %s, por suerte no parece infectado y no despide sangre"){
 			public void onApply(Creature creature, Creature applier){
-				applier.doAction("golpea generando una severa fisura en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
-				if(Math.random() < 0.4){
-					creature.modifyActionPoints(-200, "bajo gran dolor");
-					creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
-					creature.notifyArround(Constants.MESSAGE_STATUS_EFFECT_COLOR, "El dolor "+ (creature.isPlayer() ? "es muy intenso" : 
-						((creature.gender() == 'M' ? "del " : "de la ") + creature.name() + " es muy intenso")), creature);
+				applier.doAction("logra inflingir un corte en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
+				if(Math.random() < 0.1){
+					modifyDescription("Un corte abierto pero no profundo en tu %s, no parece infectado y por suerte dejo de sangrar");
+					creature.notifyArround(Constants.BLOOD_COLOR, "La herida despide un chorro de sangre");
+					Wound bleed = new Wound(BLEED, 1, Constants.LVL1_DURATION);
+					creature.addWound(bleed, applier);
 				}
 			}
 			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.notify("El corte de tu "+this.bodyPart().position()+" cicatriza");
+			}
 		});
-		//******************BLUNT 4 ARM**********************************
+		//******************PIERCING 2***********************************
+		TYPES.put("PIERCING2-ANY",new Wound(Constants.LVL2_DURATION,2,"pinchazo",
+				"Un pinchazo bastante profundo en tu %s, por suerte no parece estar infectado"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("logra penetrar " + (creature.isPlayer() ? "tu piel" : "la carne "+StringUtils.genderizeCreature(creature.gender(), creature.name(), true)));
+			}
+			public void update(Creature creature){
+				if(Math.random() < 0.1){
+					modifyDescription("Un pinchazo bastante profundo en tu %s, parece estar infectado y despide un hedor nahuseabundo");
+					Wound infection = new Wound(INFECTED, 1, Constants.LVL1_DURATION);
+					creature.addWound(infection, null);
+					resetDuration();
+				}
+			}
+			public void onFinish(Creature creature){
+				creature.notify("La apertura de la herida punzante de tu "+this.bodyPart().position()+" se cierra");
+			}
+		});
+		//******************BLUNT 3**************************************
+		TYPES.put("BLUNT3-ANY",new Wound(Constants.LVL3_DURATION,3,"fisura",
+				"Tienes un hueso fisurado en tu %s, sientes un gran dolor y temes que la herida empeore..."){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("golpea en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null) + " que cruje horriblemente");
+				if(Math.random() < 0.4){
+					creature.modifyActionPoints(-100, "bajo gran dolor");
+					creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
+					creature.doAction(Constants.MESSAGE_STATUS_EFFECT_COLOR, "grita en completa agonia!");
+				}
+			}
+			public void update(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.notify("Tu "+this.bodyPart().position()+" se deshincha y ya no sientes el dolor de tu fisura");
+			}
+		});
+		//******************SLICE 3**************************************
+		TYPES.put("SLICE3-ANY",new Wound(Constants.LVL3_DURATION,3,"raspadura",
+				"Una herida profunda y abierta en tu %s, despide un hedor nauseabundo y no parece sangrar"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("logra inflingir un profundo corte en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
+				if(Math.random() < 0.4){
+					modifyDescription("Una herida profunda y abierta en tu %s, despide un hedor nauseabundo y un gran chorro de sangre sale de ella");
+					creature.notifyArround(Constants.BLOOD_COLOR, "La herida despide un gran chorro de sangre");
+					Wound bleed = new Wound(BLEED, 2, Constants.LVL1_DURATION);
+					creature.addWound(bleed, applier);
+				}
+			}
+			public void update(Creature creature){}
+			public void onFinish(Creature creature){
+				creature.notify("El corte de tu "+this.bodyPart().position()+" se cura y cierra por completo");
+			}
+		});
+		//******************PIERCING 3***********************************
+		TYPES.put("PIERCING3-ANY",new Wound(Constants.LVL3_DURATION,3,"acuchillamiento",
+				"Una profunda incision en tu %s que despide sangre y un hedor nausabundo"){
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction("acuchilla " + (creature.isPlayer() ? "tu piel" : "la carne "+ StringUtils.genderizeCreature(creature.gender(), creature.name(), true)));
+				if(Math.random() < 0.2){
+					creature.notifyArround(Constants.BLOOD_COLOR, "La herida despide un chorro de sangre");
+					Wound bleed = new Wound(BLEED, 1, Constants.LVL1_DURATION);
+					creature.addWound(bleed, applier);
+				}
+			}
+			public void update(Creature creature){
+				if(Math.random() < 0.2){
+					Wound infection = new Wound(INFECTED, 1, Constants.LVL1_DURATION);
+					creature.addWound(infection, null);
+					resetDuration();
+				}
+			}
+			public void onFinish(Creature creature){
+				creature.notify("La apertura de la herida punzante de tu "+this.bodyPart().position()+" se cierra");
+			}
+		});
+		/*//******************BLUNT 4 ARM**********************************
 		TYPES.put("BLUNT4-"+BodyPart.ARMS,new Wound(Constants.INCURABLE,4,"fractura expuesta"){
 			public void onApply(Creature creature, Creature applier){
 				Item itemToDrop = creature.shield();
@@ -182,29 +299,6 @@ public class Wound {
 				creature.doAction("observa incredulo el milagro...");
 			}
 		});
-		//******************SLICE 1**************************************
-		TYPES.put("SLICE1-ANY",new Wound(Constants.LVL1_DURATION,1,"raspadura"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("logra causar una ligera raspadura en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), null));
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
-		//******************SLICE 2**************************************
-		TYPES.put("SLICE2-ANY",new Wound(Constants.LVL2_DURATION,2,"corte"){
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction("logra inflingir un corte en "+StringUtils.genderizeBodyPosition(this.bodyPart().position(), creature.isPlayer() ? "tu" : null)
-						+ (creature.isPlayer() ? "" : " " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true)));
-				if(Math.random() < 0.1){
-					creature.modifyActionPoints(-100, "aturdido");
-					creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
-					creature.notifyArround(Constants.MESSAGE_STATUS_EFFECT_COLOR, "El impacto "+ (creature.isPlayer() ? "te aturde" : 
-						("aturde " + (creature.gender() == 'M' ? "al " : "a la ") + creature.name())), creature);
-				}
-			}
-			public void update(Creature creature){}
-			public void onFinish(Creature creature){}
-		});
 		//******************PIERCING 1**************************************
 		TYPES.put("PIERCING1-ANY",new Wound(Constants.LVL1_DURATION,1,"tajo"){
 			public void onApply(Creature creature, Creature applier){
@@ -213,12 +307,14 @@ public class Wound {
 			}
 			public void update(Creature creature){}
 			public void onFinish(Creature creature){}
-		});
+		});*/
 	}
 	
 	protected int duration;
 	public int duration() { return duration; }
-	protected int orignalDuration;
+	
+	protected int originalDuration;
+	public void resetDuration() { this.duration = this.originalDuration; }
 	
 	public boolean isHealed() { return duration < 0 ? false : duration < 1; }
 	
@@ -228,22 +324,38 @@ public class Wound {
 	private String name;
 	public String name() { return name; }
 	
+	private String description;
+	public String description() { return description; }
+	public void modifyDescription(String modify) { this.description = modify; }
+	
 	private BodyPart bodyPart;
 	public BodyPart bodyPart() { return bodyPart; }
 	public Wound setBodyPart(BodyPart position) { this.bodyPart = position; return this; }
 	
 	private Wound reference;
 	
-	public Wound(int duration, int severity, String name){
+	public Wound(int duration, int severity, String name, String description){
 		this.duration = duration;
+		this.originalDuration = duration;
 		this.severity = severity;
 		this.name = name;
+		this.description = description;
 	}
 	
 	public Wound(Wound other){
 		this.duration = other.duration();
+		this.originalDuration = other.duration();
 		this.name = other.name();
 		this.severity = other.severity();
+		this.bodyPart = other.bodyPart();
+		this.reference = other;
+	}
+	
+	public Wound(Wound other, int severity, int duration){
+		this.duration = duration;
+		this.originalDuration = duration;
+		this.name = other.name();
+		this.severity = severity;
 		this.bodyPart = other.bodyPart();
 		this.reference = other;
 	}

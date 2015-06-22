@@ -35,6 +35,7 @@ public class Constants {
 	
 	protected static final Color MESSAGE_KILL_COLOR = AsciiPanel.brightRed;
 	protected static final Color BLOOD_COLOR = AsciiPanel.red;
+	protected static final Color SICK_COLOR = AsciiPanel.magenta;
 	
 	public static final int SEV_LEG_PENALTY = 100;
 	public static final int BROKEN_LEG_PENALTY = 50;

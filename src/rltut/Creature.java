@@ -412,8 +412,14 @@ public class Creature {
 		}else if(Wound.TYPES.get(damageType+""+damagePower+"-ANY") != null){
 			wound_to_apply = Wound.TYPES.get(damageType+""+damagePower+"-ANY").setBodyPart(getBodyPart(position));
 		}
-		
-		other.addWound(new Wound(wound_to_apply), this);
+		try{
+			other.addWound(new Wound(wound_to_apply), this);
+		}catch(NullPointerException e){
+			System.out.println("----- Error obteniendo herida -----");
+			System.out.println("Tipo herida: " + damageType);
+			System.out.println("Nivel herida: " + damagePower);
+			System.out.println("Posicion herida: " + position);
+		}
 	}
 
 	public void modifyHp(int amount, String causeOfDeath) { 
@@ -481,7 +487,8 @@ public class Creature {
 	private void updateWounds(){
 		List<Wound> done = new ArrayList<Wound>();
 		
-		for (Wound wound : wounds){
+		for (int i = 0; i < wounds.size(); i++){
+			Wound wound = wounds.get(i);
 			wound.update(this);
 			if (wound.isHealed()) {
 				wound.onFinish(this);
