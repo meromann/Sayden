@@ -120,10 +120,13 @@ public class Creature {
 	
 	private boolean inmaculado = true;
 	public boolean inmaculado() { return inmaculado; }
+	
 	private int woundSeverity;
 	public int woundSeverity() { return woundSeverity; }
+	
 	private List<Wound> wounds;
 	public List<Wound> wounds() { return wounds; }
+	
 	public void addWound(Wound wound, Creature applier){ inmaculado = false; woundSeverity += wound.severity(); wound.onApply(this, applier); wounds.add(wound); }
 	public int getWorstWound(){
 		int bigger = 0;
@@ -311,8 +314,8 @@ public class Creature {
 	 * Esta funcion maneja todos los tipos de ataque
 	 */
 	private void commonAttack(Creature other, Item damagingObject) {
-		String position = "NONE";		//Posicion del ataque
-		String damageType = "NONE";		//Tipo de daño inflinjido (BLUNT, SLICE, etc) Declarados en DamageType
+		BodyPart position = null;		//Posicion del ataque
+		DamageType damageType = null;		//Tipo de daño inflinjido (BLUNT, SLICE, etc) Declarados en DamageType
 		int damagePower = 0;			//Poder del daño inflinjido (si el arma tiene varios tipos de ataque tomaria el mayor
 		int defendingPower = 0;			//Poder de defensa contra el mayor daño, usado para chequear bloqueos
 		Item defendingObject = null;	//Objeto con el que la criatura esta intentando defender el ataque
@@ -336,7 +339,7 @@ public class Creature {
 			position = BodyPart.HEAD;
 			defendingObject = other.helment();
 		}else if(x > other.x && y <= other.y){
-			if(other.hasBodyPart(BodyPart.ARMS)){
+			if(other.hasBodyPart(BodyPart.ARMS.position())){//TODO: Arreglar esto
 				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? BodyPart.ARMS : BodyPart.CHEST) : BodyPart.ARMS);
 				defendingObject = (position == BodyPart.CHEST ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
 			}else{
@@ -344,7 +347,7 @@ public class Creature {
 				defendingObject = other.armor();
 			}
 		}else if(y > other.y && x >= other.x){
-			if(other.hasBodyPart(BodyPart.LEGS)){
+			if(other.hasBodyPart(BodyPart.LEGS.position())){
 				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? BodyPart.LEGS : BodyPart.CHEST) : BodyPart.LEGS);
 				defendingObject = (position == BodyPart.CHEST ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
 			}else{
@@ -364,7 +367,7 @@ public class Creature {
 		//Comienza a recorrer todos los ataques posibles del objeto con el que se ataca
 		for(int i = 0; i < damagingObject.damageTypes().size(); i++){
 			int power = damagingObject.damageTypes().get(i).power();		//Guardamos el poder
-			String type = damagingObject.damageTypes().get(i).wondType();	//Guardamos el tipo
+			DamageType type = damagingObject.damageTypes().get(i);	//Guardamos el tipo
 			
 			damageType = type;
 			damagePower = power;
@@ -385,7 +388,7 @@ public class Creature {
 				}
 				
 				//Si es diferente el tipo no le prestemos atencion (BLUNT vs SLICE no hace nada)
-				if(type != defense_type)
+				if(type.wondType() != defense_type)
 					continue;
 
 				//Si este es el mayor daño que encontramos, lo guardamos (el = es para que se guarde tambien la defensa)
@@ -405,13 +408,18 @@ public class Creature {
 			return;
 		}
 		
-		Wound wound_to_apply = null;
-
-		if(Wound.TYPES.get(damageType+""+damagePower+"-"+position) != null){
-			wound_to_apply = Wound.TYPES.get(damageType+""+damagePower+"-"+position).setBodyPart(getBodyPart(position));
-		}else if(Wound.TYPES.get(damageType+""+damagePower+"-ANY") != null){
-			wound_to_apply = Wound.TYPES.get(damageType+""+damagePower+"-ANY").setBodyPart(getBodyPart(position));
-		}
+		Wound wound_to_apply = new Wound(Constants.ARRAY_WOUND_DURATION[damagePower - 1], damagePower, damageType, position) {
+			public void onApply(Creature creature, Creature applier){
+				applier.doAction(Constants.ARRAY_WOUND_COLORS[severity() - 1], "genera una herida "+type().name()+" en "
+							+(creature.isPlayer() ? "tu " + bodyPart().name() : (StringUtils.genderizeBodyPosition(bodyPart().name(), "")
+								+" "+ StringUtils.genderizeCreature(creature.gender(), creature.name(), true))
+									+". [NIVEL %s]"), severity());
+			}
+			public void onFinish(Creature creature){
+				creature.notify(Constants.ARRAY_WOUND_COLORS[severity() - 1], "[La herida "+type().name()+" sana]");
+			}
+		};
+		
 		try{
 			other.addWound(new Wound(wound_to_apply), this);
 		}catch(NullPointerException e){
@@ -541,7 +549,7 @@ public class Creature {
 	}
 	
 	public void talkAction(Color color, String message, Object ... params){
-		boolean hasPunctuation = message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?");
+		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
 				other.notify(color, StringUtils.makeSecondPerson(message, false) + (hasPunctuation ? "" : "."), params);
@@ -553,7 +561,7 @@ public class Creature {
 	}
 	
 	public void doAction(String message, Object ... params){
-		boolean hasPunctuation = message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?");
+		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
 				other.notify(StringUtils.makeSecondPerson(message, true) + (hasPunctuation ? "" : "."), params);
@@ -565,7 +573,7 @@ public class Creature {
 	}
 	
 	public void doAction(Color actionColor, String message, Object ... params){
-		boolean hasPunctuation = message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?");
+		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
 				other.notify(actionColor, StringUtils.makeSecondPerson(message, true) + (hasPunctuation ? "" : "."), params);
@@ -580,7 +588,7 @@ public class Creature {
 		if (hp < 1)
 			return;
 		
-		boolean hasPunctuation = message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?");
+		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){

@@ -37,7 +37,6 @@ public class PlayScreen implements Screen {
 		messages = new ArrayList<Message>();
 		worldList = new HashMap<String, World>();
 		
-		Wound.instantiateWounds();
 		createWorld();
 		
 		fov = new FieldOfView(world);
@@ -81,14 +80,7 @@ public class PlayScreen implements Screen {
 	
 	private void displayWounds(AsciiPanel terminal, List<Wound> wounds){
 		for(int i = 0; i < wounds.size(); i++){
-			Color[] arrayColor = new Color[]{	
-					Color.ORANGE,
-					new Color(249,120,0),
-					new Color(200, 80, 0),
-					new Color(211,0,0),
-					new Color(255,0,0)
-			};
-			terminal.write(wounds.get(i).severity() + " ", (i*2)+1, Constants.MENU_OFFSET, arrayColor[wounds.get(i).severity() - 1 >= arrayColor.length ? arrayColor.length : wounds.get(i).severity() - 1]);
+			terminal.write(wounds.get(i).severity() + " ", (i*2)+1, Constants.MENU_OFFSET, Constants.ARRAY_WOUND_COLORS[wounds.get(i).severity() - 1 >= Constants.ARRAY_WOUND_COLORS.length ?  Constants.ARRAY_WOUND_COLORS.length : wounds.get(i).severity() - 1]);
 		}
 		String stats = String.format("Mov %s (%3d) Ataq %s (%3d) %s", StringUtils.speedToString(player.movementSpeed()), player.movementSpeed(), StringUtils.speedToString(player.attackSpeed()), player.attackSpeed(), StringUtils.woundsToString(player));
 		//String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.hp(), player.mana(), player.maxMana(), hunger());

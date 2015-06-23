@@ -4,6 +4,11 @@ import java.util.ArrayList;
 
 public class StringUtils {
 	
+	public static boolean hasPunctuation(String message){
+		return message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?") ||  message.endsWith("]")
+				 ||  message.endsWith(")")  ||  message.endsWith("}");
+	}
+	
 	public static String woundsToString(Creature creature){
 		if(creature.hp() < creature.woundSeverity() && creature.getWorstWound() >= 3)
 			return "Muerto";

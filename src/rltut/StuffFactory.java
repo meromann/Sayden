@@ -40,42 +40,13 @@ public class StuffFactory {
 	}
 	
 	private Creature makeBiped(Creature base){
-		base.addBodyPart(
-				new BodyPart("brazo derecho", BodyPart.ARMS){
-					public void onRemove(Creature creature) {
-							creature.drop(creature.shield());
-							creature.setShield(
-								new Item(ItemType.UNEQUIPPABLE, 'M', "brazo inhabilitado").addDamageType(DamageType.BLUNT, 1)
-							);
-					}
-				});
-		base.addBodyPart(
-				new BodyPart("brazo izquierdo", BodyPart.ARMS){
-					public void onRemove(Creature creature) {
-						creature.drop(creature.weapon());
-						creature.setWeapon(
-							new Item(ItemType.UNEQUIPPABLE, 'M', "brazo inhabilitado").addDamageType(DamageType.BLUNT, 1)
-						);
-					}
-				});
-		base.addBodyPart(
-				new BodyPart("pierna derecha", BodyPart.LEGS){
-					public void onRemove(Creature creature) {
-						//creature.force_drop(new Item(ItemType.STATIC,(char)192, 'F', creature.color(), "pierna separada", null));
-						creature.modifyMovementSpeed(Constants.SEV_LEG_PENALTY);
-					}
-				});
-		base.addBodyPart(
-				new BodyPart("pierna izquierda", BodyPart.LEGS){
-					public void onRemove(Creature creature) {
-						//creature.force_drop(new Item(ItemType.STATIC,(char)192, 'F', creature.color(), "pierna separada", null));
-						creature.modifyMovementSpeed(Constants.SEV_LEG_PENALTY);
-					}
-				});
-		base.addBodyPart(new BodyPart("cabeza", BodyPart.HEAD));
-		base.addBodyPart(new BodyPart("torso", BodyPart.CHEST));
-		base.addBodyPart(new BodyPart("espalda", BodyPart.BACK));
-		
+		base.addBodyPart(BodyPart.HEAD);
+		base.addBodyPart(BodyPart.CHEST);
+		base.addBodyPart(BodyPart.BACK);
+		base.addBodyPart(BodyPart.DER_ARM);
+		base.addBodyPart(BodyPart.DER_LEG);
+		base.addBodyPart(BodyPart.IZQ_ARM);
+		base.addBodyPart(BodyPart.IZQ_LEG);
 		return base;
 	}
 	
@@ -101,13 +72,11 @@ public class StuffFactory {
 	}*/
 	
 	public Creature newZombie(int depth, Creature player){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.PIERCING, 2);
-		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.BLUNT, 1);
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
+		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.SLICE, 1);
 		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, puños, piel);
 		world.addAtEmptyLocation(zombie, depth);
 		new ZombieAi(zombie, player);
-		zombie.equip(newLightArmor(-1));
-		zombie.equip(newWoodenShield(-1));
 		zombie.modifyAttackSpeed(-50);
 		zombie = makeBiped(zombie);
 		

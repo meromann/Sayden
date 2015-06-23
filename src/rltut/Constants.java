@@ -33,6 +33,20 @@ public class Constants {
 	public static final int LVL3_DURATION = 80;
 	public static final int INCURABLE = -1;
 	
+	public static final int[] ARRAY_WOUND_DURATION = new int[]{	
+												LVL1_DURATION,
+												LVL2_DURATION,
+												LVL3_DURATION,
+												INCURABLE,
+												INCURABLE};
+	
+	public static final Color[] ARRAY_WOUND_COLORS = new Color[]{	
+												Color.ORANGE,
+												new Color(249,120,0),
+												new Color(200, 80, 0),
+												new Color(211,0,0),
+												new Color(255,0,0)};
+	
 	protected static final Color MESSAGE_KILL_COLOR = AsciiPanel.brightRed;
 	protected static final Color BLOOD_COLOR = AsciiPanel.red;
 	protected static final Color SICK_COLOR = AsciiPanel.magenta;
