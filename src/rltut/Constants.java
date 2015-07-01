@@ -22,42 +22,21 @@ public class Constants {
 	public static final int STARTING_MOVE_SPEED = 100;
 	
 	public static final Color MESSAGE_STATUS_EFFECT_COLOR = AsciiPanel.yellow;
-	public static final String MESSAGE_DODGE = "falla el ataque";				//doAction(MESSAGE_DODGE)
+	public static final String MESSAGE_DODGE = "falla el ataque!";				//doAction(MESSAGE_DODGE)
+	public static final Color MESSAGE_CRIT_COLOR = Color.RED;
+	public static final String MESSAGE_CRIT = "impacta con gran presicion!";		//doAction(MESSAGE_CRIT)
+	public static final String MESSAGE_PARTIAL_HIT = "efectua un ataque impresiso!";		//doAction(MESSAGE_CRIT)
 	public static final Color MESSAGE_DODGE_COLOR = AsciiPanel.brightBlue;
 	public static final String MESSAGE_DODGE_WARNING = "prepara para atacar";	//doAction(MESSAGE_DODGE_WARNING)
-	
+	public static final Color WOUND_COLOR = new Color(255,144,0);
+	protected static final Color BLOOD_COLOR = AsciiPanel.red;
+
 	public static final int STARTING_VISION_RADIUS = 9;
 	
-	public static final int LVL1_DURATION = 20;
-	public static final int LVL2_DURATION = 42;
-	public static final int LVL3_DURATION = 80;
-	public static final int INCURABLE = -1;
-	
-	public static final int[] ARRAY_WOUND_DURATION = new int[]{	
-												LVL1_DURATION,
-												LVL2_DURATION,
-												LVL3_DURATION,
-												INCURABLE,
-												INCURABLE};
-	
-	public static final Color[] ARRAY_WOUND_COLORS = new Color[]{	
-												Color.ORANGE,
-												new Color(249,120,0),
-												new Color(200, 80, 0),
-												new Color(211,0,0),
-												new Color(255,0,0)};
-	
-	protected static final Color MESSAGE_KILL_COLOR = AsciiPanel.brightRed;
-	protected static final Color BLOOD_COLOR = AsciiPanel.red;
-	protected static final Color SICK_COLOR = AsciiPanel.magenta;
-	
+	public static final int WOUND_DURATION_LOW = 30;
+	public static final int WOUND_DURATION_MID = 50;
+	public static final int WOUND_DURATION_HIGH = 90;
+		
 	public static final int SEV_LEG_PENALTY = 100;
-	public static final int BROKEN_LEG_PENALTY = 50;
-	public static final int BROKEN_ARM_PENALTY = 50;
-	public static final int BACK_TRAUMA_PENALTY = 100;
-	public static final float BROKEN_ARM_DROP_CHANCE = 0.3f;	
-	public static final float HEAD_TRAUMA_WANDER_CHANCE = 0.3f;
-	public static final float BACK_TRAUMA_SKIP_CHANCE = 0.3f;
 	public static final float DISMEMBER_CHANCE_LIMB_OVER_KILL = 0.70f;			//brazo < chance
-
 }

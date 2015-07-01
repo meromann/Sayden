@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rltut.BodyPart;
 import rltut.Creature;
+import rltut.DamageType;
 import rltut.FieldOfView;
 import rltut.Item;
 import rltut.LevelUpController;
@@ -13,6 +15,7 @@ import rltut.Message;
 import rltut.Path;
 import rltut.Point;
 import rltut.Tile;
+import rltut.Wound;
 
 public class CreatureAi {
 	protected Creature creature;
@@ -33,6 +36,8 @@ public class CreatureAi {
 		}
 	}
 	
+	public Wound getWound(DamageType type, BodyPart bodyPart, Creature target) { return null; }
+	
 	public CreatureAi(Creature creature){
 		this.creature = creature;
 		this.creature.setCreatureAi(this);
@@ -49,13 +54,12 @@ public class CreatureAi {
 		itemNames.put(item.name(), name);
 	}
 	
+	/** Esta funcion se llama luego de que una unidad entre en una casilla*/
 	public void onEnter(int x, int y, int z, Tile tile){
 		if (tile.isGround()){
 			creature.x = x;
 			creature.y = y;
 			creature.z = z;
-		} else {
-			creature.doAction("bump into a wall");
 		}
 	}
 	
@@ -63,19 +67,26 @@ public class CreatureAi {
 	
 	public void onGive(Item item, Creature to){}
 	
+	/** Esta funcion se llama antes de que una unidad efectue un ataque sobre otra*/
+	public void onBeforeAttack(Creature target){}
+	
+	/** Esta funcion se llama luego de que una unidad efectue un ataque sobre otra satisfactoriamente*/
+	public void onAttack(Creature target){}
+	
+	/** Esta funcion se llama luego de que una unidad "aliada" deje de hablar con la criatura*/
 	public void onFarewell(){}
 	
-	public void onTalkedTo(Creature talker){
-	}
+	/** Esta funcion se llama luego de que una unidad "aliada" se choque con tigo*/
+	public void onTalkedTo(Creature talker){}
 	
-	public void onUpdate(){
-	}
+	/** Esta funcion se llama luego de que el player toca una tecla*/
+	public void onUpdate(){}
 	
-	public void updateFow(FieldOfView fov){
-	}
+	/** Esta funcion se llama luego de que el player toca una tecla*/
+	public void updateFow(FieldOfView fov){}
 	
-	public void onNotify(Message message){
-	}
+	/** Esta funcion se llama al notificar algo a la criatura*/
+	public void onNotify(Message message){}
 
 	public boolean canSee(int wx, int wy, int wz) {
 		if (creature.z != wz)

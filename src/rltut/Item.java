@@ -30,7 +30,7 @@ public class Item {
 	public Color color() { return color; }
 
 	private String name;
-	public String name() { return name; }
+	public String name() { return broken ? name+ " " + (gender == 'M' ? "roto" : "rota") : name; }
 	
 	private String appearance;
 	public String appearance() { return appearance; }
@@ -46,13 +46,23 @@ public class Item {
 	private List<Spell> writtenSpells;
 	public List<Spell> writtenSpells() { return writtenSpells; }
 	
+	public Wound getWound(DamageType type, BodyPart bodyPart, Creature target) { return null; }
+	
 	private List<DamageType> damageTypes;
 	public List<DamageType> damageTypes() { return damageTypes; }
 	public Item addDamageType(DamageType newDamage, int power) { 
-		DamageType newType = new DamageType(newDamage.name(), newDamage.wondType());
+		DamageType newType = new DamageType(newDamage.name(), newDamage.wondType(), newDamage.causeOfDeath());
 		this.damageTypes.add(newType.addPower(power)); 
 		return this; 
 	}
+	
+	private boolean broken = false;
+	public boolean broken() { return broken; }
+	public void makeBroken(boolean val) { this.broken = val; }
+	
+	private int playerBonusDamage;
+	public int playerBonusDamage() { return playerBonusDamage; }
+	public void modifyPlayerBonusDamage(int amount) { playerBonusDamage += amount; }
 	
 	private int perceivedValue;
 	public int perceivedValue() { return perceivedValue; }
@@ -68,6 +78,7 @@ public class Item {
 		this.gender = gender;
 		this.name = name;
 		this.damageTypes = new ArrayList<DamageType>();
+		this.playerBonusDamage = 0;
 	}
 	
 	public Item(ItemType type, char glyph, char gender, Color color, String name, String appearance, int value){
@@ -80,6 +91,7 @@ public class Item {
 		this.damageTypes = new ArrayList<DamageType>();
 		this.perceivedValue = value;
 		this.itemType = type;
+		this.playerBonusDamage = 0;
 	}
 	
 	public Item(ItemType type, char glyph, char gender, Color color, String name, String appearance){
@@ -92,6 +104,7 @@ public class Item {
 		this.damageTypes = new ArrayList<DamageType>();
 		this.perceivedValue = 0;
 		this.itemType = type;
+		this.playerBonusDamage = 0;
 	}
 	
 	public String details() {

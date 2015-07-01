@@ -1,8 +1,17 @@
 package rltut;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class StringUtils {
+	
+	public static int randInt(int min, int max) {
+	    Random rand = new Random();
+
+	    int randomNum = rand.nextInt((max - min) + 1) + min;
+
+	    return randomNum;
+	}
 	
 	public static boolean hasPunctuation(String message){
 		return message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?") ||  message.endsWith("]")
@@ -10,20 +19,19 @@ public class StringUtils {
 	}
 	
 	public static String woundsToString(Creature creature){
-		if(creature.hp() < creature.woundSeverity() && creature.getWorstWound() >= 3)
+		if(creature.hp() < creature.maxHp())
 			return "Muerto";
 		
-		if(creature.woundSeverity() == 0)
+		if(creature.hp() == creature.maxHp())
 			return creature.inmaculado() ? "Inmaculado" : "Sano";
 		
-		if(creature.hp() * 0.5f >= creature.woundSeverity() && creature.getWorstWound() <= 2)
+		if(creature.hp() * 0.5f >= creature.maxHp())
 			return "Lastimado";
 		
-		if(creature.hp() * 0.5f >= creature.woundSeverity() && creature.getWorstWound() <= 4 && creature.getWorstWound() > 2)
+		if(creature.hp() * 0.5f >= creature.maxHp())
 			return "Malherido";
 		
-		if(creature.hp() >= creature.woundSeverity() && creature.hp() * 0.5f < creature.woundSeverity()
-				&& creature.getWorstWound() <= 4 && creature.getWorstWound() > 2)
+		if(creature.hp() >= creature.maxHp() && creature.hp() * 0.5f < creature.maxHp())
 			return "Moribundo";
 		
 		return "Sano";
@@ -78,6 +86,37 @@ public class StringUtils {
 		}else{
 			return (additive == "tu" ? "tu " : additive == "de" ? "de la " : "la ") + position;
 		}
+	}
+	
+	/**
+	 * @param text El texto a formatear
+	 * @param creature La criatura de referencia
+	 * 
+	 * Formatea el texto de la siguiente manera:
+	 * text = "golpea"
+	 * "te golpea" (si la referencia es el player)
+	 * "golpea a el lobo" / "golpea a la cucaracha" (si la referencia es una criatura comun"
+	 * */
+	public static String formatTextToGender(String text, Creature creature){
+		return creature.isPlayer() ? "te " + text : text + " " + (creature.gender() == 'M' ? "al " + creature.name() : "a la " + creature.name());
+	}
+	
+	/**
+	 * 
+	 * @param text El texto a formatear
+	 * @param creature La criatura de referencia
+	 * @param effect puede ser "s" o "S" para añadirle la S en caso de que sea el player
+	 * @param effect puede ser "d" para añadir "de" en lugar de "al / a la"
+	 * @return
+	 */
+	public static String formatTextToGender(String text, Creature creature, String effect){		
+		if(effect.indexOf("s") != -1 && !creature.isPlayer())
+			text = makeSecondPerson(text, false);
+		if(effect.indexOf("S") != -1 && !creature.isPlayer())
+			text = makeSecondPerson(text, true);
+			
+		return creature.isPlayer() ? "te " + text : text + " " + (creature.gender() == 'M' ? (effect.indexOf("d") != -1 ? "al " : "del ") + 
+				creature.name() :  (effect.indexOf("d") != -1 ? "a la " : "de la ") + creature.name());
 	}
 	
 	/**

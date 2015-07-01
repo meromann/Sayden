@@ -46,10 +46,26 @@ public class Creature {
 	private int hp;
 	public int hp() { return hp; }
 	
+	private int maxHp;
+	public int maxHp() { return maxHp; }
+	public void modifyMaxHp(int amount) { this.maxHp += amount; }
+	
+	private int woundResistance;
+	public int woundResistance() { return woundResistance; }
+	public void modifyWoundResistance(int amount) { this.woundResistance += amount; }
+	
 	private int visionRadius;
 	public void modifyVisionRadius(int value) { visionRadius += value; }
-	public int visionRadius() { return visionRadius; }
+	public int visionRadius() { return visionRadius <= 0 ? 1 : visionRadius; }
 
+	private int accuracy;
+	public int accuracy() { return accuracy; }
+	public void modifyAccuracy(int amount) { this.accuracy += amount; }
+	
+	private int missChance;
+	public int missChance() { return missChance; }
+	public void modifyMissChance(int amount) { this.missChance += amount; }
+	
 	private String name;
 	public String name() { return name; }
 
@@ -90,6 +106,8 @@ public class Creature {
 	public void modifyAttackSpeed(int amount) { this.attackSpeed += amount; }
 	
 	private Point attackQue = null;
+	public Point attackQue() { return attackQue; }
+	public void modifyAttackQue(Point p) { this.attackQue = p; }
 	
 	private String statusEffect;
 	public String statusEffect() { return statusEffect; }
@@ -118,24 +136,20 @@ public class Creature {
 	public boolean isPlayer(){ return isPlayer; }
 	public void makePlayer() { this.isPlayer = true; }
 	
-	private boolean inmaculado = true;
+	private boolean inmaculado;
 	public boolean inmaculado() { return inmaculado; }
-	
-	private int woundSeverity;
-	public int woundSeverity() { return woundSeverity; }
-	
+		
 	private List<Wound> wounds;
 	public List<Wound> wounds() { return wounds; }
 	
-	public void addWound(Wound wound, Creature applier){ inmaculado = false; woundSeverity += wound.severity(); wound.onApply(this, applier); wounds.add(wound); }
-	public int getWorstWound(){
-		int bigger = 0;
+	public void addWound(Wound wound, Creature applier){ inmaculado = false; wound.onApply(this, applier); wounds.add(wound); }
+	public boolean hasWound(String woundName){
 		for(Wound wound : wounds){
-			if(wound.severity() > bigger)
-				bigger = wound.severity();
+			if(wound.name() == woundName)
+				return true;
 		}
-		return bigger;
-	}
+		return false;
+	}	
 	
 	private List<BodyPart> limbs;
 	public List<BodyPart> limbs() { return limbs; }
@@ -171,12 +185,14 @@ public class Creature {
 	private boolean dismembered;
 	public boolean dismembered() { return dismembered; }
 	
-	public Creature(World world, char glyph, char gender, Color color, String name, int hp, Item weapon, Item armor){
+	public Creature(World world, char glyph, char gender, Color color, String name, int maxHp, Item weapon, Item armor){
 		this.world = world;
 		this.glyph = glyph;
 		this.color = color;
 		this.originalColor = color;
-		this.hp = hp;
+		this.maxHp = maxHp;
+		this.hp = maxHp;
+		this.woundResistance = 4;
 		this.visionRadius = Constants.STARTING_VISION_RADIUS;
 		this.name = name;
 		this.inventory = new Inventory(Constants.INVENTORY_SIZE);
@@ -190,6 +206,9 @@ public class Creature {
 		this.attackSpeed = Constants.STARTING_ATTACK_SPEED;
 		this.movementSpeed = Constants.STARTING_MOVE_SPEED;
 		this.dismembered = false;
+		this.inmaculado = true;
+		this.accuracy = 100;
+		this.missChance = 10;
 	}
 	
 	public void moveBy(int mx, int my, int mz){
@@ -268,6 +287,11 @@ public class Creature {
 		Creature other = world.creature(x+mx, y+my, z+mz);
 		
 		if (other == null){
+			for (int i = 0; i < wounds.size(); i++){
+				Wound wound = wounds.get(i);
+				wound.onBeforeMove(this);
+			}
+			
 			if(isPlayer){
 				world.modifyActionPoints(movementSpeed);
 			}else if(actionPoints < movementSpeed){
@@ -314,14 +338,27 @@ public class Creature {
 	 * Esta funcion maneja todos los tipos de ataque
 	 */
 	private void commonAttack(Creature other, Item damagingObject) {
-		BodyPart position = null;		//Posicion del ataque
-		DamageType damageType = null;		//Tipo de daño inflinjido (BLUNT, SLICE, etc) Declarados en DamageType
-		int damagePower = 0;			//Poder del daño inflinjido (si el arma tiene varios tipos de ataque tomaria el mayor
-		int defendingPower = 0;			//Poder de defensa contra el mayor daño, usado para chequear bloqueos
-		Item defendingObject = null;	//Objeto con el que la criatura esta intentando defender el ataque
+		BodyPart position = null;					//Posicion del ataque
+		DamageType damageType = null;				//Tipo de daño inflinjido (BLUNT, SLICE, etc) Declarados en DamageType
+		int damagePower = 0;						//Poder del daño inflinjido (si el arma tiene varios tipos de ataque tomaria el mayor
+		int defendingPower = 0;						//Poder de defensa contra el mayor daño, usado para chequear bloqueos
+		Item defendingObject = null;				//Objeto con el que la criatura esta intentando defender el ataque
+		int chanceToHit = StringUtils.randInt(accuracy() - missChance(), accuracy());	//Chances de fallar el golpe	//TODO: Mejorar formula
 		
 		if(other.hp() < 0)
 			return;
+		
+		if(chanceToHit <= other.accuracy() * .5f){	//Si las chances de pegar son menores que la mitad del accurancy de tu enemigo
+			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_DODGE);
+			return;
+		}
+		
+		for (int i = 0; i < wounds.size(); i++){
+			Wound wound = wounds.get(i);
+			wound.onBeforeAttack(this);
+		}
+		
+		ai.onBeforeAttack(other);
 		
 		//Elige el lugar donde se golpea, se toma en cuenta si el enemigo "dispara" un arco (no esta directamente al lado
 		//del objetivo del ataque. Tambien se guarda el objeto con el cual el objetivo trata de defender el ataque
@@ -369,6 +406,9 @@ public class Creature {
 			int power = damagingObject.damageTypes().get(i).power();		//Guardamos el poder
 			DamageType type = damagingObject.damageTypes().get(i);	//Guardamos el tipo
 			
+			if(damagingObject.broken())
+				power = 1;
+			
 			damageType = type;
 			damagePower = power;
 			
@@ -377,15 +417,17 @@ public class Creature {
 				int defense_power = defendingObject.damageTypes().get(n).power();		//Guardamos el poder
 				String defense_type = defendingObject.damageTypes().get(n).wondType();	//Guardamos el tipo
 				
-				//Las debilidades a ciertos tipos se resuelven con numeros negativos
-				if(defense_power < 0)
-					power += Math.abs(defense_power);
-				
 				//Si esta defendiendo con "la piel" no lo hace desde la cabeza
 				if(defendingObject.itemType() == ItemType.INTRINSIC &&
 						position == BodyPart.HEAD){
 					defense_power = 0;
 				}
+				
+				//Las debilidades a ciertos tipos se resuelven con numeros negativos, en otro caso se le resta al poder de ataque
+				if(defense_power < 0)
+					power += Math.abs(defense_power);
+				else
+					power -= defense_power;
 				
 				//Si es diferente el tipo no le prestemos atencion (BLUNT vs SLICE no hace nada)
 				if(type.wondType() != defense_type)
@@ -399,35 +441,77 @@ public class Creature {
 				}
 			}			
 		}
-
+		
+		//Si tus chances de pegar son mayores que la presicion del enemigo efectuas un golpe critico
+		if(chanceToHit > other.accuracy()){
+			damagePower++;
+			doAction(Constants.MESSAGE_CRIT_COLOR, Constants.MESSAGE_CRIT);
+		//Si tus chances de pegar son menores que tu 80% de presicion entonces efectuas un golpe parcial
+		}else if(chanceToHit <= accuracy() * .8f){
+			damagePower--;
+			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_PARTIAL_HIT);
+		}
+		
 		//Si el poder es menor que la defensa (teniendo en cuenta que es el mismo tipo de daño) no hace nada
-		//TODO: Efectos de overdefense! El arma rebota/se rompe/se cae
 		if(damagePower <= defendingPower){
 			other.doAction("resiste el ataque"+ (defendingObject.itemType() != ItemType.INTRINSIC ?
 					" con %s %s" : ""), other.isPlayer() ? "tu" : "su", defendingObject.name());
+			
+			//Si el objeto que defiende es un escudo y tiene mas de la mitad defensa el arma se CAE
+			if(defendingObject.itemType() != ItemType.INTRINSIC
+					&& damagingObject.itemType() != ItemType.INTRINSIC
+					&& damagePower <= defendingPower * 0.5f
+					&& damagePower > defendingPower * 0.3f){
+				notifyArround(damagingObject.gender() == 'M' ? "El " : "La " + damagingObject.name() + " cae al suelo"
+						+" al impactar contra " + (defendingObject.gender() == 'M' ? "el " : "la " + defendingObject.name()));
+				drop(damagingObject, "");
+			}else
+			//Si el objeto que defiende es un escudo y tiene mas de tres veces la defensa el arma se ROMPE contra el
+			if(defendingObject.itemType() != ItemType.INTRINSIC
+					&& damagingObject.itemType() != ItemType.INTRINSIC
+					&& damagePower <= defendingPower * 0.3f){
+				notifyArround(damagingObject.gender() == 'M' ? "El " : "La " + damagingObject.name() + " se rompe"
+						+" al impactar contra " + (defendingObject.gender() == 'M' ? "el " : "la " + defendingObject.name()));
+				damagingObject.makeBroken(true);
+			}
+			
 			return;
 		}
-		
-		Wound wound_to_apply = new Wound(Constants.ARRAY_WOUND_DURATION[damagePower - 1], damagePower, damageType, position) {
-			public void onApply(Creature creature, Creature applier){
-				applier.doAction(Constants.ARRAY_WOUND_COLORS[severity() - 1], "genera una herida "+type().name()+" en "
-							+(creature.isPlayer() ? "tu " + bodyPart().name() : (StringUtils.genderizeBodyPosition(bodyPart().name(), "")
-								+" "+ StringUtils.genderizeCreature(creature.gender(), creature.name(), true))
-									+". [NIVEL %s]"), severity());
-			}
-			public void onFinish(Creature creature){
-				creature.notify(Constants.ARRAY_WOUND_COLORS[severity() - 1], "[La herida "+type().name()+" sana]");
-			}
-		};
-		
-		try{
-			other.addWound(new Wound(wound_to_apply), this);
-		}catch(NullPointerException e){
-			System.out.println("----- Error obteniendo herida -----");
-			System.out.println("Tipo herida: " + damageType);
-			System.out.println("Nivel herida: " + damagePower);
-			System.out.println("Posicion herida: " + position);
+				
+		//Efecto de COUNTER en el enemigo
+		//Si el enemigo tiene un ataque guardado (fue muy lento para pegar) y uno le pega y al pegarle
+		//es lo suficientemente rapido para que no efectue el ataque el mismo, uno contrarresta el ataque		
+		if(other.attackQue() != null && 
+				other.getActionPoints() <= other.attackSpeed()){
+			doAction(Constants.MESSAGE_DODGE_COLOR, "logra contrarrestar el ataque "+ StringUtils.genderizeCreature(other.gender(), other.name(), true) +"!");
+			other.modifyAttackQue(null);
+			other.resetActionPoints();
 		}
+				
+		if(damagePower < other.woundResistance()){
+			doAction("golpea efectuando %s "+ (damagePower > 1 ? "puntos" : "punto")  +" de herida", damagePower);
+		}else{
+			doAction("golpea por %s generando una herida!", damagePower);
+			
+			Wound wound_to_apply = other.getCreatureAi().getWound(damageType, position, other);
+			
+			if(wound_to_apply == null)
+				wound_to_apply = damagingObject.getWound(damageType, position, other);
+			
+			if(wound_to_apply == null)
+				wound_to_apply = Wound.getWound(damageType, position, other);
+			
+			if(wound_to_apply != null)
+				other.addWound(wound_to_apply, this);
+		}
+		
+		for (int i = 0; i < wounds.size(); i++){
+			Wound wound = wounds.get(i);
+			wound.onAttack(this);
+		}
+		ai.onAttack(other);
+		
+		other.modifyHp(-damagePower, damageType.causeOfDeath());
 	}
 
 	public void modifyHp(int amount, String causeOfDeath) { 
@@ -501,7 +585,6 @@ public class Creature {
 			if (wound.isHealed()) {
 				wound.onFinish(this);
 				done.add(wound);
-				woundSeverity -= wound.severity();
 			}
 		}
 		

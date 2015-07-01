@@ -57,10 +57,9 @@ public class StuffFactory {
 		world.addAtEmptyLocation(player, 0);
 		new PlayerAi(player, messages, fov);
 		player.makePlayer();
-		player.inventory().add(newDagger(-1));
-		player.inventory().add(newOPDagger(-1));
+		player.modifyAccuracy(10);
 		player = makeBiped(player);
-
+		
 		return player;
 	}
 	
@@ -74,11 +73,12 @@ public class StuffFactory {
 	public Creature newZombie(int depth, Creature player){
 		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.SLICE, 1);
-		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 10, puños, piel);
+		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 30, puños, piel);
 		world.addAtEmptyLocation(zombie, depth);
 		new ZombieAi(zombie, player);
-		zombie.modifyAttackSpeed(-50);
+		zombie.modifyAttackSpeed(100);
 		zombie = makeBiped(zombie);
+		zombie.modifyWoundResistance(-2);
 		
 		return zombie;
 	}
