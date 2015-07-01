@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Wound {
-
 	protected int duration;
 	public int duration() { return duration; }
 	
@@ -30,6 +29,62 @@ public class Wound {
 	
 	public static Wound getWound(DamageType type, BodyPart bodyPart, Creature target) {
 		ArrayList<Wound> possibleWounds = new ArrayList<Wound>();
+		
+		if(type.wondType() == DamageType.SLICE.wondType()){
+			possibleWounds.add(new Wound("Corte", "[sangrado por 2 puntos]", 2, type, bodyPart){
+				public void onApply(Creature creature, Creature applier){
+					creature.notifyArround(Constants.WOUND_COLOR, "Con un habil movimiento %s!", StringUtils.formatTextToGender("inflije un corte", creature, "s"));
+					creature.notify(Constants.WOUND_COLOR,"[sangrado por 2 puntos]");
+				}
+				public void update(Creature creature){
+					creature.bleed(1);
+					creature.modifyHp(-1, "Mueres desangrado");
+				}
+			});
+			
+			if(bodyPart.position() == BodyPart.HEAD.position() && !target.hasWound("Sangre en el rostro"))
+				possibleWounds.add(new Wound("Sangre en el rostro", "[enceguecimiento]", Constants.WOUND_DURATION_LOW, type, bodyPart){
+					public void onApply(Creature creature, Creature applier){
+						creature.notifyArround(Constants.WOUND_COLOR, "El ataque genera un corte en %s y la sangre cae hacia los ojos!", 
+								StringUtils.formatTextToGender("cabeza", creature, "td"));
+						creature.notify(Constants.WOUND_COLOR,"[enceguecimiento]");
+						creature.modifyVisionRadius(-20);
+					}
+					public void onFinish(Creature creature){
+						creature.modifyVisionRadius(20);
+					}
+				});
+			
+			if(bodyPart.position() == BodyPart.ARMS.position() && !target.hasWound("Corte en la mano"))
+				possibleWounds.add(new Wound("Corte en la mano", "[15% chances soltar arma al pegar]", Constants.WOUND_DURATION_LOW, type, bodyPart){
+					public void onApply(Creature creature, Creature applier){
+						creature.notifyArround(Constants.WOUND_COLOR, "El ataque genera un corte en %s!", 
+								StringUtils.formatTextToGender("mano", creature, "td"));
+						creature.notify(Constants.WOUND_COLOR,"[15%% chances soltar arma al pegar]");
+					}
+					public void onAttack(Creature creature){
+						if(Math.random() < 0.15f && creature.weapon() != null){
+							creature.drop(creature.weapon(), "deja caer");
+							creature.notify("Aun no te recuperas de la herida de la mano!");
+						}
+					}
+				});
+			
+			if(bodyPart.position() == BodyPart.ARMS.position() && !target.hasWound("Corte en la mano "))
+				possibleWounds.add(new Wound("Corte en la mano ", "[30% chances soltar escudo al ser golpeado]", Constants.WOUND_DURATION_LOW, type, bodyPart){
+					public void onApply(Creature creature, Creature applier){
+						creature.notifyArround(Constants.WOUND_COLOR, "El ataque genera un corte en %s!", 
+								StringUtils.formatTextToGender("mano", creature, "td"));
+						creature.notify(Constants.WOUND_COLOR,"[30%% chances soltar escudo al ser golpeado]");
+					}
+					public void onAttack(Creature creature){
+						if(Math.random() < 0.30f && creature.shield() != null){
+							creature.drop(creature.shield(), "deja caer");
+							creature.notify("Aun no te recuperas de la herida de la mano!");
+						}
+					}
+				});
+		}
 		
 		if(type.wondType() == DamageType.BLUNT.wondType()){
 			//Deshorientacion
@@ -147,6 +202,8 @@ public class Wound {
 	public void onBeforeAttack(Creature creature){}
 	
 	public void onAttack(Creature creature){}
+	
+	public void onGetAttack(Creature creature, Creature attacker){}
 	
 	public void onBeforeMove(Creature creature){}
 	

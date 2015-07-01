@@ -28,6 +28,7 @@ public class Constants {
 	public static final String MESSAGE_PARTIAL_HIT = "efectua un ataque impresiso!";		//doAction(MESSAGE_CRIT)
 	public static final Color MESSAGE_DODGE_COLOR = AsciiPanel.brightBlue;
 	public static final String MESSAGE_DODGE_WARNING = "prepara para atacar";	//doAction(MESSAGE_DODGE_WARNING)
+	public static final String MESSAGE_COUNTER = "aprovecha la oportunidad para atacar";
 	public static final Color WOUND_COLOR = new Color(255,144,0);
 	protected static final Color BLOOD_COLOR = AsciiPanel.red;
 

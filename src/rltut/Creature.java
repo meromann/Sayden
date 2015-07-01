@@ -239,6 +239,7 @@ public class Creature {
 			}
 			modifyActionPoints(-attackSpeed);
 			attackQue = null;
+			modifyStatusColor(null);
 			return;
 		}
 		
@@ -304,8 +305,9 @@ public class Creature {
 			if(isPlayer){
 				world.modifyActionPoints(attackSpeed);
 			}else if(actionPoints <= (attackSpeed * 0.5f) && actionPoints > 0){
-				doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_DODGE_WARNING);
+				doAction(Constants.MESSAGE_DODGE_COLOR, "se " + Constants.MESSAGE_DODGE_WARNING);
 				attackQue = new Point(x+mx, y+my, z+mz);
+				modifyStatusColor(Constants.MESSAGE_DODGE_COLOR);
 				return;
 			}else if(actionPoints < attackSpeed){
 				return;
@@ -483,9 +485,10 @@ public class Creature {
 		//es lo suficientemente rapido para que no efectue el ataque el mismo, uno contrarresta el ataque		
 		if(other.attackQue() != null && 
 				other.getActionPoints() <= other.attackSpeed()){
-			doAction(Constants.MESSAGE_DODGE_COLOR, "logra contrarrestar el ataque "+ StringUtils.genderizeCreature(other.gender(), other.name(), true) +"!");
+			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_COUNTER + " a " + StringUtils.genderizeCreature(other.gender(), other.name(), false) +"!");
 			other.modifyAttackQue(null);
 			other.resetActionPoints();
+			other.modifyStatusColor(null);
 		}
 				
 		if(damagePower < other.woundResistance()){
@@ -509,6 +512,12 @@ public class Creature {
 			Wound wound = wounds.get(i);
 			wound.onAttack(this);
 		}
+		
+		for (int i = 0; i < other.wounds().size(); i++){
+			Wound wound = other.wounds().get(i);
+			wound.onGetAttack(other, this);
+		}
+				
 		ai.onAttack(other);
 		
 		other.modifyHp(-damagePower, damageType.causeOfDeath());

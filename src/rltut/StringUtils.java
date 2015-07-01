@@ -114,9 +114,9 @@ public class StringUtils {
 			text = makeSecondPerson(text, false);
 		if(effect.indexOf("S") != -1 && !creature.isPlayer())
 			text = makeSecondPerson(text, true);
-			
-		return creature.isPlayer() ? "te " + text : text + " " + (creature.gender() == 'M' ? (effect.indexOf("d") != -1 ? "al " : "del ") + 
-				creature.name() :  (effect.indexOf("d") != -1 ? "a la " : "de la ") + creature.name());
+		
+		return creature.isPlayer() ? (effect.indexOf("t") != -1 ? "te " : "tu ") + text : text + " " + (creature.gender() == 'M' ? (effect.indexOf("d") == -1 ? "al " : "del ") + 
+				creature.name() :  (effect.indexOf("d") == -1 ? "a la " : "de la ") + creature.name());
 	}
 	
 	/**
