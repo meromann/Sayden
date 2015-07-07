@@ -51,7 +51,9 @@ public class PlayScreen implements Screen {
 
 	private void createCreatures(StuffFactory factory){
 		player = factory.newPlayer(messages, fov);
-		factory.newZombie(0, player);
+		factory.newMaleWolf(0, player);
+		factory.newMaleWolf(0, player);
+		factory.newMaleWolf(0, player);
 	}
 
 	private void createRocks(StuffFactory factory) {
@@ -79,12 +81,15 @@ public class PlayScreen implements Screen {
 	}
 	
 	private void displayWounds(AsciiPanel terminal, List<Wound> wounds){
-		for(int i = 0; i < wounds.size(); i++){
-			terminal.write(wounds.get(i).duration() + " ", (i*2)+1, Constants.MENU_OFFSET, Constants.MESSAGE_STATUS_EFFECT_COLOR);
+		for(int i = 0; i < wounds.size(); i++){	//Si la herida tiene tiempo mostramelo con su color, sino ponele X y de color rojo
+			terminal.write((wounds.get(i).duration() > 0 ? wounds.get(i).duration() : "X") + " ", (i*2)+1, Constants.MENU_OFFSET, wounds.get(i).duration() > 0 ? Constants.MESSAGE_STATUS_EFFECT_COLOR : Color.RED);
 		}
-		String stats = String.format("Mov %s (%3d) Ataq %s (%3d) %s", StringUtils.speedToString(player.movementSpeed()), player.movementSpeed(), StringUtils.speedToString(player.attackSpeed()), player.attackSpeed(), StringUtils.woundsToString(player));
+		String stats = String.format("Mov %s (%3d) Ataq %s (%3d)", StringUtils.speedToString(player.movementSpeed()), player.movementSpeed(), StringUtils.speedToString(player.attackSpeed()), player.attackSpeed());
 		//String stats = String.format(" %3d/%3d hp   %d/%d mana   %8s", player.hp(), player.hp(), player.mana(), player.maxMana(), hunger());
 		terminal.write(stats, 1, Constants.SCREEN_HEIGHT - 1);
+		
+		String hp = String.format("%s/%s", player.hp(), player.maxHp());
+		terminal.write(hp, Constants.SCREEN_WIDTH - hp.length() - 2, Constants.SCREEN_HEIGHT - 1);
 	}
 	
 	private void displayMessages(AsciiPanel terminal, List<Message> messages) {

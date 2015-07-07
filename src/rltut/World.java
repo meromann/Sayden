@@ -106,6 +106,9 @@ public class World {
 		int x;
 		int y;
 		
+		if(z < 0)
+			return;
+		
 		do {
 			x = (int)(Math.random() * width);
 			y = (int)(Math.random() * height);
@@ -178,7 +181,7 @@ public class World {
 	public void remove(int x, int y, int z) {
 		items[x][y][z] = null;
 	}
-
+	
 	public boolean addAtEmptySpace(Item item, int x, int y, int z){
 		if (item == null)
 			return true;
@@ -201,6 +204,37 @@ public class World {
 				
 				if (c != null)
 					c.notify((item.gender() == 'M' ? "Un" : "Una") + " %s cae entre tus pies.", c.nameOf(item));
+				
+				return true;
+			} else {
+				List<Point> neighbors = p.neighbors8();
+				neighbors.removeAll(checked);
+				points.addAll(neighbors);
+			}
+		}
+		return false;
+	}
+	
+	public boolean addAtEmptySpace(Creature creature, int x, int y, int z){
+		if (creature == null)
+			return true;
+		
+		List<Point> points = new ArrayList<Point>();
+		List<Point> checked = new ArrayList<Point>();
+		
+		points.add(new Point(x, y, z));
+		
+		while (!points.isEmpty()){
+			Point p = points.remove(0);
+			checked.add(p);
+			
+			if (!tile(p.x, p.y, p.z).isGround())
+				continue;
+				
+			if (creature(p.x,p.y,p.z) == null){
+				creature.x = x;
+				creature.y = y;
+				creature.z = z;
 				
 				return true;
 			} else {

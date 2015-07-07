@@ -76,7 +76,7 @@ public abstract class InventoryBasedScreen implements Screen {
 			return null;
 		} else if(key.getKeyCode() == KeyEvent.VK_LEFT){
 			return leftScreen();
-		} else if(key.getKeyCode() == KeyEvent.VK_RIGHT){
+		} else if(key.getKeyCode() == KeyEvent.VK_RIGHT || key.getKeyCode() == KeyEvent.VK_TAB){
 			return rightScreen();
 		} else if(key.getKeyChar() >= '1' && key.getKeyChar() <= '9'){
 			int mappedKey = Integer.parseInt(key.getKeyChar()+"") - 1;

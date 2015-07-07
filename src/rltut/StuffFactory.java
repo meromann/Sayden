@@ -9,6 +9,7 @@ import java.util.Map;
 
 import rltut.Item.ItemType;
 import rltut.ai.PlayerAi;
+import rltut.ai.WolfAi;
 import rltut.ai.ZombieAi;
 import asciiPanel.AsciiPanel;
 
@@ -50,6 +51,17 @@ public class StuffFactory {
 		return base;
 	}
 	
+	private Creature makeCuadruped(Creature base){
+		base.addBodyPart(BodyPart.HEAD);
+		base.addBodyPart(BodyPart.CHEST);
+		base.addBodyPart(BodyPart.BACK);
+		base.addBodyPart(BodyPart.DER_LEG);
+		base.addBodyPart(BodyPart.DER_LEG);
+		base.addBodyPart(BodyPart.IZQ_LEG);
+		base.addBodyPart(BodyPart.IZQ_LEG);
+		return base;
+	}
+	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
 		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
@@ -58,8 +70,11 @@ public class StuffFactory {
 		new PlayerAi(player, messages, fov);
 		player.makePlayer();
 		player.modifyAccuracy(10);
-		player = makeBiped(player);
+		player.modifyWoundResistance(3);
 		
+		player = makeBiped(player);
+		player.inventory().add(newSword(0));
+		player.inventory().add(newStaff(0));
 		return player;
 	}
 	
@@ -70,15 +85,48 @@ public class StuffFactory {
 		return fungus;
 	}*/
 	
+	public Creature newMaleWolf(int depth, Creature player){
+		Item garras = new Item(ItemType.INTRINSIC, 'L', "garras"){
+			public Wound getWound(DamageType type, BodyPart bodyPart, Creature target){
+				if(bodyPart.position() == BodyPart.HEAD.position())
+					return new Wound("Mordida a la yugular", "[sangrado al moverse]", 10, type, bodyPart){
+						public void onApply(Creature creature, Creature applier){
+							creature.notifyArround(Constants.WOUND_COLOR, "El lobo logra morder tu yugular, inflingiendo un horrible corte!");
+							creature.notifyArround(Constants.WOUND_COLOR, "Logras detener el sangrado aplicando presion...");
+							creature.notify(Constants.WOUND_COLOR,"[sangrado al moverse]");
+						}
+						public void onMove(Creature creature){
+							creature.bleed(1);
+							creature.notify(Constants.WOUND_COLOR, "Al moverte no puedes atender tu herida en el cuello!");
+							creature.modifyHp(-1, "Mueres desangrado");
+						}
+					};
+				else
+					return null;
+			}
+		}.addDamageType(DamageType.SLICE, 2);
+		
+		Item pelaje = new Item(ItemType.INTRINSIC, 'M', "pelaje").addDamageType(DamageType.BLUNT, 1).addDamageType(DamageType.SLICE, 1);
+		Creature maleWolf = new Creature(world, 'l', 'M', AsciiPanel.brightBlack, "lobo adulto", 4, garras, pelaje);
+		world.addAtEmptyLocation(maleWolf, depth);
+		new WolfAi(maleWolf, player);
+		maleWolf.modifyMovementSpeed(-20);
+		maleWolf.modifyWoundResistance(2);
+		maleWolf.modifyAccuracy(15);
+		maleWolf = makeCuadruped(maleWolf);
+		
+		return maleWolf;
+	}
+	
 	public Creature newZombie(int depth, Creature player){
 		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.SLICE, 1);
-		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 30, puños, piel);
+		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 100, puños, piel);
 		world.addAtEmptyLocation(zombie, depth);
 		new ZombieAi(zombie, player);
 		zombie.modifyAttackSpeed(100);
 		zombie = makeBiped(zombie);
-		zombie.modifyWoundResistance(-2);
+		zombie.modifyWoundResistance(-3);
 		
 		return zombie;
 	}
@@ -112,7 +160,7 @@ public class StuffFactory {
 	
 	public Item newDagger(int depth){
 		Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.white, "daga", null);
-		item.addDamageType(DamageType.PIERCING, 1);
+		item.addDamageType(DamageType.PIERCING, 2);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
@@ -126,6 +174,7 @@ public class StuffFactory {
 	
 	public Item newSword(int depth){
 		Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.brightWhite, "espada", null);
+		item.addDamageType(DamageType.SLICE, 2);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
@@ -140,6 +189,7 @@ public class StuffFactory {
 	public Item newStaff(int depth){
 		Item item = new Item(ItemType.WEAPON, ')', 'M', AsciiPanel.yellow, "baston", null);
 		world.addAtEmptyLocation(item, depth);
+		item.addDamageType(DamageType.BLUNT, 2);
 		return item;
 	}
 

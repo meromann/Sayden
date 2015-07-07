@@ -34,9 +34,10 @@ public class Constants {
 
 	public static final int STARTING_VISION_RADIUS = 9;
 	
-	public static final int WOUND_DURATION_LOW = 30;
-	public static final int WOUND_DURATION_MID = 50;
-	public static final int WOUND_DURATION_HIGH = 90;
+	public static final int WOUND_DURATION_LOW = 10;
+	public static final int WOUND_DURATION_MID = 20;
+	public static final int WOUND_DURATION_HIGH = 30;
+	public static final int WOUND_PERMANENT = -1;
 		
 	public static final int SEV_LEG_PENALTY = 100;
 	public static final float DISMEMBER_CHANCE_LIMB_OVER_KILL = 0.70f;			//brazo < chance

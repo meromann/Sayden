@@ -21,6 +21,25 @@ public class CreatureAi {
 	protected Creature creature;
 	private Map<String, String> itemNames;
 	
+	private int[] desires = {0,//Aggression
+							 0,//Fear
+							 0 //Unknown
+							 };
+	/**
+	 * @param desire
+	 * 0 Aggression
+	 * 1 Fear
+	 * 2 Unkonw
+	 * */
+	public int getDesire(int desire) { return desires[desire]; }
+	/**
+	 * @param desire
+	 * 0 Aggression
+	 * 1 Fear
+	 * 2 Unkonw
+	 * */
+	public void modifyDesire(int desire, int amount) { this.desires[desire] += amount; }
+	
 	private int relationTreshold;
 	private int relationship;
 	public int relationship() { return relationship; }
@@ -60,6 +79,11 @@ public class CreatureAi {
 			creature.x = x;
 			creature.y = y;
 			creature.z = z;
+			
+			for (int i = 0; i < creature.wounds().size(); i++){
+				Wound wound = creature.wounds().get(i);
+				wound.onMove(creature);
+			}
 		}
 	}
 	
@@ -72,6 +96,8 @@ public class CreatureAi {
 	
 	/** Esta funcion se llama luego de que una unidad efectue un ataque sobre otra satisfactoriamente*/
 	public void onAttack(Creature target){}
+	
+	public void onGetAttacked(Creature attacker){}
 	
 	/** Esta funcion se llama luego de que una unidad "aliada" deje de hablar con la criatura*/
 	public void onFarewell(){}
@@ -87,7 +113,7 @@ public class CreatureAi {
 	
 	/** Esta funcion se llama al notificar algo a la criatura*/
 	public void onNotify(Message message){}
-
+	
 	public boolean canSee(int wx, int wy, int wz) {
 		if (creature.z != wz)
 			return false;
@@ -170,8 +196,45 @@ public class CreatureAi {
 			&& !creature.inventory().isFull();
 	}
 
+	public void moveTo(Point target) {
+		List<Point> points = new Path(creature, target.x, target.y).points();
+		
+		int mx = points.get(0).x - creature.x;
+		int my = points.get(0).y - creature.y;
+		
+		if(mx != 0 && my != 0){
+			if(Math.random() > 0.5f){
+				mx = 0;
+			}else{
+				my = 0;
+			}
+		}
+		
+		creature.moveBy(mx, my, 0);
+	}
+	
+	public void flee(Creature target){
+		List<Point> points = new Path(creature, target.x, target.y).points();
+		
+		int mx = points.get(0).x - creature.x;
+		int my = points.get(0).y - creature.y;
+		
+		if(mx != 0 && my != 0){
+			if(Math.random() > 0.5f){
+				mx = 0;
+			}else{
+				my = 0;
+			}
+		}
+		
+		creature.moveBy(-mx, -my, 0);
+	}
+	
 	public void hunt(Creature target) {
 		List<Point> points = new Path(creature, target.x, target.y).points();
+		
+		if(points.isEmpty())
+			return;
 		
 		int mx = points.get(0).x - creature.x;
 		int my = points.get(0).y - creature.y;

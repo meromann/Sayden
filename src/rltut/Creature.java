@@ -68,6 +68,7 @@ public class Creature {
 	
 	private String name;
 	public String name() { return name; }
+	public void setName(String newName) { this.name = newName; }
 
 	private Inventory inventory;
 	public Inventory inventory() { return inventory; }
@@ -150,6 +151,13 @@ public class Creature {
 		}
 		return false;
 	}	
+	public boolean hasWoundAt(String woundName, BodyPart part){
+		for(Wound wound : wounds){
+			if(wound.name() == woundName && wound.bodyPart().position().indexOf(part.position()) != -1)
+				return true;
+		}
+		return false;
+	}	
 	
 	private List<BodyPart> limbs;
 	public List<BodyPart> limbs() { return limbs; }
@@ -174,6 +182,11 @@ public class Creature {
 		}
 		return null;
 	}
+	/**
+	 * 
+	 * @param bodyPart La posicion de la parte del cuerpo
+	 * @return true o false
+	 */
 	public boolean hasBodyPart(String bodyPart){
 		for(int i = 0; i < limbs.size(); i++){
 			if(limbs.get(i).position().indexOf(bodyPart) != -1){
@@ -192,7 +205,6 @@ public class Creature {
 		this.originalColor = color;
 		this.maxHp = maxHp;
 		this.hp = maxHp;
-		this.woundResistance = 4;
 		this.visionRadius = Constants.STARTING_VISION_RADIUS;
 		this.name = name;
 		this.inventory = new Inventory(Constants.INVENTORY_SIZE);
@@ -208,7 +220,6 @@ public class Creature {
 		this.dismembered = false;
 		this.inmaculado = true;
 		this.accuracy = 100;
-		this.missChance = 10;
 	}
 	
 	public void moveBy(int mx, int my, int mz){
@@ -314,8 +325,9 @@ public class Creature {
 			}else{
 				modifyActionPoints(-attackSpeed);
 			}
+			if(other.isPlayer() || isPlayer())
 			//other.ai.onTalkedTo(this);
-			meleeAttack(other, weapon);
+				meleeAttack(other, weapon);
 		}
 	}
 
@@ -444,6 +456,17 @@ public class Creature {
 			}			
 		}
 		
+		//Efecto de COUNTER en el enemigo
+		//Si el enemigo tiene un ataque guardado (fue muy lento para pegar) y uno le pega y al pegarle
+		//es lo suficientemente rapido para que no efectue el ataque el mismo, uno contrarresta el ataque		
+		if(other.attackQue() != null && 
+				other.getActionPoints() <= other.attackSpeed()){
+			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_COUNTER + " a " + StringUtils.genderizeCreature(other.gender(), other.name(), false) +"!");
+			other.modifyAttackQue(null);
+			other.resetActionPoints();
+			other.modifyStatusColor(null);
+		}
+		
 		//Si tus chances de pegar son mayores que la presicion del enemigo efectuas un golpe critico
 		if(chanceToHit > other.accuracy()){
 			damagePower++;
@@ -479,23 +502,12 @@ public class Creature {
 			
 			return;
 		}
-				
-		//Efecto de COUNTER en el enemigo
-		//Si el enemigo tiene un ataque guardado (fue muy lento para pegar) y uno le pega y al pegarle
-		//es lo suficientemente rapido para que no efectue el ataque el mismo, uno contrarresta el ataque		
-		if(other.attackQue() != null && 
-				other.getActionPoints() <= other.attackSpeed()){
-			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_COUNTER + " a " + StringUtils.genderizeCreature(other.gender(), other.name(), false) +"!");
-			other.modifyAttackQue(null);
-			other.resetActionPoints();
-			other.modifyStatusColor(null);
-		}
-				
+								
 		if(damagePower < other.woundResistance()){
 			doAction("golpea efectuando %s "+ (damagePower > 1 ? "puntos" : "punto")  +" de herida", damagePower);
 		}else{
 			doAction("golpea por %s generando una herida!", damagePower);
-			
+				
 			Wound wound_to_apply = other.getCreatureAi().getWound(damageType, position, other);
 			
 			if(wound_to_apply == null)
@@ -515,10 +527,11 @@ public class Creature {
 		
 		for (int i = 0; i < other.wounds().size(); i++){
 			Wound wound = other.wounds().get(i);
-			wound.onGetAttack(other, this);
+			wound.onGetAttack(other, this, position);
 		}
 				
 		ai.onAttack(other);
+		other.getCreatureAi().onGetAttacked(this);
 		
 		other.modifyHp(-damagePower, damageType.causeOfDeath());
 	}
@@ -590,10 +603,12 @@ public class Creature {
 		
 		for (int i = 0; i < wounds.size(); i++){
 			Wound wound = wounds.get(i);
-			wound.update(this);
+			
 			if (wound.isHealed()) {
 				wound.onFinish(this);
 				done.add(wound);
+			}else{
+				wound.update(this);
 			}
 		}
 		

@@ -36,6 +36,7 @@ public class PreLookScreen extends TargetBasedScreen {
 
 		switch (key.getKeyCode()){
 		case KeyEvent.VK_LEFT: return leftScreen();
+		case KeyEvent.VK_TAB:
 		case KeyEvent.VK_RIGHT: return rightScreen();
 		case KeyEvent.VK_ENTER: return new LookScreen(player, "Observando", player.x - scrollX, player.y - scrollY);
 		case KeyEvent.VK_ESCAPE: return null;
