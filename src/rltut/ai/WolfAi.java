@@ -2,8 +2,12 @@ package rltut.ai;
 
 import java.awt.Point;
 
+import rltut.BodyPart;
+import rltut.Constants;
 import rltut.Creature;
+import rltut.DamageType;
 import rltut.StringUtils;
+import rltut.Wound;
 
 public class WolfAi extends CreatureAi {
 	private Creature player;
@@ -13,6 +17,24 @@ public class WolfAi extends CreatureAi {
 		this.player = player;
 		this.modifyDesire(0, StringUtils.randInt(0, 100));
 		this.modifyDesire(1, StringUtils.randInt(0, 80));
+	}
+	
+	public Wound getWoundAttack(DamageType type, BodyPart bodyPart, Creature target) { 
+		if(bodyPart.position() == BodyPart.HEAD.position() && !target.hasWound("Mordida a la yugular"))
+			return new Wound("Mordida a la yugular", "[sangrado al moverse]", 10, type, bodyPart){
+				public void onApply(Creature creature, Creature applier){
+					creature.notifyArround(Constants.WOUND_COLOR, "El lobo logra morder tu yugular, inflingiendo un horrible corte!");
+					creature.notifyArround(Constants.WOUND_COLOR, "Logras detener el sangrado aplicando presion...");
+					creature.notify(Constants.WOUND_COLOR,"[sangrado al moverse]");
+				}
+				public void onMove(Creature creature){
+					creature.bleed(1);
+					creature.notify(Constants.WOUND_COLOR, "Al moverte no puedes atender tu herida en el cuello!");
+					creature.modifyHp(-1, "Mueres desangrado");
+				}
+			};
+		else
+			return null;
 	}
 	
 	private void propagate(int desire, int amount){

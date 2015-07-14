@@ -57,6 +57,8 @@ public class CreatureAi {
 	
 	public Wound getWound(DamageType type, BodyPart bodyPart, Creature target) { return null; }
 	
+	public Wound getWoundAttack(DamageType type, BodyPart bodyPart, Creature target) { return null; }
+	
 	public CreatureAi(Creature creature){
 		this.creature = creature;
 		this.creature.setCreatureAi(this);

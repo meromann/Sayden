@@ -69,50 +69,22 @@ public class StuffFactory {
 		world.addAtEmptyLocation(player, 0);
 		new PlayerAi(player, messages, fov);
 		player.makePlayer();
-		player.modifyAccuracy(10);
-		player.modifyWoundResistance(3);
+		player.modifyWoundResistance(2);
 		
 		player = makeBiped(player);
 		player.inventory().add(newSword(0));
 		player.inventory().add(newStaff(0));
 		return player;
 	}
-	
-	/*public Creature newFungus(int depth, int spreadcount){
-		Creature fungus = new Creature(world, 'f', 'M', AsciiPanel.green, "hongo", 10, "NONE", 0);
-		world.addAtEmptyLocation(fungus, depth);
-		new FungusAi(fungus, this, spreadcount);
-		return fungus;
-	}*/
-	
+
 	public Creature newMaleWolf(int depth, Creature player){
-		Item garras = new Item(ItemType.INTRINSIC, 'L', "garras"){
-			public Wound getWound(DamageType type, BodyPart bodyPart, Creature target){
-				if(bodyPart.position() == BodyPart.HEAD.position())
-					return new Wound("Mordida a la yugular", "[sangrado al moverse]", 10, type, bodyPart){
-						public void onApply(Creature creature, Creature applier){
-							creature.notifyArround(Constants.WOUND_COLOR, "El lobo logra morder tu yugular, inflingiendo un horrible corte!");
-							creature.notifyArround(Constants.WOUND_COLOR, "Logras detener el sangrado aplicando presion...");
-							creature.notify(Constants.WOUND_COLOR,"[sangrado al moverse]");
-						}
-						public void onMove(Creature creature){
-							creature.bleed(1);
-							creature.notify(Constants.WOUND_COLOR, "Al moverte no puedes atender tu herida en el cuello!");
-							creature.modifyHp(-1, "Mueres desangrado");
-						}
-					};
-				else
-					return null;
-			}
-		}.addDamageType(DamageType.SLICE, 2);
-		
+		Item garras = new Item(ItemType.INTRINSIC, 'L', "garras").addDamageType(DamageType.SLICE, 1);
 		Item pelaje = new Item(ItemType.INTRINSIC, 'M', "pelaje").addDamageType(DamageType.BLUNT, 1).addDamageType(DamageType.SLICE, 1);
 		Creature maleWolf = new Creature(world, 'l', 'M', AsciiPanel.brightBlack, "lobo adulto", 4, garras, pelaje);
 		world.addAtEmptyLocation(maleWolf, depth);
 		new WolfAi(maleWolf, player);
 		maleWolf.modifyMovementSpeed(-20);
-		maleWolf.modifyWoundResistance(2);
-		maleWolf.modifyAccuracy(15);
+		maleWolf.modifyWoundResistance(1);
 		maleWolf = makeCuadruped(maleWolf);
 		
 		return maleWolf;

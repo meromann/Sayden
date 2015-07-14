@@ -7,6 +7,7 @@ import rltut.FieldOfView;
 import rltut.Item;
 import rltut.Message;
 import rltut.Tile;
+import rltut.Wound;
 
 public class PlayerAi extends CreatureAi {
 
@@ -32,6 +33,11 @@ public class PlayerAi extends CreatureAi {
 			Item item = creature.item(creature.x, creature.y, creature.z);
 			if (item != null)
 				creature.notify("Te topas con " + (item.gender() == 'M' ? "un " : "una ") + creature.nameOf(item) + ".");
+			
+			for (int i = 0; i < creature.wounds().size(); i++){
+				Wound wound = creature.wounds().get(i);
+				wound.onMove(creature);
+			}
 		}
 		/*} else if (tile.get()) {
 			creature.dig(x, y, z);

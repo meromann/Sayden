@@ -220,6 +220,7 @@ public class Creature {
 		this.dismembered = false;
 		this.inmaculado = true;
 		this.accuracy = 100;
+		this.woundResistance = 0;
 	}
 	
 	public void moveBy(int mx, int my, int mz){
@@ -505,10 +506,18 @@ public class Creature {
 								
 		if(damagePower < other.woundResistance()){
 			doAction("golpea efectuando %s "+ (damagePower > 1 ? "puntos" : "punto")  +" de herida", damagePower);
+			
+			Wound force_wound = ai.getWoundAttack(damageType, position, other);
+			
+			if(force_wound != null)
+				other.addWound(force_wound, this);
 		}else{
 			doAction("golpea por %s generando una herida!", damagePower);
 				
 			Wound wound_to_apply = other.getCreatureAi().getWound(damageType, position, other);
+			
+			if(wound_to_apply == null)
+				wound_to_apply = ai.getWoundAttack(damageType, position, other);
 			
 			if(wound_to_apply == null)
 				wound_to_apply = damagingObject.getWound(damageType, position, other);
@@ -656,6 +665,9 @@ public class Creature {
 	}
 	
 	public void talkAction(Color color, String message, Object ... params){
+		if (hp < 1)
+			return;
+		
 		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
@@ -668,6 +680,9 @@ public class Creature {
 	}
 	
 	public void doAction(String message, Object ... params){
+		if (hp < 1)
+			return;
+		
 		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
@@ -680,6 +695,9 @@ public class Creature {
 	}
 	
 	public void doAction(Color actionColor, String message, Object ... params){
+		if (hp < 1)
+			return;
+		
 		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
