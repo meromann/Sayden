@@ -34,7 +34,7 @@ public class Wound {
 		ArrayList<Wound> possibleWounds = new ArrayList<Wound>();
 		
 		if(type.wondType() == DamageType.PIERCING.wondType()){
-			possibleWounds.add(new Wound("Estocada", "[bonus de herida por estocada]", 2, type, bodyPart){
+			possibleWounds.add(new Wound("Estocada", "bonus de herida por estocada", 2, type, bodyPart){
 				public void onApply(Creature creature, Creature applier){
 					if(!creature.hasWound("Estocada"))
 						creature.getBodyPart(this.bodyPart().position()).setPiercingLvl(0);
@@ -49,7 +49,7 @@ public class Wound {
 				}
 			});
 			if(bodyPart.position() == BodyPart.HEAD.position())
-				possibleWounds.add(new Wound("Filo al ojo", "[reduccion vision]", Constants.WOUND_DURATION_MID, type, bodyPart){
+				possibleWounds.add(new Wound("Filo al ojo", "reduce vision", Constants.WOUND_DURATION_MID, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR, "Con un movimiento descendente %s!", 
 								applier.isPlayer() ? "hundes tu arma en el ojo " + StringUtils.genderizeCreature(creature.gender(), creature.name(), true) : StringUtils.genderizeCreature(applier.gender(), applier.name(), true) + " recibes un impacto en el ojo!");
@@ -62,7 +62,7 @@ public class Wound {
 					}
 				});
 			if(bodyPart.position() == BodyPart.BACK.position())
-				possibleWounds.add(new Wound("Estoque a la nuca", "[5 puntos de herida]", 1, type, bodyPart){
+				possibleWounds.add(new Wound("Estoque a la nuca", "5 puntos de herida", 1, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR, "Tomando%s del pelo %s craneo!", 
 								creature.isPlayer() ? "te" : StringUtils.formatTextToGender("", creature), applier.isPlayer() ? "atraviezas su" : "atraviesas tu");
@@ -72,7 +72,7 @@ public class Wound {
 					}
 				});
 			if(bodyPart.position() == BodyPart.CHEST.position())
-				possibleWounds.add(new Wound("Estoque al corazon", "[5 puntos de herida]", 1, type, bodyPart){
+				possibleWounds.add(new Wound("Estoque al corazon", "5 puntos de herida", 1, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR, "Con un rapido movimiento"+
 								(applier.isPlayer() ? StringUtils.genderizeCreature(creature.gender(), creature.name(), false) : "")
@@ -84,7 +84,7 @@ public class Wound {
 		}
 		
 		if(type.wondType() == DamageType.SLICE.wondType()){
-			possibleWounds.add(new Wound("Corte superficial", "[sangrado por 1 punto]", 1, type, bodyPart){
+			possibleWounds.add(new Wound("Corte superficial", "sangrado por 1 punto", 1, type, bodyPart){
 				public void onApply(Creature creature, Creature applier){
 					creature.notifyArround(Constants.WOUND_COLOR, "Con un movimiento impreciso %s!", StringUtils.formatTextToGender("inflije un corte", creature, "s"));
 					creature.notify(Constants.WOUND_COLOR,"[sangrado por 1 punto]");
@@ -95,7 +95,7 @@ public class Wound {
 					creature.modifyHp(-1, "Mueres desangrado");
 				}
 			});
-			possibleWounds.add(new Wound("Corte peligroso", "[sangrado por 2 puntos]", 2, type, bodyPart){
+			possibleWounds.add(new Wound("Corte peligroso", "sangrado por 2 puntos", 2, type, bodyPart){
 				public void onApply(Creature creature, Creature applier){
 					creature.notifyArround(Constants.WOUND_COLOR, "Con un movimiento ascendente %s!", StringUtils.formatTextToGender("inflije un corte", creature, "s"));
 					creature.notify(Constants.WOUND_COLOR,"[sangrado por 2 puntos]");
@@ -106,7 +106,7 @@ public class Wound {
 					creature.modifyHp(-1, "Mueres desangrado");
 				}
 			});
-			possibleWounds.add(new Wound("Corte profundo", "[sangrado por 3 puntos]", 3, type, bodyPart){
+			possibleWounds.add(new Wound("Corte profundo", "sangrado por 3 puntos", 3, type, bodyPart){
 				public void onApply(Creature creature, Creature applier){
 					creature.notifyArround(Constants.WOUND_COLOR, "Con un movimiento elegante y preciso %s!", StringUtils.formatTextToGender("inflije un profundo corte", creature, "s"));
 					creature.notify(Constants.WOUND_COLOR,"[sangrado por 3 puntos]");
@@ -119,7 +119,7 @@ public class Wound {
 			});
 			
 			if(bodyPart.position() == BodyPart.HEAD.position() && !target.hasWound("Corte en la cien"))
-				possibleWounds.add(new Wound("Corte en la cien", "[enceguecimiento]", Constants.WOUND_DURATION_LOW, type, bodyPart){
+				possibleWounds.add(new Wound("Corte en la cien", "enceguecimiento", Constants.WOUND_DURATION_LOW, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR, "El ataque genera un corte en %s y la sangre cae hacia los ojos!", 
 								StringUtils.formatTextToGender("cabeza", creature, "td"));
@@ -131,7 +131,7 @@ public class Wound {
 					}
 				});
 			if(bodyPart.position() == BodyPart.HEAD.position() && !target.hasWound("Corte al cuello"))
-				possibleWounds.add(new Wound("Corte al cuello", "[3 puntos de herida y 3 desangre]", 3, type, bodyPart){
+				possibleWounds.add(new Wound("Corte al cuello", "3 herida y 3 desangre", 3, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR, "Con un peligroso movimiento el ataque alcanza %s!", 
 								StringUtils.formatTextToGender("cuello", creature, "td"));
@@ -145,7 +145,7 @@ public class Wound {
 				});
 			
 			if(bodyPart.position() == BodyPart.ARMS.position() && target.hasBodyPart(BodyPart.IZQ_ARM.position()))
-				possibleWounds.add(new Wound("Brazo amputado", "[brazo habil amputado]", Constants.WOUND_PERMANENT, type, bodyPart){
+				possibleWounds.add(new Wound("Brazo amputado", "brazo habil amputado", Constants.WOUND_PERMANENT, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR, "El ataque es certero y separa %s!", 
 								creature.isPlayer() ? "tu brazo":"el brazo "+ StringUtils.genderizeCreature(creature.gender(), creature.name(),false));
@@ -156,7 +156,7 @@ public class Wound {
 				});
 			
 			if(bodyPart.position() == BodyPart.ARMS.position() && target.hasBodyPart(BodyPart.DER_ARM.position()))
-				possibleWounds.add(new Wound("Brazo amputado", "[brazo amputado]", Constants.WOUND_PERMANENT, type, bodyPart){
+				possibleWounds.add(new Wound("Brazo amputado", "brazo amputado", Constants.WOUND_PERMANENT, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR, "El ataque es certero y separa %s!", 
 								creature.isPlayer() ? "tu brazo":"el brazo "+ StringUtils.genderizeCreature(creature.gender(), creature.name(),false));
@@ -167,7 +167,7 @@ public class Wound {
 				});
 			
 			if(bodyPart.position() == BodyPart.LEGS.position() && target.hasBodyPart(BodyPart.LEGS.position()))
-				possibleWounds.add(new Wound("Pierna amputada", "[amputas la pierna]", Constants.WOUND_PERMANENT, type, bodyPart){
+				possibleWounds.add(new Wound("Pierna amputada", "pierna amputada", Constants.WOUND_PERMANENT, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR, "El ataque es certero y separa %s!", 
 								creature.isPlayer() ? "tu pierna":"la pierna "+ StringUtils.genderizeCreature(creature.gender(), creature.name(),false));
@@ -180,7 +180,7 @@ public class Wound {
 		
 		if(type.wondType() == DamageType.BLUNT.wondType()){
 			//Hueso roto
-			possibleWounds.add(new Wound("Hueso roto","[-1 vida maxima]", Constants.WOUND_DURATION_HIGH, type, bodyPart){
+			possibleWounds.add(new Wound("Hueso roto","-1 vida maxima", Constants.WOUND_DURATION_HIGH, type, bodyPart){
 				public void onApply(Creature creature, Creature applier){
 					creature.notifyArround(Constants.WOUND_COLOR,"El impacto %s!", StringUtils.formatTextToGender("rompe un hueso", creature));
 					creature.notify(Constants.WOUND_COLOR,"[-1 vida maxima]");
@@ -191,7 +191,7 @@ public class Wound {
 				}
 			});
 			//Contusion
-			possibleWounds.add(new Wound("Contusion","[impacto produce dolor]", Constants.WOUND_DURATION_HIGH, type, bodyPart){
+			possibleWounds.add(new Wound("Contusion","impacto produce dolor", Constants.WOUND_DURATION_HIGH, type, bodyPart){
 				public void onApply(Creature creature, Creature applier){
 					creature.notifyArround(Constants.WOUND_COLOR,"El golpe %s!", StringUtils.formatTextToGender("produce una contusion severa", creature));
 					creature.notify(Constants.WOUND_COLOR,"[impacto produce dolor]");
@@ -200,19 +200,19 @@ public class Wound {
 			});
 			//Mareos
 			if(bodyPart.position() == BodyPart.HEAD.position() && !target.hasWound("Mareado"))
-				possibleWounds.add(new Wound("Mareado","[mareos severos al moverse]", Constants.WOUND_DURATION_LOW, type, bodyPart){
+				possibleWounds.add(new Wound("Mareado","mareos al moverse", Constants.WOUND_DURATION_LOW, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR,"El golpe en la cabeza %s!", StringUtils.formatTextToGender("produce severos mareos", creature));
 						creature.notify(Constants.WOUND_COLOR,"[mareos severos al moverse]");
 					}
 					public void onBeforeMove(Creature creature){
-						creature.getCreatureAi().wander();
+						creature.ai().wander();
 						creature.notify("Estas mareado!");
 					}
 				});
 			//Creaneo destrozado
 			if(bodyPart.position() == BodyPart.HEAD.position())
-				possibleWounds.add(new Wound("Craneo destrozado","[3 puntos de herida y -2 vida maxima]", Constants.WOUND_PERMANENT, type, bodyPart){
+				possibleWounds.add(new Wound("Craneo destrozado","3 herida y -2 vida maxima", Constants.WOUND_PERMANENT, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR,"Con un gran impacto en la cabeza %s!", StringUtils.formatTextToGender("provoca una fisura", creature));
 						creature.notify(Constants.WOUND_COLOR,"[3 puntos de herida y -2 vida maxima]");
@@ -225,7 +225,7 @@ public class Wound {
 				});
 			//Contusion en brazo
 			if(bodyPart.position() == BodyPart.ARMS.position())
-				possibleWounds.add(new Wound("Contusion en el brazo", "[50 penalizador velocidad ataque]", Constants.WOUND_DURATION_MID, type, bodyPart){
+				possibleWounds.add(new Wound("Contusion en el brazo", "-50 velocidad ataque", Constants.WOUND_DURATION_MID, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR,"Al golpear %s!", StringUtils.formatTextToGender("provoca una contusion en el brazo", creature, "sd"));
 						creature.notify(Constants.WOUND_COLOR,"[50 penalizador velocidad ataque]");
@@ -237,7 +237,7 @@ public class Wound {
 				});
 			//Fractura en brazo habil
 			if(bodyPart.position() == BodyPart.ARMS.position() && !target.hasWound("Brazo habil fracturado"))
-				possibleWounds.add(new Wound("Brazo habil fracturado", "[suelta el arma al ser golpeado]", Constants.WOUND_DURATION_MID, type, bodyPart){
+				possibleWounds.add(new Wound("Brazo habil fracturado", "suelta el arma al ser golpeado", Constants.WOUND_DURATION_MID, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR,"Al golpear %s!", StringUtils.formatTextToGender("fractura el brazo habil", creature, "sd"));
 						creature.notify(Constants.WOUND_COLOR,"[suelta el arma al ser golpeado]");						
@@ -249,7 +249,7 @@ public class Wound {
 				});
 			//Fractura en brazo secundario
 			if(bodyPart.position() == BodyPart.ARMS.position() && !target.hasWound("Brazo tosco fracturado"))
-				possibleWounds.add(new Wound("Brazo tosco fracturado", "[suelta el escudo al ser golpeado]", Constants.WOUND_DURATION_MID, type, bodyPart){
+				possibleWounds.add(new Wound("Brazo tosco fracturado", "suelta el escudo al ser golpeado", Constants.WOUND_DURATION_MID, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR,"Al golpear %s!", StringUtils.formatTextToGender("fractura el brazo tosco", creature, "sd"));
 						creature.notify(Constants.WOUND_COLOR,"[suelta el escudo al ser golpeado]");						
@@ -261,7 +261,7 @@ public class Wound {
 				});
 			//Fractura en piernas
 			if(bodyPart.position() == BodyPart.LEGS.position())
-				possibleWounds.add(new Wound("Contusion en la pierna", "[50 penalizador velocidad movimiento]", Constants.WOUND_DURATION_MID, type, bodyPart){
+				possibleWounds.add(new Wound("Contusion en la pierna", "-50 velocidad movimiento", Constants.WOUND_DURATION_MID, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR,"Al golpear %s!", StringUtils.formatTextToGender("provoca una contusion en la pierna", creature, "sd"));
 						creature.notify(Constants.WOUND_COLOR,"[50 penalizador velocidad movimiento]");
@@ -273,7 +273,7 @@ public class Wound {
 				});
 			//Rodilla dislocada
 			if(bodyPart.position() == BodyPart.LEGS.position())
-				possibleWounds.add(new Wound("Rodilla dislocada", "[1 punto de herida al moverse]", Constants.WOUND_DURATION_MID, type, bodyPart){
+				possibleWounds.add(new Wound("Rodilla dislocada", "1 herida al moverse", Constants.WOUND_DURATION_MID, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
 						creature.notifyArround(Constants.WOUND_COLOR,"Al impactar %s!", StringUtils.formatTextToGender("expone el hueso de la rodilla", creature, "sd"));
 						creature.notify(Constants.WOUND_COLOR,"[1 punto de herida al moverse]");

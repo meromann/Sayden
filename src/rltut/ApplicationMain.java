@@ -19,7 +19,7 @@ public class ApplicationMain extends JFrame implements KeyListener {
 	public ApplicationMain(){
 		super("Sayden");		
 		//Instanciamos el panel de texto
-		terminal = new AsciiPanel(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+		terminal = new AsciiPanel(Constants.SCREEN_WIDTH + Constants.WOUND_MENU_WIDTH, Constants.SCREEN_HEIGHT);
 		add(terminal);
 		pack();
 		//La primer pantalla es la StartScreen
@@ -53,6 +53,6 @@ public class ApplicationMain extends JFrame implements KeyListener {
 		app.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		app.setVisible(true);
 		app.setResizable(false);
-		app.setSize(Constants.SCREEN_WIDTH * 9 + 1, Constants.SCREEN_HEIGHT * 16 + 29);
+		app.setSize((Constants.SCREEN_WIDTH + Constants.WOUND_MENU_WIDTH) * 9 + 4, Constants.SCREEN_HEIGHT * 16 + 29);
 	}
 }

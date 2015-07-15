@@ -25,6 +25,47 @@ public class CreatureAi {
 							 0,//Fear
 							 0 //Unknown
 							 };
+	
+	private Map<String, Boolean> flags;
+	public boolean getFlag(String flag){ return flags.get(flag) == null ? false : flags.get(flag); }
+	public void addFlag(String flag, boolean value) { flags.put(flag, value); }
+	public void setFlag(String flag, boolean value) { 
+		if(getFlag(flag))
+			flags.put(flag, value);
+		else
+			addFlag(flag, value);
+	}
+	
+	public void setNeutral(){
+		addFlag("IsHostile", false);
+		addFlag("IsNeutral", true);
+	}
+	
+	public void setHostile(){
+		if(creature.isPlayer())
+			return;
+		addFlag("IsHostile",true);
+	}
+	
+	public boolean isHostileTo(Creature b){
+		if(creature == b) return false;
+		
+		boolean aHostile = creature.ai().getFlag("IsHostile");
+		boolean bHostile = b.ai().getFlag("IsHostile");
+		
+		if(aHostile&&bHostile) return false;
+		if(creature.isPlayer()&&bHostile) return true;
+		if(b.isPlayer()&&aHostile) return true;
+		if(creature.ai().getFlag("IsInsane") || b.ai().getFlag("IsInsane")) return true;
+		if(creature.name() == b.name()) return false;
+		if(creature.ai().getFlag("IsNeutral") || creature.ai().getFlag("IsNeutral")) return false;
+		
+		if ((aHostile)&&(!bHostile)) return true;
+		if ((bHostile)&&(!aHostile)) return true;
+		
+		return false;
+	}
+	
 	/**
 	 * @param desire
 	 * 0 Aggression
@@ -63,6 +104,7 @@ public class CreatureAi {
 		this.creature = creature;
 		this.creature.setCreatureAi(this);
 		this.itemNames = new HashMap<String, String>();
+		this.flags = new HashMap<String, Boolean>();
 	}
 	
 	public String getName(Item item){
@@ -200,6 +242,26 @@ public class CreatureAi {
 
 	public void moveTo(Point target) {
 		List<Point> points = new Path(creature, target.x, target.y).points();
+		
+		if(points.isEmpty())
+			return;
+		
+		int mx = points.get(0).x - creature.x;
+		int my = points.get(0).y - creature.y;
+		
+		if(mx != 0 && my != 0){
+			if(Math.random() > 0.5f){
+				mx = 0;
+			}else{
+				my = 0;
+			}
+		}
+		
+		creature.moveBy(mx, my, 0);
+	}
+	
+	public void moveTo(int x, int y) {
+		List<Point> points = new Path(creature, x, y).points();
 		
 		int mx = points.get(0).x - creature.x;
 		int my = points.get(0).y - creature.y;

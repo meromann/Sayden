@@ -24,7 +24,7 @@ public class SwapScreen extends InventoryBasedScreen {
 		if(!buyer.isPlayer())
 			return true;
 		
-		return item.perceivedValue() > buyer.getCreatureAi().relationship() ? false : true;
+		return item.perceivedValue() > buyer.ai().relationship() ? false : true;
 	}
 	
 	@Override
@@ -32,10 +32,10 @@ public class SwapScreen extends InventoryBasedScreen {
 		if(isAcceptable(item)){
 			player.inventory().remove(item);
 			buyer.inventory().add(item);
-			player.getCreatureAi().upRelationship(item.perceivedValue());
+			player.ai().upRelationship(item.perceivedValue());
 		}
-		buyer.getCreatureAi().onReceive(item, player);	
-		player.getCreatureAi().onGive(item, buyer);
+		buyer.ai().onReceive(item, player);	
+		player.ai().onGive(item, buyer);
 		
 		return null;
 	}

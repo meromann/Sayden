@@ -2,6 +2,7 @@ package rltut;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import asciiPanel.AsciiPanel;
@@ -37,7 +38,7 @@ public class Creature {
 	
 	private CreatureAi ai;
 	public void setCreatureAi(CreatureAi ai) { this.ai = ai; }
-	public CreatureAi getCreatureAi() { return ai; }
+	public CreatureAi ai() { return ai; }
 	
 	private String job;
 	public String job() { return job; }
@@ -46,12 +47,18 @@ public class Creature {
 	private int hp;
 	public int hp() { return hp; }
 	
+	private int hpRegenerationCooldown;
+	
+	private int hpRegeneration;
+	public int hpRegeneration() { return hpRegeneration; }
+	public void modifyHpRegeneration(int amount) { this.hpRegeneration += amount; }
+	
 	private int maxHp;
 	public int maxHp() { return maxHp; }
 	public void modifyMaxHp(int amount) { this.maxHp += amount; }
 	
 	private int woundResistance;
-	public int woundResistance() { return woundResistance; }
+	public int woundResistance() { return hp < 1 ? woundResistance - 2 : woundResistance; }
 	public void modifyWoundResistance(int amount) { this.woundResistance += amount; }
 	
 	private int visionRadius;
@@ -136,14 +143,20 @@ public class Creature {
 	private boolean isPlayer;
 	public boolean isPlayer(){ return isPlayer; }
 	public void makePlayer() { this.isPlayer = true; }
-	
-	private boolean inmaculado;
-	public boolean inmaculado() { return inmaculado; }
 		
 	private List<Wound> wounds;
 	public List<Wound> wounds() { return wounds; }
 	
-	public void addWound(Wound wound, Creature applier){ inmaculado = false; wound.onApply(this, applier); wounds.add(wound); }
+	public void addWound(Wound wound, Creature applier){ 
+		wound.onApply(this, applier); 
+		wounds.add(wound); 
+		
+		if (hp < 1) {
+			doAction("perece");
+			leaveCorpse();
+			world.remove(this);
+		}
+	}
 	public boolean hasWound(String woundName){
 		for(Wound wound : wounds){
 			if(wound.name() == woundName)
@@ -218,7 +231,6 @@ public class Creature {
 		this.attackSpeed = Constants.STARTING_ATTACK_SPEED;
 		this.movementSpeed = Constants.STARTING_MOVE_SPEED;
 		this.dismembered = false;
-		this.inmaculado = true;
 		this.accuracy = 100;
 		this.woundResistance = 0;
 	}
@@ -326,9 +338,11 @@ public class Creature {
 			}else{
 				modifyActionPoints(-attackSpeed);
 			}
-			if(other.isPlayer() || isPlayer())
-			//other.ai.onTalkedTo(this);
+			
+			if(ai.isHostileTo(other))
 				meleeAttack(other, weapon);
+			else
+				other.ai.onTalkedTo(this);
 		}
 	}
 
@@ -514,7 +528,7 @@ public class Creature {
 		}else{
 			doAction("golpea por %s generando una herida!", damagePower);
 				
-			Wound wound_to_apply = other.getCreatureAi().getWound(damageType, position, other);
+			Wound wound_to_apply = other.ai().getWound(damageType, position, other);
 			
 			if(wound_to_apply == null)
 				wound_to_apply = ai.getWoundAttack(damageType, position, other);
@@ -540,8 +554,7 @@ public class Creature {
 		}
 				
 		ai.onAttack(other);
-		other.getCreatureAi().onGetAttacked(this);
-		
+		other.ai().onGetAttacked(this);
 		other.modifyHp(-damagePower, damageType.causeOfDeath());
 	}
 
@@ -549,25 +562,8 @@ public class Creature {
 		hp += amount;
 		this.causeOfDeath = causeOfDeath;
 		
-		if (hp < 1) {
-			doAction("perece");
-			leaveCorpse();
-			world.remove(this);
-		}
-	}
-	
-	public void kill(String causeOfDeath, String action){
-		this.causeOfDeath = causeOfDeath;
-		
-		if(action != null)
-			doAction(action);
-		
-		hp = -1;
-		
-		if(!isPlayer){
-			leaveCorpse();
-			world.remove(this);
-		}
+		if(hp < 1)
+			hp = 0;
 	}
 	
 	public void bleed(int intensity){
@@ -603,8 +599,21 @@ public class Creature {
 		do{
 			updateEffects();
 			updateWounds();
+			regenerateHp();
 			ai.onUpdate();
 		}while(actionPoints >= 100 && actionPoints < 100);
+	}
+	
+	private void regenerateHp(){
+		if(wounds.isEmpty()){
+			hpRegenerationCooldown -= hpRegeneration;
+	        if (hpRegenerationCooldown < 0){
+	            if (hp < maxHp) {
+	                modifyHp(1, "Mueres por regenerar vida?");
+	            }
+	            hpRegenerationCooldown += 50;
+	        }
+		}
 	}
 	
 	private void updateWounds(){
@@ -664,10 +673,7 @@ public class Creature {
 		}
 	}
 	
-	public void talkAction(Color color, String message, Object ... params){
-		if (hp < 1)
-			return;
-		
+	public void talkAction(Color color, String message, Object ... params){		
 		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
@@ -680,9 +686,6 @@ public class Creature {
 	}
 	
 	public void doAction(String message, Object ... params){
-		if (hp < 1)
-			return;
-		
 		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
@@ -695,9 +698,6 @@ public class Creature {
 	}
 	
 	public void doAction(Color actionColor, String message, Object ... params){
-		if (hp < 1)
-			return;
-		
 		boolean hasPunctuation = StringUtils.hasPunctuation(message);
 		for (Creature other : getCreaturesWhoSeeMe()){
 			if (other == this){
@@ -724,6 +724,25 @@ public class Creature {
 			}
 			other.learnName(item);
 		}
+	}
+	
+	public HashMap<Item, Point> getItemsArroundMe(){
+		HashMap<Item, Point> items = new HashMap<Item, Point>();
+		int r = 9;
+		for (int ox = -r; ox < r+1; ox++){
+			for (int oy = -r; oy < r+1; oy++){
+				if (ox*ox + oy*oy > r*r)
+					continue;
+				
+				Item item = world.item(x+ox, y+oy, z);
+				
+				if (item == null)
+					continue;
+				
+				items.put(item, new Point(x+ox, y+oy, z));
+			}
+		}
+		return items;
 	}
 	
 	public List<Creature> getCreaturesWhoSeeMe(){

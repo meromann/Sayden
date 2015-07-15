@@ -234,15 +234,15 @@ public class MapLoader {
 			NodeList ongive = dialogueList.getElementsByTagName("ongive");
 			NodeList onreceive = dialogueList.getElementsByTagName("onreceive");
 			
-			((NpcAi) npc.getCreatureAi()).setIntroduction(retrieveMessageData(introduction, npc.color()));
-			((NpcAi) npc.getCreatureAi()).setGreetings(retrieveMessageData(greetings, npc.color()));
-			((NpcAi) npc.getCreatureAi()).setGoodbye(retrieveMessageData(goodbye, npc.color()));
-			((NpcAi) npc.getCreatureAi()).setOngive(retrieveMessageData(ongive, npc.color()));
-			((NpcAi) npc.getCreatureAi()).setOnreceive(retrieveMessageData(onreceive, npc.color()));
+			((NpcAi) npc.ai()).setIntroduction(retrieveMessageData(introduction, npc.color()));
+			((NpcAi) npc.ai()).setGreetings(retrieveMessageData(greetings, npc.color()));
+			((NpcAi) npc.ai()).setGoodbye(retrieveMessageData(goodbye, npc.color()));
+			((NpcAi) npc.ai()).setOngive(retrieveMessageData(ongive, npc.color()));
+			((NpcAi) npc.ai()).setOnreceive(retrieveMessageData(onreceive, npc.color()));
 		}
 		
 		if(permittedTile > 0){
-			((NpcAi) npc.getCreatureAi()).setPermittedTile(tileSet.get(permittedTile));
+			((NpcAi) npc.ai()).setPermittedTile(tileSet.get(permittedTile));
 		}
 		
 		return npc;

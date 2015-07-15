@@ -65,15 +65,17 @@ public class StuffFactory {
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
 		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
-		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 10, puños, piel);
+		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 20, puños, piel);
 		world.addAtEmptyLocation(player, 0);
 		new PlayerAi(player, messages, fov);
 		player.makePlayer();
 		player.modifyWoundResistance(2);
+		player.modifyHpRegeneration(1);
 		
 		player = makeBiped(player);
 		player.inventory().add(newSword(0));
 		player.inventory().add(newStaff(0));
+		player.inventory().add(newFruit(0));
 		return player;
 	}
 
@@ -83,6 +85,8 @@ public class StuffFactory {
 		Creature maleWolf = new Creature(world, 'l', 'M', AsciiPanel.brightBlack, "lobo adulto", 4, garras, pelaje);
 		world.addAtEmptyLocation(maleWolf, depth);
 		new WolfAi(maleWolf, player);
+		
+		maleWolf.ai().setHostile();
 		maleWolf.modifyMovementSpeed(-20);
 		maleWolf.modifyWoundResistance(1);
 		maleWolf = makeCuadruped(maleWolf);

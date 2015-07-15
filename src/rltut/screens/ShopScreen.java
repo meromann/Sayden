@@ -35,7 +35,7 @@ public class ShopScreen extends OptionBasedScreen {
 
 	@Override
 	protected void onLeave() {
-		seller.getCreatureAi().onFarewell();
+		seller.ai().onFarewell();
 		player.setShopScreen(null);
 	}
 

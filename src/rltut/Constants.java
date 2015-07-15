@@ -9,6 +9,9 @@ public class Constants {
 	
 	public static final int SCREEN_WIDTH = 80;
 	public static final int SCREEN_HEIGHT = 32;
+	public static final int WOUND_MENU_WIDTH = 20;
+	public static final int REAL_SCREEN_WIDTH = SCREEN_WIDTH + WOUND_MENU_WIDTH;
+	public static final int WOUND_MENU_OFFSET_HEIGHT = 3;
 	
 	public static final int WORLD_WIDTH = 80;
 	public static final int WORLD_HEIGHT = 24;

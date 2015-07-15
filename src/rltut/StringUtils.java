@@ -1,5 +1,6 @@
 package rltut;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,28 +14,26 @@ public class StringUtils {
 	    return randomNum;
 	}
 	
+	public static Point pointBetweenPoints(int x1, int y1, int x2, int y2){
+		return new Point((int)((x1 + x2) * 0.5), (int)((y1 + y2) * 0.5), 0);
+	}
+	
+	public static int positionBetweenCoordinates(int x1, int x2){
+		return (int)((x1 + x2) * 0.5);
+	}
+	
+	public static int positionBetweenCoordinates(int x1, int x2, String text){
+		return (int)(((x1 + x2) * 0.5) - text.length() * 0.5);
+	}
+	
+	
+	public static Point pointBetweenPoints(int x1, int y1, int x2, int y2, String text){
+		return new Point((int)(((x1 + x2) * 0.5) - text.length() * 0.5), (int)((y1 + y2) * 0.5), 0);
+	}
+	
 	public static boolean hasPunctuation(String message){
 		return message.endsWith(".") ||  message.endsWith("!") ||  message.endsWith("?") ||  message.endsWith("]")
 				 ||  message.endsWith(")")  ||  message.endsWith("}");
-	}
-	
-	public static String woundsToString(Creature creature){
-		if(creature.hp() < creature.maxHp())
-			return "Muerto";
-		
-		if(creature.hp() == creature.maxHp())
-			return creature.inmaculado() ? "Inmaculado" : "Sano";
-		
-		if(creature.hp() * 0.5f >= creature.maxHp())
-			return "Lastimado";
-		
-		if(creature.hp() * 0.5f >= creature.maxHp())
-			return "Malherido";
-		
-		if(creature.hp() >= creature.maxHp() && creature.hp() * 0.5f < creature.maxHp())
-			return "Moribundo";
-		
-		return "Sano";
 	}
 	
 	public static String speedToString(int speed){
@@ -70,6 +69,21 @@ public class StringUtils {
 		        i++;
 		    }
 		    array.add(new Message(line, text.color()));
+		}
+		return array;
+	}
+	
+	public static ArrayList<Message> splitPhraseByLimit(String text, int limit){
+		String[] words = text.split(" ");
+		ArrayList<Message> array = new ArrayList<Message>();
+		int i = 0;
+		while (words.length > i) {
+		    String line = "";
+		    while ( words.length > i && line.length() + words[i].length() < limit ) {
+		        line += " "+words[i];
+		        i++;
+		    }
+		    array.add(new Message(line, Color.WHITE));
 		}
 		return array;
 	}

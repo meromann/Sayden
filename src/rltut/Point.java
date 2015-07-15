@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Point {
+public class Point extends java.awt.Point{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public int x;
 	public int y;
 	public int z;
@@ -57,5 +61,10 @@ public class Point {
 
 		Collections.shuffle(points);
 		return points;
+	}
+
+	public static int distance(int x2, int y2, int x3, int y3) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

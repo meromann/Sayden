@@ -146,7 +146,11 @@ public class World {
 	}
 	
 	public Item item(int x, int y, int z){
-		return items[x][y][z];
+		try{
+			return items[x][y][z];
+		}catch(IndexOutOfBoundsException e){
+			return null;
+		}
 	}
 	
 	public void addAtEmptyLocation(Item item, int depth) {
