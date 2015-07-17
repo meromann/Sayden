@@ -34,10 +34,6 @@ public class Item {
 	
 	private String appearance;
 	public String appearance() { return appearance; }
-
-	private int rangedAttackValue;
-	public int rangedAttackValue() { return rangedAttackValue; }
-	public void modifyRangedAttackValue(int amount) { rangedAttackValue += amount; }
 	
 	private Effect quaffEffect;
 	public Effect quaffEffect() { return quaffEffect; }
@@ -64,9 +60,13 @@ public class Item {
 	public int playerBonusDamage() { return playerBonusDamage; }
 	public void modifyPlayerBonusDamage(int amount) { playerBonusDamage += amount; }
 	
-	private int perceivedValue;
-	public int perceivedValue() { return perceivedValue; }
-	public void setPerceivedValue(int newValue) { this.perceivedValue = newValue; }
+	private int attackSpeedModifier;
+	public int attackSpeedModifier() { return attackSpeedModifier; }
+	public void modifyAttackSpeed(int amount) { this.attackSpeedModifier += amount; }
+	
+	private int movementSpeedModifier;
+	public int movementSpeedModifier() { return movementSpeedModifier; }
+	public void modifyMovementSpeed(int amount) { this.movementSpeedModifier += amount; }
 	
 	public void addWrittenSpell(String name, int manaCost, Effect effect){
 		writtenSpells.add(new Spell(name, manaCost, effect));
@@ -81,19 +81,6 @@ public class Item {
 		this.playerBonusDamage = 0;
 	}
 	
-	public Item(ItemType type, char glyph, char gender, Color color, String name, String appearance, int value){
-		this.glyph = glyph;
-		this.color = color;
-		this.name = name;
-		this.gender = gender;
-		this.appearance = appearance == null ? name : appearance;
-		this.writtenSpells = new ArrayList<Spell>();
-		this.damageTypes = new ArrayList<DamageType>();
-		this.perceivedValue = value;
-		this.itemType = type;
-		this.playerBonusDamage = 0;
-	}
-	
 	public Item(ItemType type, char glyph, char gender, Color color, String name, String appearance){
 		this.glyph = glyph;
 		this.color = color;
@@ -102,7 +89,6 @@ public class Item {
 		this.appearance = appearance == null ? name : appearance;
 		this.writtenSpells = new ArrayList<Spell>();
 		this.damageTypes = new ArrayList<DamageType>();
-		this.perceivedValue = 0;
 		this.itemType = type;
 		this.playerBonusDamage = 0;
 	}

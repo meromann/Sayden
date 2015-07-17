@@ -2,7 +2,6 @@ package rltut;
 import java.awt.Color;
 import java.io.File;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -12,9 +11,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import rltut.Item.ItemType;
-import rltut.ai.NpcAi;
 
 public class MapLoader {
 	
@@ -102,7 +98,7 @@ public class MapLoader {
 			    	}else{
 				    	mapElement = (Element)mapElementList.item(0);
 			    	}
-	                
+			    	
 	                NodeList textMNList = mapElement.getChildNodes();
 	                
 	                mapReference = ((Node)textMNList.item(0)).getNodeValue().trim();
@@ -167,25 +163,12 @@ public class MapLoader {
 		NodeList textWNList = creatureElement.getChildNodes();
 		
 		String npcName = ((Node)textWNList.item(0)).getNodeValue().trim();
-		String npcJob = !creatureElement.getAttribute("trabajo").isEmpty() ? creatureElement.getAttribute("trabajo") : "ciudadano";
-		
-		int glyphN = Integer.parseInt((creatureElement.getAttribute("glyphN").isEmpty() ? "0" : creatureElement.getAttribute("glyphN")));
-		char glyphC = creatureElement.getAttribute("glyphC").isEmpty() ? ' ' : creatureElement.getAttribute("glyphC").charAt(0);
-		char gender = creatureElement.getAttribute("gender").isEmpty() ? 'M' : creatureElement.getAttribute("gender").charAt(0);
-		char actualGlyph = '@';
 		
 		int startPosX = Integer.parseInt(creatureElement.getAttribute("x"));
 		int startPosY = Integer.parseInt(creatureElement.getAttribute("y"));
 		int startPosZ = Integer.parseInt(creatureElement.getAttribute("z"));
-		
-		int permittedTile = Integer.parseInt((creatureElement.getAttribute("permittedTile").isEmpty() ? "-1" : creatureElement.getAttribute("permittedTile")));
-			
+					
 		Color npcColor = Color.white;
-		Color talkColor = Color.white;
-		
-		if(glyphC != ' ' || glyphN > 0){
-			actualGlyph = (char) (glyphN > 0 ? glyphN : glyphC);
-		}
 		
 		if(!creatureElement.getAttribute("color").isEmpty()){		
 			String color = creatureElement.getAttribute("color");
@@ -197,85 +180,14 @@ public class MapLoader {
 			
 			npcColor = new Color(r,g,b);
 		}
-		
-		if(!creatureElement.getAttribute("talkColor").isEmpty()){		
-			String color = creatureElement.getAttribute("talkColor");
-			String[] rgb = color.split("-");
-						
-			int r = Integer.parseInt(rgb[0]);
-			int g = Integer.parseInt(rgb[1]);
-			int b = Integer.parseInt(rgb[2]);
-			
-			talkColor = new Color(r,g,b);
-		}else{
-			talkColor = npcColor;
-		}
-		
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
-		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
-		Creature npc = new Creature(world, gender, actualGlyph, npcColor, npcName, 10, puños, piel);
-		new NpcAi(npc, npcJob, talkColor);
+
+		Creature npc = StuffFactory.getNpc(npcName.trim(), world, npcColor);
+
 		npc.x = startPosX;
 		npc.y = startPosY;
 		npc.z = startPosZ;
 		
-		if(creatureElement.getElementsByTagName("inventory").getLength() > 0){
-			
-		}
-		
-		if(creatureElement.getElementsByTagName("dialogue").getLength() > 0){
-			NodeList dialogueNode = creatureElement.getElementsByTagName("dialogue");
-			
-			Element dialogueList = (Element) dialogueNode.item(0);
-			
-			NodeList introduction = dialogueList.getElementsByTagName("introduction");
-			NodeList greetings = dialogueList.getElementsByTagName("greetings");
-			NodeList goodbye = dialogueList.getElementsByTagName("goodbye");
-			NodeList ongive = dialogueList.getElementsByTagName("ongive");
-			NodeList onreceive = dialogueList.getElementsByTagName("onreceive");
-			
-			((NpcAi) npc.ai()).setIntroduction(retrieveMessageData(introduction, npc.color()));
-			((NpcAi) npc.ai()).setGreetings(retrieveMessageData(greetings, npc.color()));
-			((NpcAi) npc.ai()).setGoodbye(retrieveMessageData(goodbye, npc.color()));
-			((NpcAi) npc.ai()).setOngive(retrieveMessageData(ongive, npc.color()));
-			((NpcAi) npc.ai()).setOnreceive(retrieveMessageData(onreceive, npc.color()));
-		}
-		
-		if(permittedTile > 0){
-			((NpcAi) npc.ai()).setPermittedTile(tileSet.get(permittedTile));
-		}
-		
 		return npc;
-	}
-	
-	/** Analiza el esquema de datos presente en los dialogos de los npc, los añade a una coleccion y los
-	 * devuelve para agregarlos a la criatura */
-	private List<Message> retrieveMessageData(NodeList messageNode, Color defaultColor){
-		List<Message> messageList = new LinkedList<Message>();
-
-		for(int i = 0; i < messageNode.getLength(); i++){
-			Element message = (Element) messageNode.item(i);
-			
-			Color messageColor = defaultColor;
-			String messageText = message.getTextContent().trim();
-			
-			if(!message.getAttribute("color").isEmpty()){	
-				String color = message.getAttribute("color");
-				String[] rgb = color.split("-");
-							
-				int r = Integer.parseInt(rgb[0]);
-				int g = Integer.parseInt(rgb[1]);
-				int b = Integer.parseInt(rgb[2]);
-				
-				messageColor = new Color(r,g,b);
-			}
-			
-			Message introMessage = new Message(messageText, messageColor);
-			
-			messageList.add(introMessage);
-		}
-		
-		return messageList;
 	}
 	
 	/** Analiza el esquema de datos presente en los tiles y lo traduce en un objeto */

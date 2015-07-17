@@ -64,7 +64,8 @@ public class Point extends java.awt.Point{
 	}
 
 	public static int distance(int x2, int y2, int x3, int y3) {
-		// TODO Auto-generated method stub
-		return 0;
+		int dx = x2 - x3;
+		int dy = y2 - y3;
+		return (int)Math.sqrt(dx * dx + dy * dy);
 	}
 }

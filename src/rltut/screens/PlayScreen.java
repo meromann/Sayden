@@ -164,7 +164,7 @@ public class PlayScreen implements Screen {
 			terminal.write(messages.get(i).message(), msg_x, top + i, messages.get(i).color());
 		}
 		
-		if (subscreen == null || player.shopScreen() != null)
+		if (subscreen == null)
 			messages.clear();
 	}
 
@@ -208,6 +208,7 @@ public class PlayScreen implements Screen {
 			case KeyEvent.VK_DOWN:
 			case KeyEvent.VK_S: player.moveBy( 0, 1, 0); break;
 			case KeyEvent.VK_TAB: subscreen = new EquipScreen(player); break;
+			case KeyEvent.VK_I: subscreen = new EquipScreen(player); break;
 			}
 			/*case KeyEvent.VK_L: subscreen = new LookScreen(player, "Observando", 
 					player.x - getScrollX(), 
@@ -258,8 +259,8 @@ public class PlayScreen implements Screen {
 			player.ai().updateFow(fov);
 		}
 		
-		if(player.shopScreen() != null && subscreen == null)
-			subscreen = player.shopScreen();
+		if(!player.options().isEmpty() && subscreen == null)
+			subscreen = new OptionBasedScreen(player);
 		
 		if (subscreen == null)
 			world.update();

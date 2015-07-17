@@ -41,6 +41,12 @@ public class CreatureAi {
 		addFlag("IsNeutral", true);
 	}
 	
+	public void setNpc(){
+		addFlag("IsHostile", false);
+		addFlag("IsNeutral", true);
+		addFlag("IsNpc", true);
+	}
+	
 	public void setHostile(){
 		if(creature.isPlayer())
 			return;
@@ -81,18 +87,10 @@ public class CreatureAi {
 	 * */
 	public void modifyDesire(int desire, int amount) { this.desires[desire] += amount; }
 	
-	private int relationTreshold;
-	private int relationship;
-	public int relationship() { return relationship; }
-	public void upRelationship(int level) { 
-		if(level > relationship) { 
-			relationship++; 
-		}else{
-			relationTreshold += level;
-			if(relationTreshold > relationship){
-				relationTreshold = 0;
-				relationship++;
-			}
+	public void propagate(int desire, int amount){
+		for(Creature c : creature.getCreaturesWhoSeeMe()){
+			if(c.name().indexOf(creature.originalName()) != -1)
+				c.ai().modifyDesire(desire, amount);
 		}
 	}
 	
@@ -117,6 +115,8 @@ public class CreatureAi {
 		itemNames.put(item.name(), name);
 	}
 	
+	public void onTalkTo(Creature talker){	}
+	
 	/** Esta funcion se llama luego de que una unidad entre en una casilla*/
 	public void onEnter(int x, int y, int z, Tile tile){
 		if (tile.isGround()){
@@ -130,11 +130,7 @@ public class CreatureAi {
 			}
 		}
 	}
-	
-	public void onReceive(Item item, Creature from){}
-	
-	public void onGive(Item item, Creature to){}
-	
+			
 	/** Esta funcion se llama antes de que una unidad efectue un ataque sobre otra*/
 	public void onBeforeAttack(Creature target){}
 	
@@ -143,11 +139,6 @@ public class CreatureAi {
 	
 	public void onGetAttacked(Creature attacker){}
 	
-	/** Esta funcion se llama luego de que una unidad "aliada" deje de hablar con la criatura*/
-	public void onFarewell(){}
-	
-	/** Esta funcion se llama luego de que una unidad "aliada" se choque con tigo*/
-	public void onTalkedTo(Creature talker){}
 	
 	/** Esta funcion se llama luego de que el player toca una tecla*/
 	public void onUpdate(){}
@@ -231,7 +222,7 @@ public class CreatureAi {
 
 	protected boolean canRangedWeaponAttack(Creature other) {
 		return creature.weapon() != null
-		    && creature.weapon().rangedAttackValue() > 0
+		    //&& creature.weapon().rangedAttackValue() > 0
 		    && creature.canSee(other.x, other.y, other.z);
 	}
 

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import rltut.Item.ItemType;
 import rltut.ai.PlayerAi;
+import rltut.ai.TomasAi;
 import rltut.ai.WolfAi;
 import rltut.ai.ZombieAi;
 import asciiPanel.AsciiPanel;
@@ -62,6 +63,22 @@ public class StuffFactory {
 		return base;
 	}
 	
+	public static Creature getNpc(String name, World world, Color color){
+		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
+		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
+		
+		if(name.indexOf("Tomas") != -1){
+			Creature tomas = new Creature(world, '@', 'M', color, "Tomas el herrero", 20, puños, piel);
+			new TomasAi(tomas);
+			tomas.modifyWoundResistance(2);
+			tomas.ai().setNpc();
+			
+			return tomas;
+		}
+		
+		return null;
+	}
+	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
 		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
 		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
@@ -71,23 +88,19 @@ public class StuffFactory {
 		player.makePlayer();
 		player.modifyWoundResistance(2);
 		player.modifyHpRegeneration(1);
-		
 		player = makeBiped(player);
-		player.inventory().add(newSword(0));
-		player.inventory().add(newStaff(0));
-		player.inventory().add(newFruit(0));
+		
 		return player;
 	}
 
 	public Creature newMaleWolf(int depth, Creature player){
 		Item garras = new Item(ItemType.INTRINSIC, 'L', "garras").addDamageType(DamageType.SLICE, 1);
 		Item pelaje = new Item(ItemType.INTRINSIC, 'M', "pelaje").addDamageType(DamageType.BLUNT, 1).addDamageType(DamageType.SLICE, 1);
-		Creature maleWolf = new Creature(world, 'l', 'M', AsciiPanel.brightBlack, "lobo adulto", 4, garras, pelaje);
+		Creature maleWolf = new Creature(world, 'l', 'M', AsciiPanel.brightBlack, "lobo", 4, garras, pelaje);
 		world.addAtEmptyLocation(maleWolf, depth);
-		new WolfAi(maleWolf, player);
+		new WolfAi(maleWolf, player, this);
 		
 		maleWolf.ai().setHostile();
-		maleWolf.modifyMovementSpeed(-20);
 		maleWolf.modifyWoundResistance(1);
 		maleWolf = makeCuadruped(maleWolf);
 		
@@ -171,7 +184,7 @@ public class StuffFactory {
 
 	public Item newBow(int depth){
 		Item item = new Item(ItemType.WEAPON, ')', 'M', AsciiPanel.yellow, "arco", null);
-		item.modifyRangedAttackValue(5);
+		//item.modifyRangedAttackValue(5);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}

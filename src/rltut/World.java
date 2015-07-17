@@ -19,6 +19,8 @@ public class World {
 	
 	private List<Creature> creatures;
 	
+	public Point startPos = null;
+	
 	public String name;
 	
 	public World(){

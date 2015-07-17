@@ -8,7 +8,7 @@ import java.util.List;
 import asciiPanel.AsciiPanel;
 import rltut.Item.ItemType;
 import rltut.ai.CreatureAi;
-import rltut.screens.Screen;
+import rltut.screens.Option;
 
 public class Creature {
 	private World world;
@@ -73,6 +73,9 @@ public class Creature {
 	public int missChance() { return missChance; }
 	public void modifyMissChance(int amount) { this.missChance += amount; }
 	
+	private String originalName;
+	public String originalName() { return originalName; } 
+	
 	private String name;
 	public String name() { return name; }
 	public void setName(String newName) { this.name = newName; }
@@ -106,11 +109,19 @@ public class Creature {
 	public List<Effect> effects(){ return effects; }
 	
 	private int movementSpeed;
-	public int movementSpeed() { return movementSpeed; }
+	public int movementSpeed() { return movementSpeed
+			+ (armor != null ? armor.movementSpeedModifier() : 0)
+			+ (helment != null ? helment.movementSpeedModifier() : 0)
+			+ (shield != null ? shield.movementSpeedModifier() : 0)
+			+ (weapon != null ? weapon.movementSpeedModifier() : 0); }
 	public void modifyMovementSpeed(int amount) { this.movementSpeed += amount; }
 	
 	public int attackSpeed;
-	public int attackSpeed() { return attackSpeed; }
+	public int attackSpeed() { return attackSpeed 
+			+ (armor != null ? armor.attackSpeedModifier() : 0)
+			+ (helment != null ? helment.attackSpeedModifier() : 0)
+			+ (shield != null ? shield.attackSpeedModifier() : 0)
+			+ (weapon != null ? weapon.attackSpeedModifier() : 0); }
 	public void modifyAttackSpeed(int amount) { this.attackSpeed += amount; }
 	
 	private Point attackQue = null;
@@ -135,10 +146,6 @@ public class Creature {
 
 	private String causeOfDeath;
 	public String causeOfDeath() { return causeOfDeath; }
-	
-	private Screen shopScreen;
-	public Screen shopScreen() { return shopScreen; }
-	public void setShopScreen(Screen shop) { this.shopScreen = shop; }
 	
 	private boolean isPlayer;
 	public boolean isPlayer(){ return isPlayer; }
@@ -171,6 +178,12 @@ public class Creature {
 		}
 		return false;
 	}	
+	
+	private ArrayList<Option> options;
+	public ArrayList<Option> options() { return options; }
+	public void addOptions(ArrayList<Option> newOptions) { options.clear(); options.addAll(newOptions); }
+	public void addOption(Option newOption){ options.add(newOption); }
+	public void clearOptions() { options.clear(); }
 	
 	private List<BodyPart> limbs;
 	public List<BodyPart> limbs() { return limbs; }
@@ -220,10 +233,12 @@ public class Creature {
 		this.hp = maxHp;
 		this.visionRadius = Constants.STARTING_VISION_RADIUS;
 		this.name = name;
+		this.originalName = name;
 		this.inventory = new Inventory(Constants.INVENTORY_SIZE);
 		this.effects = new ArrayList<Effect>();
 		this.limbs = new ArrayList<BodyPart>();
 		this.wounds = new ArrayList<Wound>();
+		this.options = new ArrayList<Option>();
 		this.job = name;
 		this.gender = gender;
 		this.intrinsicWeapon = weapon;
@@ -236,9 +251,9 @@ public class Creature {
 	}
 	
 	public void moveBy(int mx, int my, int mz){
-		if (mx==0 && my==0 && mz==0 || (isPlayer && actionPoints < 0)){
+		if (mx==0 && my==0 && mz==0 || (isPlayer && getActionPoints() < 0)){
 			if(isPlayer){
-				if(actionPoints < 0){
+				if(getActionPoints() < 0){
 					doAction(Constants.MESSAGE_STATUS_EFFECT_COLOR, "esta " + statusEffect()); 
 					modifyActionPoints(100);
 				}
@@ -249,19 +264,19 @@ public class Creature {
 			return;
 		}
 		
-		if(statusEffect != null && (actionPoints > 0 || isPlayer)){
+		if(statusEffect != null && (getActionPoints() > 0 || isPlayer)){
 			statusEffect = null;
 			modifyStatusColor(null);
 		}
 		
-		if(attackQue != null && actionPoints >= attackSpeed){
+		if(attackQue != null && getActionPoints() >= attackSpeed()){
 			Creature queCreature = world.creature(attackQue.x, attackQue.y, attackQue.z);
 			if(queCreature == null){
 				doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_DODGE);
 			}else{
 				meleeAttack(queCreature, weapon);
 			}
-			modifyActionPoints(-attackSpeed);
+			modifyActionPoints(-attackSpeed());
 			attackQue = null;
 			modifyStatusColor(null);
 			return;
@@ -318,31 +333,31 @@ public class Creature {
 			}
 			
 			if(isPlayer){
-				world.modifyActionPoints(movementSpeed);
-			}else if(actionPoints < movementSpeed){
+				world.modifyActionPoints(movementSpeed());
+			}else if(getActionPoints() < movementSpeed()){
 				return;
 			}else{
-				modifyActionPoints(-movementSpeed);
+				modifyActionPoints(-movementSpeed());
 			}
 			ai.onEnter(x+mx, y+my, z+mz, tile);
 		}else{
 			if(isPlayer){
-				world.modifyActionPoints(attackSpeed);
-			}else if(actionPoints <= (attackSpeed * 0.5f) && actionPoints > 0){
+				world.modifyActionPoints(attackSpeed());
+			}else if(getActionPoints() <= (attackSpeed() * 0.5f) && getActionPoints() > 0){
 				doAction(Constants.MESSAGE_DODGE_COLOR, "se " + Constants.MESSAGE_DODGE_WARNING);
 				attackQue = new Point(x+mx, y+my, z+mz);
 				modifyStatusColor(Constants.MESSAGE_DODGE_COLOR);
 				return;
-			}else if(actionPoints < attackSpeed){
+			}else if(getActionPoints() < attackSpeed()){
 				return;
 			}else{
-				modifyActionPoints(-attackSpeed);
+				modifyActionPoints(-attackSpeed());
 			}
 			
 			if(ai.isHostileTo(other))
 				meleeAttack(other, weapon);
 			else
-				other.ai.onTalkedTo(this);
+				other.ai().onTalkTo(this);
 		}
 	}
 
@@ -670,18 +685,6 @@ public class Creature {
 	public void notifyArround(Color color, String message, Object ... params){
 		for (Creature other : getCreaturesWhoSeeMe()){
 			other.notify(color, message, params);
-		}
-	}
-	
-	public void talkAction(Color color, String message, Object ... params){		
-		boolean hasPunctuation = StringUtils.hasPunctuation(message);
-		for (Creature other : getCreaturesWhoSeeMe()){
-			if (other == this){
-				other.notify(color, StringUtils.makeSecondPerson(message, false) + (hasPunctuation ? "" : "."), params);
-			} else {
-				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " : "La " + name);
-				other.notify(color, String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
-			}
 		}
 	}
 	

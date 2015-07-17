@@ -2,9 +2,9 @@
 	<version>
 		<map>
 			222222222222222222222222222222222222222222222222222222222222222222222222222222222
-			277777777777770000770007777711111111111111100000000000000000000000777777770007772
-			277777777700000000077777700113999999999993110000000000000000000077770000000077002
-			211111111170000000000770001133399999999333311000000000000000007777000000000770002
+			211111117777770000770007777711111111111111100000000000000000000000777777770007772
+			213333317700000000077777700113999999999993110000000000000000000077770000000077002
+			213333311170000000000770001133399999999333311000000000000000007777000000000770002
 			213333333177000000007000001333339999993333331000000000000000777111111111111100002
 			653333333177700000000000001333333999933333331000000000000000000133333333333100002
 			213333333177770000000000001933333399333333391000000000000000000433333333333170002
@@ -64,50 +64,6 @@
 		</tile>
 	</tiles>
 	<npcs>
-		<npc glyphC="@" gender="M" permittedTile="3" color="127-131-134" talkColor="166-170-173" trabajo="herrero"
-		x="4" y="5" z="0">
-			Tomas
-			<dialogue>
-				<introduction>
-					Dejame en paz...
-				</introduction>
-				<introduction>
-					Crei haberte dicho que me dejes en paz...
-				</introduction>
-				<introduction>
-					Mi amada Maria...aun hoy dia juro sentir su perfume...
-				</introduction>
-				<introduction>
-					Oh basta! Que debo hacer para que te esfumes?!
-				</introduction>
-				<greetings>
-					No tu de nuevo...por lo que mas quieras...
-				</greetings>
-				<greetings>
-					Maria...mi amada Maria...
-				</greetings>
-				<greetings>
-					Susurros...susurros en la oscuridad...
-				</greetings>
-				<greetings>
-					La brisa gelida de este lugar...es como un susurro...
-				</greetings>
-				<greetings>
-					He he he...Aun te recuerdo mi amada...
-				</greetings>
-				<goodbye>
-					Al fin...no te molestes en regresar...
-				</goodbye>
-				<goodbye>
-					La soledad...el eterno susurro...
-				</goodbye>
-				<onreceive>
-					Como si esto hiciese diferencia...
-				</onreceive>
-				<ongive>
-					Que te sea de utilidad...ahora largate
-				</ongive>
-			</dialogue>
-		</npc>
+		<npc color="127-131-134" x="4" y="5" z="0">Tomas</npc>
 	</npcs>
 </archivo>
