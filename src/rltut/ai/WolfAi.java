@@ -30,7 +30,7 @@ public class WolfAi extends CreatureAi {
 		this.modifyDesire(1, StringUtils.randInt(0, 80));
 		
 		if(Math.random() < 1){
-			setFlag("IsHungry", true);
+			creature.setData("IsHungry", true);
 			creature.modifyColor(Color.RED);
 			creature.setName(creature.name() + " hambriento");
 			hunger = 10;
@@ -40,7 +40,7 @@ public class WolfAi extends CreatureAi {
 		creature.modifyAttackSpeed(100);
 		
 		if(Math.random() < 0.15){
-			setFlag("IsCub", true);
+			creature.setData("IsCub", true);
 			creature.modifyColor(AsciiPanel.brightBlue);
 			creature.setName("lobezno");
 			modifyDesire(1, 50);
@@ -48,7 +48,7 @@ public class WolfAi extends CreatureAi {
 		}
 				
 		if(Math.random() < 0.15){
-			setFlag("IsPregnant", true);
+			creature.setData("IsPregnant", true);
 			creature.modifyColor(AsciiPanel.cyan);
 			creature.setName("loba");
 			creature.modifyMovementSpeed(100);
@@ -100,12 +100,12 @@ public class WolfAi extends CreatureAi {
 	}
 	
 	public void onGetAttacked(Creature attacker){
-		if(getFlag("IsPregnant")){
+		if(creature.getBooleanData("IsPregnant")){
 			propagate(0, 80);
 			creature.doAction("aulla de dolor y panico, con terror en su mirada y un bebe en el vientre...");
 			return;
 		}
-		if(getFlag("IsCub")){
+		if(creature.getBooleanData("IsCub")){
 			propagate(0, 50);
 			creature.doAction("gime desamparado, con terror en su mirada");
 			return;
@@ -118,7 +118,7 @@ public class WolfAi extends CreatureAi {
 	}
 	
 	public void onUpdate(){
-		if(getFlag("IsCub")){
+		if(creature.getBooleanData("IsCub")){
 			if(creature.canSee(player.x, player.y, player.z)){
 				flee(player);
 				return;
@@ -126,7 +126,7 @@ public class WolfAi extends CreatureAi {
 				growTime--;
 				
 				if(growTime < 1){
-					setFlag("IsCub", false);
+					creature.unsetData("IsCub");
 					creature.modifyColor(creature.originalColor());
 					creature.setName(creature.originalName());
 				}
@@ -134,7 +134,7 @@ public class WolfAi extends CreatureAi {
 				return;
 			}
 		}
-		if(getFlag("IsPregnant")){
+		if(creature.getBooleanData("IsPregnant")){
 			if(creature.canSee(player.x, player.y, player.z)){
 				flee(player);
 				return;
@@ -149,7 +149,7 @@ public class WolfAi extends CreatureAi {
 				return;
 			}
 		}
-		if(getFlag("IsHungry")){
+		if(creature.getBooleanData("IsHungry")){
 			Item check = creature.item(creature.x, creature.y, creature.z);
 
 			if(check != null
@@ -167,7 +167,7 @@ public class WolfAi extends CreatureAi {
 				hunger--;
 				
 				if(hunger < 1){
-					setFlag("IsHungry", false);
+					creature.unsetData("IsHungry");
 					creature.modifyColor(creature.originalColor());
 					creature.getWorld().remove(creature.x, creature.y, creature.z);
 					creature.setName(creature.originalName());

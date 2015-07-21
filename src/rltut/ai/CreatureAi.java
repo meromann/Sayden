@@ -26,45 +26,35 @@ public class CreatureAi {
 							 0 //Unknown
 							 };
 	
-	private Map<String, Boolean> flags;
-	public boolean getFlag(String flag){ return flags.get(flag) == null ? false : flags.get(flag); }
-	public void addFlag(String flag, boolean value) { flags.put(flag, value); }
-	public void setFlag(String flag, boolean value) { 
-		if(getFlag(flag))
-			flags.put(flag, value);
-		else
-			addFlag(flag, value);
-	}
-	
 	public void setNeutral(){
-		addFlag("IsHostile", false);
-		addFlag("IsNeutral", true);
+		creature.setData("IsHostile", false);
+		creature.setData("IsNeutral", true);
 	}
 	
 	public void setNpc(){
-		addFlag("IsHostile", false);
-		addFlag("IsNeutral", true);
-		addFlag("IsNpc", true);
+		creature.setData("IsHostile", false);
+		creature.setData("IsNeutral", true);
+		creature.setData("IsNpc", true);
 	}
 	
 	public void setHostile(){
 		if(creature.isPlayer())
 			return;
-		addFlag("IsHostile",true);
+		creature.setData("IsHostile",true);
 	}
 	
 	public boolean isHostileTo(Creature b){
 		if(creature == b) return false;
 		
-		boolean aHostile = creature.ai().getFlag("IsHostile");
-		boolean bHostile = b.ai().getFlag("IsHostile");
+		boolean aHostile = creature.getBooleanData("IsHostile");
+		boolean bHostile = b.getBooleanData("IsHostile");
 		
 		if(aHostile&&bHostile) return false;
 		if(creature.isPlayer()&&bHostile) return true;
 		if(b.isPlayer()&&aHostile) return true;
-		if(creature.ai().getFlag("IsInsane") || b.ai().getFlag("IsInsane")) return true;
+		if(creature.getBooleanData("IsInsane") || b.getBooleanData("IsInsane")) return true;
 		if(creature.name() == b.name()) return false;
-		if(creature.ai().getFlag("IsNeutral") || creature.ai().getFlag("IsNeutral")) return false;
+		if(creature.getBooleanData("IsNeutral") || creature.getBooleanData("IsNeutral")) return false;
 		
 		if ((aHostile)&&(!bHostile)) return true;
 		if ((bHostile)&&(!aHostile)) return true;
@@ -99,10 +89,10 @@ public class CreatureAi {
 	public Wound getWoundAttack(DamageType type, BodyPart bodyPart, Creature target) { return null; }
 	
 	public CreatureAi(Creature creature){
+		super();
 		this.creature = creature;
 		this.creature.setCreatureAi(this);
 		this.itemNames = new HashMap<String, String>();
-		this.flags = new HashMap<String, Boolean>();
 	}
 	
 	public String getName(Item item){

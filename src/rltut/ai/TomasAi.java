@@ -18,7 +18,7 @@ public class TomasAi extends CreatureAi {
 		messages = new ArrayList<String>();
 	}
 	public void onTalkTo(Creature talker){
-		if(!getFlag("IsIntroduced") && messages.isEmpty()){
+		if(!creature.getBooleanData("IsIntroduced") && messages.isEmpty()){
 			messages.clear();
 			messages.add("Mi nombre es Tomas, mi camino es el del herrero");
 			messages.add("Existo en la medida que puedo fraguar los metales");
@@ -27,36 +27,38 @@ public class TomasAi extends CreatureAi {
 			messages.add("Pocas personas necesitan armas hoy en dia, y las que lo necesitan no son de fiar");
 			messages.add("Eres tu de fiar? O lo que es mas importante...");
 			messages.add("Encuentras en tu camino utilidad para un arma?");
-			setFlag("IsIntroduced", true);
+			creature.setData("IsIntroduced", true);
 		}
-		if(getFlag("IsIntroduced") && messages.isEmpty() &&
-				!getFlag("IsWarrior") && !getFlag("IsPacific")){
+		if(creature.getBooleanData("IsIntroduced") 
+				&& messages.isEmpty() &&
+					!creature.getBooleanData("IsWarrior") 
+						&& !creature.getBooleanData("IsPacific")){
 			talker.addOption(new Option("Si (pedir el arma)", creature){
 				public void onSelect(Creature player){
 					player.clearOptions();
-					creature.ai().setFlag("IsWarrior", true);
+					creature.setData("IsWarrior", true);
 					creature.ai().onTalkTo(player);
 				}
 			});
 			talker.addOption(new Option("No (rechazar el arma)", creature){
 				public void onSelect(Creature player){
 					player.clearOptions();
-					creature.ai().setFlag("IsPacific", true);
+					creature.setData("IsPacific", true);
 					creature.ai().onTalkTo(player);
 				}
 			});
 		}
-		if(getFlag("IsPacific") && messages.isEmpty() && !getFlag("IsFinished")){
+		if(creature.getBooleanData("IsPacific") && messages.isEmpty() && !creature.getBooleanData("IsFinished")){
 			messages.clear();
 			messages.add("Bien...Poco consiguen las armas y demasiado demandan de uno");
 			messages.add("El arma entrega la ilusion de poder, es un temible objeto de perdicion");
 			messages.add("Cuantos guerreros de epocas pasadas perdieron su cordura...");
 			messages.add("...su resolucion...su camino...");
 			messages.add("Yo soy Tomas y mi camino es del herrero, que tengas suerte en el tuyo, donde sea que te lleve");
-			setFlag("IsFinished", true);
+			creature.setData("IsFinished", true);
 			
 		}
-		if(getFlag("IsWarrior") && messages.isEmpty() && !getFlag("IsFinished")){
+		if(creature.getBooleanData("IsWarrior") && messages.isEmpty() && !creature.getBooleanData("IsFinished")){
 			messages.clear();
 			messages.add("...");
 			messages.add("Un sabio guerrero sabe que del arma poco se puede esperar");
@@ -64,10 +66,10 @@ public class TomasAi extends CreatureAi {
 			messages.add("Un sabio guerrero sabe que el arma es su maldicion pero tambien su herramienta");
 			messages.add("...te ruego, desconocido, que si has de blandir una de mis armas sea tuyo el camino del guerrero");
 			messages.add("Yo soy Tomas y mi camino es del herrero...ten cuidado mientras deambules por el tuyo desconocido");
-			setFlag("IsFinished", true);
+			creature.setData("IsFinished", true);
 		}		
-		if(getFlag("IsFinished") && messages.isEmpty() ){
-			if(getFlag("IsWarrior") && !getFlag("IsArmed")){
+		if(creature.getBooleanData("IsFinished") && messages.isEmpty() ){
+			if(creature.getBooleanData("IsWarrior") && !creature.getBooleanData("IsArmed")){
 				talker.addOption(new Option("Espada (cortante)", creature){
 					public void onSelect(Creature player){
 						Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.brightWhite, "espada", null);
@@ -75,7 +77,7 @@ public class TomasAi extends CreatureAi {
 						item.modifyAttackSpeed(50);
 						player.clearOptions();
 						player.inventory().add(item);
-						creature.ai().setFlag("IsArmed",true);
+						creature.setData("IsArmed",true);
 						creature.ai().onTalkTo(player);
 					}
 				});
@@ -86,7 +88,7 @@ public class TomasAi extends CreatureAi {
 						item.modifyAttackSpeed(50);
 						player.clearOptions();
 						player.inventory().add(item);
-						creature.ai().setFlag("IsArmed",true);
+						creature.setData("IsArmed",true);
 						creature.ai().onTalkTo(player);
 					}
 				});
@@ -97,7 +99,7 @@ public class TomasAi extends CreatureAi {
 						
 						player.clearOptions();
 						player.inventory().add(item);
-						creature.ai().setFlag("IsArmed",true);
+						creature.setData("IsArmed",true);
 						creature.ai().onTalkTo(player);
 					}
 				});
@@ -105,12 +107,12 @@ public class TomasAi extends CreatureAi {
 					public void onSelect(Creature player){
 						player.clearOptions();
 						player.notify(creature.color(), "Bien...en una de esas eres realmente un guerrero...");
-						creature.ai().setFlag("IsArmed",true);
+						creature.setData("IsArmed",true);
 						creature.ai().onTalkTo(player);
 					}
 				});
 			}
-			if((getFlag("IsPacific") || getFlag("IsArmed")) && messages.isEmpty()){
+			if((creature.getBooleanData("IsPacific") || creature.getBooleanData("IsArmed")) && messages.isEmpty()){
 				messages.clear();
 				messages.add("Ten suerte en tu camino");
 			}

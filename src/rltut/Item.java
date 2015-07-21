@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Item {
+public class Item extends DataStructure{
 	public static enum ItemType{
 		SHIELD,
 		WEAPON,
@@ -30,7 +30,10 @@ public class Item {
 	public Color color() { return color; }
 
 	private String name;
-	public String name() { return broken ? name+ " " + (gender == 'M' ? "roto" : "rota") : name; }
+	public String name() { return getBooleanData("IsBroken") ? name+ " " + (gender == 'M' ? "roto" : "rota") : name; }
+	
+	public String nameElLa() { return (gender == 'M' ? "el " : "la ") + name(); }
+	public String nameUnUna() { return (gender == 'M' ? "un " : "una ") + name(); }
 	
 	private String appearance;
 	public String appearance() { return appearance; }
@@ -46,15 +49,18 @@ public class Item {
 	
 	private List<DamageType> damageTypes;
 	public List<DamageType> damageTypes() { return damageTypes; }
+	public DamageType getDamageType(DamageType value) {
+		for(DamageType t : damageTypes){
+			if(t.wondType() == value.wondType())
+				return t;
+		}
+		return null;
+	}
 	public Item addDamageType(DamageType newDamage, int power) { 
 		DamageType newType = new DamageType(newDamage.name(), newDamage.wondType(), newDamage.causeOfDeath());
 		this.damageTypes.add(newType.addPower(power)); 
 		return this; 
 	}
-	
-	private boolean broken = false;
-	public boolean broken() { return broken; }
-	public void makeBroken(boolean val) { this.broken = val; }
 	
 	private int playerBonusDamage;
 	public int playerBonusDamage() { return playerBonusDamage; }
@@ -74,6 +80,7 @@ public class Item {
 	
 	/**Constructor para los items intrinsecos (arma / armadura de la criatura, pelaje, puños, etc)*/
 	public Item(ItemType type, char gender, String name){
+		super();
 		this.itemType = type;
 		this.gender = gender;
 		this.name = name;
@@ -82,6 +89,7 @@ public class Item {
 	}
 	
 	public Item(ItemType type, char glyph, char gender, Color color, String name, String appearance){
+		super();
 		this.glyph = glyph;
 		this.color = color;
 		this.name = name;

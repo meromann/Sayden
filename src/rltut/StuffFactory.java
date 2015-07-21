@@ -100,6 +100,7 @@ public class StuffFactory {
 		world.addAtEmptyLocation(maleWolf, depth);
 		new WolfAi(maleWolf, player, this);
 		
+		maleWolf.modifyAttackSpeed(100);
 		maleWolf.ai().setHostile();
 		maleWolf.modifyWoundResistance(1);
 		maleWolf = makeCuadruped(maleWolf);

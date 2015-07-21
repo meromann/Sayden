@@ -10,7 +10,7 @@ import rltut.Item.ItemType;
 import rltut.ai.CreatureAi;
 import rltut.screens.Option;
 
-public class Creature {
+public class Creature extends DataStructure{
 	private World world;
 	public World getWorld() { return world; }
 	public void setWorld(World world) { this.world = world; }
@@ -79,6 +79,9 @@ public class Creature {
 	private String name;
 	public String name() { return name; }
 	public void setName(String newName) { this.name = newName; }
+	
+	public String nameElLa() { return (gender == 'M' ? "el " : "la ") + name(); }
+	public String nameUnUna() { return (gender == 'M' ? "un " : "una ") + name(); }
 
 	private Inventory inventory;
 	public Inventory inventory() { return inventory; }
@@ -225,6 +228,8 @@ public class Creature {
 	public boolean dismembered() { return dismembered; }
 	
 	public Creature(World world, char glyph, char gender, Color color, String name, int maxHp, Item weapon, Item armor){
+		super();
+		
 		this.world = world;
 		this.glyph = glyph;
 		this.color = color;
@@ -264,15 +269,17 @@ public class Creature {
 			return;
 		}
 		
-		if(statusEffect != null && (getActionPoints() > 0 || isPlayer)){
+		if(statusEffect() != null && (getActionPoints() > 0 || isPlayer)){
 			statusEffect = null;
 			modifyStatusColor(null);
 		}
 		
-		if(attackQue != null && getActionPoints() >= attackSpeed()){
+		if(attackQue() != null && getActionPoints() >= attackSpeed()){
 			Creature queCreature = world.creature(attackQue.x, attackQue.y, attackQue.z);
 			if(queCreature == null){
 				doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_DODGE);
+				Tile testTile = world.tile(attackQue().x, attackQue().y, attackQue().z);
+				ai.onEnter(attackQue().x, attackQue().y, attackQue().z, testTile);
 			}else{
 				meleeAttack(queCreature, weapon);
 			}
@@ -444,46 +451,44 @@ public class Creature {
 		if(defendingObject == null){
 			defendingObject = other.intrinsicArmor();
 		}
-				
+		
+		ArrayList<DamageType> availableDamageTypes = DamageType.getDamageTypes();
+		
 		//Comienza a recorrer todos los ataques posibles del objeto con el que se ataca
-		for(int i = 0; i < damagingObject.damageTypes().size(); i++){
-			int power = damagingObject.damageTypes().get(i).power();		//Guardamos el poder
-			DamageType type = damagingObject.damageTypes().get(i);	//Guardamos el tipo
+		for(DamageType type : availableDamageTypes){
+			if(damagingObject.getDamageType(type) == null)
+				continue;
 			
-			if(damagingObject.broken())
+			int power = damagingObject.getDamageType(type).power();		//Guardamos el poder
+			int defense_power = 0;
+			
+			if(damagingObject.getBooleanData("IsBroken"))
 				power = 1;
 			
-			damageType = type;
-			damagePower = power;
-			
 			//Comienza a recorrer todas las defensas posibles del objetivo
-			for(int n = 0; n < defendingObject.damageTypes().size(); n++){
-				int defense_power = defendingObject.damageTypes().get(n).power();		//Guardamos el poder
-				String defense_type = defendingObject.damageTypes().get(n).wondType();	//Guardamos el tipo
-				
-				//Si esta defendiendo con "la piel" no lo hace desde la cabeza
-				if(defendingObject.itemType() == ItemType.INTRINSIC &&
-						position == BodyPart.HEAD){
-					defense_power = 0;
-				}
-				
-				//Las debilidades a ciertos tipos se resuelven con numeros negativos, en otro caso se le resta al poder de ataque
-				if(defense_power < 0)
-					power += Math.abs(defense_power);
-				else
-					power -= defense_power;
-				
-				//Si es diferente el tipo no le prestemos atencion (BLUNT vs SLICE no hace nada)
-				if(type.wondType() != defense_type)
-					continue;
+			if(defendingObject.getDamageType(type) == null)
+				defense_power = 0;
+			else
+				defense_power = defendingObject.getDamageType(type).power();		//Guardamos el poder
+			
+			//Si esta defendiendo con "la piel" no lo hace desde la cabeza
+			if(defendingObject.itemType() == ItemType.INTRINSIC &&
+					position == BodyPart.HEAD){
+				defense_power = 0;
+			}
+			
+			//Las debilidades a ciertos tipos se resuelven con numeros negativos, en otro caso se le resta al poder de ataque
+			if(defense_power < 0)
+				power += Math.abs(defense_power);
+			else
+				power -= defense_power;
 
-				//Si este es el mayor daño que encontramos, lo guardamos (el = es para que se guarde tambien la defensa)
-				if(damagePower <= power){
-					damageType = type;
-					damagePower = power;
-					defendingPower = defense_power;
-				}
-			}			
+			//Si este es el mayor daño que encontramos, lo guardamos (el = es para que se guarde tambien la defensa)
+			if(damagePower <= power){
+				damageType = type;
+				damagePower = power;
+				defendingPower = defense_power;
+			}		
 		}
 		
 		//Efecto de COUNTER en el enemigo
@@ -491,7 +496,7 @@ public class Creature {
 		//es lo suficientemente rapido para que no efectue el ataque el mismo, uno contrarresta el ataque		
 		if(other.attackQue() != null && 
 				other.getActionPoints() <= other.attackSpeed()){
-			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_COUNTER + " a " + StringUtils.genderizeCreature(other.gender(), other.name(), false) +"!");
+			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_COUNTER + " a " + other.nameElLa() +"!");
 			other.modifyAttackQue(null);
 			other.resetActionPoints();
 			other.modifyStatusColor(null);
@@ -517,17 +522,17 @@ public class Creature {
 					&& damagingObject.itemType() != ItemType.INTRINSIC
 					&& damagePower <= defendingPower * 0.5f
 					&& damagePower > defendingPower * 0.3f){
-				notifyArround(damagingObject.gender() == 'M' ? "El " : "La " + damagingObject.name() + " cae al suelo"
-						+" al impactar contra " + (defendingObject.gender() == 'M' ? "el " : "la " + defendingObject.name()));
+				notifyArround(StringUtils.capitalize(damagingObject.nameElLa()) + " cae al suelo"
+						+" al impactar contra " + defendingObject.nameElLa());
 				drop(damagingObject, "");
 			}else
 			//Si el objeto que defiende es un escudo y tiene mas de tres veces la defensa el arma se ROMPE contra el
 			if(defendingObject.itemType() != ItemType.INTRINSIC
 					&& damagingObject.itemType() != ItemType.INTRINSIC
 					&& damagePower <= defendingPower * 0.3f){
-				notifyArround(damagingObject.gender() == 'M' ? "El " : "La " + damagingObject.name() + " se rompe"
-						+" al impactar contra " + (defendingObject.gender() == 'M' ? "el " : "la " + defendingObject.name()));
-				damagingObject.makeBroken(true);
+				notifyArround(StringUtils.capitalize(damagingObject.nameElLa()) + " se rompe"
+						+" al impactar contra " + defendingObject.nameElLa());
+				damagingObject.setData("IsBroken", true);
 			}
 			
 			return;
@@ -590,7 +595,7 @@ public class Creature {
 	}
 	
 	private void leaveCorpse(){
-		Item corpse = new Item(ItemType.STATIC, '%', 'M', color, "cadaver de " + name, null);
+		Item corpse = new Item(ItemType.STATIC, '%', 'M', originalColor(), "cadaver de " + name(), null);
 		world.addAtEmptySpace(corpse, x, y, z);
 		for (Item item : inventory.getItems()){
 			if (item != null){
@@ -621,9 +626,9 @@ public class Creature {
 	
 	private void regenerateHp(){
 		if(wounds.isEmpty()){
-			hpRegenerationCooldown -= hpRegeneration;
+			hpRegenerationCooldown -= hpRegeneration();
 	        if (hpRegenerationCooldown < 0){
-	            if (hp < maxHp) {
+	            if (hp() < maxHp()) {
 	                modifyHp(1, "Mueres por regenerar vida?");
 	            }
 	            hpRegenerationCooldown += 50;
@@ -694,7 +699,7 @@ public class Creature {
 			if (other == this){
 				other.notify(StringUtils.makeSecondPerson(message, true) + (hasPunctuation ? "" : "."), params);
 			} else {
-				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
+				String nombre = !name.equals(name.toLowerCase()) ? name() : StringUtils.capitalize(nameElLa());
 				other.notify(String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 		}
@@ -706,7 +711,7 @@ public class Creature {
 			if (other == this){
 				other.notify(actionColor, StringUtils.makeSecondPerson(message, true) + (hasPunctuation ? "" : "."), params);
 			} else {
-				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
+				String nombre = !name.equals(name.toLowerCase()) ? name() : StringUtils.capitalize(nameElLa());
 				other.notify(actionColor, String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 		}
@@ -722,7 +727,7 @@ public class Creature {
 			if (other == this){
 				other.notify(StringUtils.makeSecondPerson(message, false) + (hasPunctuation ? "" : "."), params);
 			} else {
-				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " : "La " + name);
+				String nombre = !name.equals(name.toLowerCase()) ? name() :  StringUtils.capitalize(nameElLa());
 				other.notify(String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 			other.learnName(item);
