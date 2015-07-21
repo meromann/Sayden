@@ -63,10 +63,10 @@ public class World {
 	public char glyph(int x, int y, int z){
 		Creature creature = creature(x, y, z);
 		if (creature != null)
-			return creature.glyph();
+			return (char)creature.getData(RPG.GLYPH);
 		
 		if (item(x,y,z) != null)
-			return item(x,y,z).glyph();
+			return (char) item(x,y,z).getData(RPG.GLYPH);
 		
 		return tile(x, y, z).glyph();
 	}
@@ -77,15 +77,15 @@ public class World {
 			return creature.color();
 		
 		if (item(x,y,z) != null)
-			return item(x,y,z).color();
+			return (Color) item(x,y,z).getData(RPG.COLOR);
 		
 		return tile(x, y, z).color();
 	}
 	
 	public Color backgroundColor(int x, int y, int z){
 		Creature creature = creature(x, y, z);
-		if (creature != null && creature.statusColor() != null)
-			return creature.statusColor();
+		if (creature != null && creature.getData(RPG.BACKGROUND_COLOR) != null)
+			return (Color) creature.getData(RPG.BACKGROUND_COLOR);
 				
 		return tile(x, y, z).backgroundColor();
 	}
@@ -209,7 +209,7 @@ public class World {
 				Creature c = this.creature(p.x, p.y, p.z);
 				
 				if (c != null)
-					c.notify((item.gender() == 'M' ? "Un" : "Una") + " %s cae entre tus pies.", c.nameOf(item));
+					c.notify(StringUtils.capitalize(item.nameUnUna()) + "cae entre tus pies.");
 				
 				return true;
 			} else {

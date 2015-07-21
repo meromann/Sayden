@@ -8,12 +8,14 @@ import rltut.BodyPart;
 import rltut.Creature;
 import rltut.DamageType;
 import rltut.FieldOfView;
+import rltut.Flags;
 import rltut.Item;
 import rltut.LevelUpController;
 import rltut.Line;
 import rltut.Message;
 import rltut.Path;
 import rltut.Point;
+import rltut.RPG;
 import rltut.Tile;
 import rltut.Wound;
 
@@ -37,34 +39,34 @@ public class CreatureAi {
 	}
 	
 	public void setNeutral(){
-		addFlag("IsHostile", false);
-		addFlag("IsNeutral", true);
+		addFlag(Flags.IS_HOSTILE, false);
+		addFlag(Flags.IS_NEUTRAL, true);
 	}
 	
 	public void setNpc(){
-		addFlag("IsHostile", false);
-		addFlag("IsNeutral", true);
-		addFlag("IsNpc", true);
+		addFlag(Flags.IS_HOSTILE, false);
+		addFlag(Flags.IS_NEUTRAL, true);
+		addFlag(Flags.IS_NPC, true);
 	}
 	
 	public void setHostile(){
 		if(creature.isPlayer())
 			return;
-		addFlag("IsHostile",true);
+		addFlag(Flags.IS_HOSTILE,true);
 	}
 	
 	public boolean isHostileTo(Creature b){
 		if(creature == b) return false;
 		
-		boolean aHostile = creature.ai().getFlag("IsHostile");
-		boolean bHostile = b.ai().getFlag("IsHostile");
+		boolean aHostile = creature.ai().getFlag(Flags.IS_HOSTILE);
+		boolean bHostile = b.ai().getFlag(Flags.IS_HOSTILE);
 		
 		if(aHostile&&bHostile) return false;
 		if(creature.isPlayer()&&bHostile) return true;
 		if(b.isPlayer()&&aHostile) return true;
-		if(creature.ai().getFlag("IsInsane") || b.ai().getFlag("IsInsane")) return true;
+		if(creature.ai().getFlag(Flags.IS_INSANE) || b.ai().getFlag(Flags.IS_INSANE)) return true;
 		if(creature.name() == b.name()) return false;
-		if(creature.ai().getFlag("IsNeutral") || creature.ai().getFlag("IsNeutral")) return false;
+		if(creature.ai().getFlag(Flags.IS_NEUTRAL) || creature.ai().getFlag(Flags.IS_NEUTRAL)) return false;
 		
 		if ((aHostile)&&(!bHostile)) return true;
 		if ((bHostile)&&(!aHostile)) return true;
@@ -108,7 +110,7 @@ public class CreatureAi {
 	public String getName(Item item){
 		String name = itemNames.get(item.name());
 		
-		return name == null ? item.appearance() : name;
+		return name == null ? ""+item.getData(RPG.APPEARANCE) : name;
 	}
 	
 	public void setName(Item item, String name){

@@ -112,7 +112,7 @@ public class StringUtils {
 	 * "golpea a el lobo" / "golpea a la cucaracha" (si la referencia es una criatura comun"
 	 * */
 	public static String formatTextToGender(String text, Creature creature){
-		return creature.isPlayer() ? "te " + text : text + " " + (creature.gender() == 'M' ? "al " + creature.name() : "a la " + creature.name());
+		return creature.isPlayer() ? "te " + text : text + " " + ((char)creature.getData(RPG.GENDER) == 'M' ? "al " + creature.name() : "a la " + creature.name());
 	}
 	
 	/**
@@ -129,7 +129,7 @@ public class StringUtils {
 		if(effect.indexOf("S") != -1 && !creature.isPlayer())
 			text = makeSecondPerson(text, true);
 		
-		return creature.isPlayer() ? (effect.indexOf("t") != -1 ? "te " : "tu ") + text : text + " " + (creature.gender() == 'M' ? (effect.indexOf("d") == -1 ? "al " : "del ") + 
+		return creature.isPlayer() ? (effect.indexOf("t") != -1 ? "te " : "tu ") + text : text + " " + ((char)creature.getData(RPG.GENDER) == 'M' ? (effect.indexOf("d") == -1 ? "al " : "del ") + 
 				creature.name() :  (effect.indexOf("d") == -1 ? "a la " : "de la ") + creature.name());
 	}
 	

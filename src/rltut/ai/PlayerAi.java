@@ -32,7 +32,7 @@ public class PlayerAi extends CreatureAi {
 			
 			Item item = creature.item(creature.x, creature.y, creature.z);
 			if (item != null)
-				creature.notify("Te topas con " + (item.gender() == 'M' ? "un " : "una ") + creature.nameOf(item) + ".");
+				creature.notify("Te topas con " + item.nameUnUna()+ ".");
 			
 			for (int i = 0; i < creature.wounds().size(); i++){
 				Wound wound = creature.wounds().get(i);

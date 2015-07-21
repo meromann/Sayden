@@ -2,6 +2,7 @@ package rltut.screens;
 
 import rltut.Creature;
 import rltut.Item;
+import rltut.RPG;
 import rltut.Tile;
 
 public class LookScreen extends TargetBasedScreen {
@@ -13,13 +14,13 @@ public class LookScreen extends TargetBasedScreen {
 	public void enterWorldCoordinate(int x, int y, int screenX, int screenY) {
 		Creature creature = player.creature(x, y, player.z);
 		if (creature != null){
-			caption = creature.glyph() + " "  + creature.name() + creature.details();
+			caption = creature.getData(RPG.GLYPH) + " "  + creature.name() + creature.details();
 			return;
 		}
 		
 		Item item = player.item(x, y, player.z);
 		if (item != null){
-			caption = item.glyph() + " "  + player.nameOf(item) + item.details();
+			caption = item.getData(RPG.GLYPH) + " "  + player.nameOf(item) + item.details();
 			return;
 		}
 		

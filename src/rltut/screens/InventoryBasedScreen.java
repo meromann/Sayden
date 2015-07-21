@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import rltut.Constants;
 import rltut.Creature;
 import rltut.Item;
+import rltut.RPG;
 import asciiPanel.AsciiPanel;
 
 public abstract class InventoryBasedScreen implements Screen {
@@ -51,7 +52,7 @@ public abstract class InventoryBasedScreen implements Screen {
 			if (item == null || !isAcceptable(item))
 				continue;
 			
-			String line = letters.charAt(i) + " - " + item.glyph() + " " + player.nameOf(item);
+			String line = letters.charAt(i) + " - " + item.getData(RPG.GENDER) + " " + player.nameOf(item);
 			
 			if(item == player.weapon() || item == player.armor() || item == player.helment()
 					|| item == player.shield())

@@ -6,7 +6,7 @@ import asciiPanel.AsciiPanel;
 import rltut.Creature;
 import rltut.DamageType;
 import rltut.Item;
-import rltut.Item.ItemType;
+import rltut.RPG;
 import rltut.screens.Option;
 
 public class TomasAi extends CreatureAi {
@@ -70,9 +70,10 @@ public class TomasAi extends CreatureAi {
 			if(getFlag("IsWarrior") && !getFlag("IsArmed")){
 				talker.addOption(new Option("Espada (cortante)", creature){
 					public void onSelect(Creature player){
-						Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.brightWhite, "espada", null);
-						item.addDamageType(DamageType.SLICE, 2);
-						item.modifyAttackSpeed(50);
+						Item item = new Item(')', 'F', AsciiPanel.brightWhite, "espada", null);
+						item.setData("IsWeapon", true);
+						item.setData(DamageType.SLICE.wondType(), 1);
+						item.setData(RPG.ATTACK_SPEED, 50);
 						player.clearOptions();
 						player.inventory().add(item);
 						creature.ai().setFlag("IsArmed",true);
@@ -81,9 +82,10 @@ public class TomasAi extends CreatureAi {
 				});
 				talker.addOption(new Option("Maza (contundente)", creature){
 					public void onSelect(Creature player){
-						Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.brightWhite, "maza", null);
-						item.addDamageType(DamageType.BLUNT, 2);
-						item.modifyAttackSpeed(50);
+						Item item = new Item(')', 'F', AsciiPanel.brightWhite, "maza", null);
+						item.setData("IsWeapon", true);
+						item.setData(DamageType.BLUNT.wondType(), 2);
+						item.setData(RPG.ATTACK_SPEED, 50);
 						player.clearOptions();
 						player.inventory().add(item);
 						creature.ai().setFlag("IsArmed",true);
@@ -92,8 +94,9 @@ public class TomasAi extends CreatureAi {
 				});
 				talker.addOption(new Option("Daga (penetrante)", creature){
 					public void onSelect(Creature player){
-						Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.brightWhite, "daga", null);
-						item.addDamageType(DamageType.PIERCING, 2);
+						Item item = new Item(')', 'F', AsciiPanel.brightWhite, "daga", null);
+						item.setData("IsWeapon", true);
+						item.setData(DamageType.PIERCING.wondType(), 1);
 						
 						player.clearOptions();
 						player.inventory().add(item);

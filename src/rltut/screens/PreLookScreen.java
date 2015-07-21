@@ -31,8 +31,8 @@ public class PreLookScreen extends TargetBasedScreen {
 
 	@Override
 	public Screen respondToUserInput(KeyEvent key) {
-		int scrollX = Math.max(0, Math.min(player.x - Constants.WORLD_WIDTH / 2, player.getWorld().width() - Constants.WORLD_WIDTH));
-		int scrollY = Math.max(0, Math.min(player.y - Constants.WORLD_HEIGHT / 2, player.getWorld().height() - Constants.WORLD_HEIGHT));
+		int scrollX = Math.max(0, Math.min(player.x - Constants.WORLD_WIDTH / 2, player.world().width() - Constants.WORLD_WIDTH));
+		int scrollY = Math.max(0, Math.min(player.y - Constants.WORLD_HEIGHT / 2, player.world().height() - Constants.WORLD_HEIGHT));
 
 		switch (key.getKeyCode()){
 		case KeyEvent.VK_LEFT: return leftScreen();

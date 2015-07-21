@@ -7,11 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import rltut.Item.ItemType;
 import rltut.ai.PlayerAi;
 import rltut.ai.TomasAi;
 import rltut.ai.WolfAi;
-import rltut.ai.ZombieAi;
 import asciiPanel.AsciiPanel;
 
 public class StuffFactory {
@@ -64,8 +62,13 @@ public class StuffFactory {
 	}
 	
 	public static Creature getNpc(String name, World world, Color color){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
-		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
+		Item puños = new Item('M', "nudillos");
+		Item piel = new Item('F', "piel");
+		
+		piel.setData(DamageType.BLUNT.wondType(), 1);
+		piel.setData(Flags.IS_INTRINSIC, true);
+		puños.setData(DamageType.BLUNT.wondType(), 1);
+		puños.setData(Flags.IS_INTRINSIC, true);
 		
 		if(name.indexOf("Tomas") != -1){
 			Creature tomas = new Creature(world, '@', 'M', color, "Tomas el herrero", 20, puños, piel);
@@ -80,8 +83,14 @@ public class StuffFactory {
 	}
 	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
-		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
+		Item puños = new Item('M', "nudillos");
+		Item piel = new Item('F', "piel");
+		
+		piel.setData(DamageType.BLUNT.wondType(), 1);
+		piel.setData(Flags.IS_INTRINSIC, true);
+		puños.setData(DamageType.BLUNT.wondType(), 1);
+		puños.setData(Flags.IS_INTRINSIC, true);
+		
 		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 20, puños, piel);
 		world.addAtEmptyLocation(player, 0);
 		new PlayerAi(player, messages, fov);
@@ -94,8 +103,15 @@ public class StuffFactory {
 	}
 
 	public Creature newMaleWolf(int depth, Creature player){
-		Item garras = new Item(ItemType.INTRINSIC, 'L', "garras").addDamageType(DamageType.SLICE, 1);
-		Item pelaje = new Item(ItemType.INTRINSIC, 'M', "pelaje").addDamageType(DamageType.BLUNT, 1).addDamageType(DamageType.SLICE, 1);
+		Item garras = new Item('L', "garras");
+		Item pelaje = new Item('M', "pelaje");
+		
+		garras.setData(DamageType.BLUNT.wondType(), 1);
+		garras.setData(Flags.IS_INTRINSIC, true);
+		pelaje.setData(DamageType.BLUNT.wondType(), 1);
+		pelaje.setData(DamageType.SLICE.wondType(), 1);
+		pelaje.setData(Flags.IS_INTRINSIC, true);
+		
 		Creature maleWolf = new Creature(world, 'l', 'M', AsciiPanel.brightBlack, "lobo", 4, garras, pelaje);
 		world.addAtEmptyLocation(maleWolf, depth);
 		new WolfAi(maleWolf, player, this);
@@ -105,19 +121,6 @@ public class StuffFactory {
 		maleWolf = makeCuadruped(maleWolf);
 		
 		return maleWolf;
-	}
-	
-	public Creature newZombie(int depth, Creature player){
-		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
-		Item piel = new Item(ItemType.INTRINSIC, 'F', "carne").addDamageType(DamageType.SLICE, 1);
-		Creature zombie = new Creature(world, 'z', 'M', AsciiPanel.white, "zombie", 100, puños, piel);
-		world.addAtEmptyLocation(zombie, depth);
-		new ZombieAi(zombie, player);
-		zombie.modifyAttackSpeed(100);
-		zombie = makeBiped(zombie);
-		zombie.modifyWoundResistance(-3);
-		
-		return zombie;
 	}
 
 	/*public Creature newGoblin(int depth, Creature player){
@@ -130,80 +133,99 @@ public class StuffFactory {
 	}*/
 	
 	public Item newRock(int depth){
-		Item rock = new Item(ItemType.STATIC, ',', 'F', AsciiPanel.yellow, "roca", null);
+		Item rock = new Item(',', 'F', AsciiPanel.yellow, "roca", null);
 		world.addAtEmptyTileLocation(rock, depth, Tile.FLOOR);
 		return rock;
 	}
 	
 	public Item newBread(int depth){
-		Item item = new Item(ItemType.EDIBLE, '%', 'M', AsciiPanel.yellow, "pan", null);
+		Item item = new Item('%', 'M', AsciiPanel.yellow, "pan", null);
+		item.setData(Flags.IS_EDIBLE, true);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newFruit(int depth){
-		Item item = new Item(ItemType.EDIBLE, '%', 'F', AsciiPanel.brightRed, "manzana", null);
+		Item item = new Item('%', 'F', AsciiPanel.brightRed, "manzana", null);
+		item.setData(Flags.IS_EDIBLE, true);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newDagger(int depth){
-		Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.white, "daga", null);
-		item.addDamageType(DamageType.PIERCING, 2);
+		Item item = new Item(')', 'F', AsciiPanel.white, "daga", null);
+		
+		item.setData(Flags.IS_WEAPON, true);
+		item.setData(DamageType.PIERCING.wondType(), 1);
+		
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newOPDagger(int depth){
-		Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.white, "op daga", null);
-		item.addDamageType(DamageType.PIERCING, 10);
+		Item item = new Item(')', 'F', AsciiPanel.white, "op daga", null);
+		item.setData(Flags.IS_WEAPON, true);
+		item.setData(DamageType.PIERCING.wondType(), 1);
+		
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newSword(int depth){
-		Item item = new Item(ItemType.WEAPON, ')', 'F', AsciiPanel.brightWhite, "espada", null);
-		item.addDamageType(DamageType.SLICE, 2);
+		Item item = new Item(')', 'F', AsciiPanel.brightWhite, "espada", null);
+		item.setData(Flags.IS_WEAPON, true);
+		item.setData(DamageType.SLICE.wondType(), 1);
+		
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newWoodenShield(int depth){
-		Item item = new Item(ItemType.SHIELD, '0', 'M', AsciiPanel.brightWhite, "escudo", null);
-		item.addDamageType(DamageType.BLUNT, 1);
+		Item item = new Item('0', 'M', AsciiPanel.brightWhite, "escudo", null);
+		item.setData(Flags.IS_SHIELD, true);
+		item.setData(DamageType.BLUNT.wondType(), 2);
+		
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newStaff(int depth){
-		Item item = new Item(ItemType.WEAPON, ')', 'M', AsciiPanel.yellow, "baston", null);
+		Item item = new Item(')', 'M', AsciiPanel.yellow, "baston", null);
+		item.setData(Flags.IS_WEAPON, true);
+		item.setData(DamageType.BLUNT.wondType(), 2);
+		
 		world.addAtEmptyLocation(item, depth);
-		item.addDamageType(DamageType.BLUNT, 2);
 		return item;
 	}
 
 	public Item newBow(int depth){
-		Item item = new Item(ItemType.WEAPON, ')', 'M', AsciiPanel.yellow, "arco", null);
+		Item item = new Item(')', 'M', AsciiPanel.yellow, "arco", null);
+		item.setData(Flags.IS_WEAPON, true);
+
 		//item.modifyRangedAttackValue(5);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newLightArmor(int depth){
-		Item item = new Item(ItemType.ARMOR, '[', 'F',AsciiPanel.green, "tunica", null);
-		item.addDamageType(DamageType.BLUNT, 2);
+		Item item = new Item('[', 'F',AsciiPanel.green, "tunica", null);
+		item.setData(Flags.IS_ARMOR, true);
+		item.setData(DamageType.BLUNT.wondType(), 2);
+		
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newMediumArmor(int depth){
-		Item item = new Item(ItemType.ARMOR, '[', 'F', AsciiPanel.white, "cota de malla", null);
+		Item item = new Item('[', 'F', AsciiPanel.white, "cota de malla", null);
+		item.setData(Flags.IS_ARMOR, true);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newHeavyArmor(int depth){
-		Item item = new Item(ItemType.ARMOR, '[', 'F', AsciiPanel.brightWhite, "cota de plata", null);
+		Item item = new Item('[', 'F', AsciiPanel.brightWhite, "cota de plata", null);
+		item.setData(Flags.IS_ARMOR, true);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
@@ -225,7 +247,7 @@ public class StuffFactory {
 		}
 	}
 	
-	public Item newPotionOfHealth(int depth){
+	/*public Item newPotionOfHealth(int depth){
 		String appearance = potionAppearances.get(0);
 		final Item item = new Item(ItemType.EDIBLE, '!', 'F', potionColors.get(appearance), "pocion de vida", appearance);
 		item.setQuaffEffect(new Effect(1){
@@ -435,7 +457,7 @@ public class StuffFactory {
 								|| creature.creature(nx, ny, creature.z) != null)
 							continue;
 						
-						/*Creature bat = null;
+						Creature bat = null;
 						
 						if (!bat.canEnter(nx, ny, creature.z)){
 							world.remove(bat);
@@ -446,7 +468,7 @@ public class StuffFactory {
 						bat.y = ny;
 						bat.z = creature.z;
 						
-						creature.summon(bat);*/
+						creature.summon(bat);
 					}
 				}
 			}
@@ -471,6 +493,6 @@ public class StuffFactory {
 		case 0: return newWhiteMagesSpellbook(depth);
 		default: return newBlueMagesSpellbook(depth);
 		}
-	}
+	}*/
 	
 }

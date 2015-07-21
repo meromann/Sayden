@@ -4,16 +4,16 @@ import java.awt.Color;
 import java.util.HashMap;
 
 import asciiPanel.AsciiPanel;
+import rltut.Flags;
 import rltut.Point;
 import rltut.BodyPart;
-import rltut.Constants;
 import rltut.Creature;
 import rltut.DamageType;
 import rltut.Item;
+import rltut.RPG;
 import rltut.StringUtils;
 import rltut.StuffFactory;
 import rltut.Wound;
-import rltut.Item.ItemType;
 
 public class WolfAi extends CreatureAi {
 	private Creature player;
@@ -31,7 +31,7 @@ public class WolfAi extends CreatureAi {
 		
 		if(Math.random() < 1){
 			setFlag("IsHungry", true);
-			creature.modifyColor(Color.RED);
+			creature.setData(RPG.COLOR, Color.RED);
 			creature.setName(creature.name() + " hambriento");
 			hunger = 10;
 			return;
@@ -41,7 +41,7 @@ public class WolfAi extends CreatureAi {
 		
 		if(Math.random() < 0.15){
 			setFlag("IsCub", true);
-			creature.modifyColor(AsciiPanel.brightBlue);
+			creature.setData(RPG.COLOR, AsciiPanel.brightBlue);
 			creature.setName("lobezno");
 			modifyDesire(1, 50);
 			return;
@@ -49,7 +49,7 @@ public class WolfAi extends CreatureAi {
 				
 		if(Math.random() < 0.15){
 			setFlag("IsPregnant", true);
-			creature.modifyColor(AsciiPanel.cyan);
+			creature.setData(RPG.COLOR, AsciiPanel.cyan);
 			creature.setName("loba");
 			creature.modifyMovementSpeed(100);
 			modifyDesire(1, 50);
@@ -58,23 +58,23 @@ public class WolfAi extends CreatureAi {
 	}
 	
 	public Wound getWound(DamageType type, BodyPart bodyPart, Creature target) {
-		if(bodyPart.position() == BodyPart.ARMS.position()
+		/*if(bodyPart.position() == BodyPart.ARMS.position()
 				&& type.wondType() == DamageType.SLICE.wondType()){
 			return new Wound("Pierna amputada", "pierna amputada", Constants.WOUND_PERMANENT, type, bodyPart){
 				public void onApply(Creature creature, Creature applier){
 					creature.notifyArround(Constants.WOUND_COLOR, "El ataque es certero y separa %s!", 
 							creature.isPlayer() ? "tu pierna":"la pierna "+ StringUtils.genderizeCreature(creature.gender(), creature.name(),false));
 					creature.notify(Constants.WOUND_COLOR,"[amputas la pierna]");
-					creature.force_drop(new Item(ItemType.STATIC,Math.random() < 0.5 ? (char)192 : (char)217, 'F', creature.color(), "pierna de lobo separada", null));
+					//creature.force_drop(new Item(ItemType.STATIC,Math.random() < 0.5 ? (char)192 : (char)217, 'F', creature.color(), "pierna de lobo separada", null));
 					creature.removeBodyPart(creature.getBodyPart(BodyPart.LEGS.position()));
 				}
 			};
-		}
+		}*/
 		return null;
 	}
 	
 	public Wound getWoundAttack(DamageType type, BodyPart bodyPart, Creature target) { 
-		if(bodyPart.position() == BodyPart.HEAD.position() && !target.hasWound("Mordida a la yugular"))
+		/*if(bodyPart.position() == BodyPart.HEAD.position() && !target.hasWound("Mordida a la yugular"))
 			return new Wound("Mordida a la yugular", "sangrado al moverse", 10, type, bodyPart){
 				public void onApply(Creature creature, Creature applier){
 					creature.notifyArround(Constants.WOUND_COLOR, "El lobo logra morder tu yugular, inflingiendo un horrible corte!");
@@ -87,7 +87,7 @@ public class WolfAi extends CreatureAi {
 					creature.modifyHp(-1, "Mueres desangrado");
 				}
 			};
-		else
+		else*/
 			return null;
 	}
 		
@@ -127,7 +127,7 @@ public class WolfAi extends CreatureAi {
 				
 				if(growTime < 1){
 					setFlag("IsCub", false);
-					creature.modifyColor(creature.originalColor());
+					creature.setData(RPG.COLOR, creature.getData(RPG.ORIGINAL_COLOR));
 					creature.setName(creature.originalName());
 				}
 				wander();
@@ -153,7 +153,7 @@ public class WolfAi extends CreatureAi {
 			Item check = creature.item(creature.x, creature.y, creature.z);
 
 			if(check != null
-					&& check.itemType() == ItemType.EDIBLE){
+					&& check.getBooleanData(Flags.IS_EDIBLE)){
 								
 				if(Point.distance(creature.x, creature.y, player.x, player.y) < 2){
 					hunt(player);
@@ -162,14 +162,14 @@ public class WolfAi extends CreatureAi {
 					creature.doAction("eriza su pelo y te observa de reojo...");
 				}
 				
-				creature.doAction("consume avidamente %s", StringUtils.genderizeCreature(check.gender(), check.name(), false));
+				creature.doAction("consume avidamente %s", check.nameElLa());
 				
 				hunger--;
 				
 				if(hunger < 1){
 					setFlag("IsHungry", false);
-					creature.modifyColor(creature.originalColor());
-					creature.getWorld().remove(creature.x, creature.y, creature.z);
+					creature.setData(RPG.COLOR, creature.getData(RPG.ORIGINAL_COLOR));
+					creature.world().remove(creature.x, creature.y, creature.z);
 					creature.setName(creature.originalName());
 				}
 			}
@@ -178,7 +178,7 @@ public class WolfAi extends CreatureAi {
 			
 			if(!items.isEmpty()){
 				for(Item i : items.keySet()){
-					if(i.itemType() == ItemType.EDIBLE)
+					if(i.getBooleanData(Flags.IS_EDIBLE))
 						moveTo(items.get(i));
 				}
 			}

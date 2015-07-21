@@ -8,8 +8,8 @@ public class DropScreen extends InventoryBasedScreen {
 		
 	@Override
 	protected Screen leftScreen(){
-		int scrollX = Math.max(0, Math.min(player.x - Constants.WORLD_WIDTH / 2, player.getWorld().width() - Constants.WORLD_WIDTH));
-		int scrollY = Math.max(0, Math.min(player.y - Constants.WORLD_HEIGHT / 2, player.getWorld().height() - Constants.WORLD_HEIGHT));
+		int scrollX = Math.max(0, Math.min(player.x - Constants.WORLD_WIDTH / 2, player.world().width() - Constants.WORLD_WIDTH));
+		int scrollY = Math.max(0, Math.min(player.y - Constants.WORLD_HEIGHT / 2, player.world().height() - Constants.WORLD_HEIGHT));
 		return new ThrowScreen(player, player.x - scrollX, player.y - scrollY);
 	}
 	

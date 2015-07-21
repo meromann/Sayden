@@ -1,8 +1,8 @@
 package rltut.screens;
 
 import rltut.Creature;
+import rltut.Flags;
 import rltut.Item;
-import rltut.Item.ItemType;
 
 public class EquipScreen extends InventoryBasedScreen {
 	
@@ -25,10 +25,10 @@ public class EquipScreen extends InventoryBasedScreen {
 	}
 
 	protected boolean isAcceptable(Item item) {
-		return item.itemType() == ItemType.ARMOR ||
-				item.itemType() == ItemType.HELMENT ||
-				item.itemType() == ItemType.SHIELD ||
-				item.itemType() == ItemType.WEAPON;
+		return item.getBooleanData(Flags.IS_ARMOR) ||
+				item.getBooleanData(Flags.IS_HELMENT) ||
+				item.getBooleanData(Flags.IS_SHIELD) ||
+				item.getBooleanData(Flags.IS_WEAPON);
 	}
 
 	protected Screen use(Item item) {

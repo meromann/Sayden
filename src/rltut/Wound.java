@@ -3,8 +3,6 @@ package rltut;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import rltut.Item.ItemType;
-
 public class Wound {
 	protected int duration;
 	public int duration() { return duration; }
@@ -27,13 +25,30 @@ public class Wound {
 	public String name() { return name; }
 	public void modifyName(String newName) { this.name = newName; }
 	
+	private int chance;
+	public int chance() { return chance; }
+	
 	private String description;
 	public String description() { return description; }
+
+	public static Wound getWoundByChance(ArrayList<Wound> wounds) {
+        double completeWeight = 0.0;
+        for (Wound wound : wounds)
+            completeWeight += wound.chance();
+        double r = Math.random() * completeWeight;
+        double countWeight = 0.0;
+        for (Wound wound : wounds) {
+            countWeight += wound.chance();
+            if (countWeight >= r)
+                return wound;
+        }
+        throw new RuntimeException("Should never be shown.");
+    }
 	
 	public static Wound getWound(DamageType type, BodyPart bodyPart, Creature target) {
 		ArrayList<Wound> possibleWounds = new ArrayList<Wound>();
 		
-		if(type.wondType() == DamageType.PIERCING.wondType()){
+		/*if(type.wondType() == DamageType.PIERCING.wondType()){
 			possibleWounds.add(new Wound("Estocada", "bonus de herida por estocada", 2, type, bodyPart){
 				public void onApply(Creature creature, Creature applier){
 					if(!creature.hasWound("Estocada"))
@@ -150,7 +165,7 @@ public class Wound {
 						creature.notifyArround(Constants.WOUND_COLOR, "El ataque es certero y separa %s!", 
 								creature.isPlayer() ? "tu brazo":"el brazo "+ StringUtils.genderizeCreature(creature.gender(), creature.name(),false));
 						creature.notify(Constants.WOUND_COLOR,"[brazo habil amputado]");
-						creature.force_drop(new Item(ItemType.STATIC,(char)191, 'M', creature.color(), "brazo humano separado", null));
+						//creature.force_drop(new Item(ItemType.STATIC,(char)191, 'M', creature.color(), "brazo humano separado", null));
 						creature.removeBodyPart(creature.getBodyPart(BodyPart.IZQ_ARM.position()));
 					}
 				});
@@ -161,7 +176,7 @@ public class Wound {
 						creature.notifyArround(Constants.WOUND_COLOR, "El ataque es certero y separa %s!", 
 								creature.isPlayer() ? "tu brazo":"el brazo "+ StringUtils.genderizeCreature(creature.gender(), creature.name(),false));
 						creature.notify(Constants.WOUND_COLOR,"[brazo amputado]");
-						creature.force_drop(new Item(ItemType.STATIC,(char)218, 'M', creature.color(), "brazo humano separado", null));
+						//creature.force_drop(new Item(ItemType.STATIC,(char)218, 'M', creature.color(), "brazo humano separado", null));
 						creature.removeBodyPart(creature.getBodyPart(BodyPart.DER_ARM.position()));
 					}
 				});
@@ -172,7 +187,7 @@ public class Wound {
 						creature.notifyArround(Constants.WOUND_COLOR, "El ataque es certero y separa %s!", 
 								creature.isPlayer() ? "tu pierna":"la pierna "+ StringUtils.genderizeCreature(creature.gender(), creature.name(),false));
 						creature.notify(Constants.WOUND_COLOR,"[amputas la pierna]");
-						creature.force_drop(new Item(ItemType.STATIC,Math.random() < 0.5 ? (char)192 : (char)217, 'F', creature.color(), "pierna humana separada", null));
+						//creature.force_drop(new Item(ItemType.STATIC,Math.random() < 0.5 ? (char)192 : (char)217, 'F', creature.color(), "pierna humana separada", null));
 						creature.removeBodyPart(creature.getBodyPart(BodyPart.LEGS.position()));
 					}
 				});
@@ -282,23 +297,24 @@ public class Wound {
 						creature.modifyHp(-1, "El hueso expuesto de tu pierna fracturada es demasiado, mueres en agonia");
 					}
 				});
-		}
+		}*/
 		
 		Collections.shuffle(possibleWounds);
 		
 		if(!possibleWounds.isEmpty())
-			return possibleWounds.get(0);
+			return getWoundByChance(possibleWounds);
 		else
 			return null;
 	}
 	
-	public Wound(String name, String description, int duration, DamageType type, BodyPart bodyPart){
+	public Wound(String name, String description, int duration, DamageType type, BodyPart bodyPart, int chance){
 		this.duration = duration;
 		this.originalDuration = duration;
 		this.type = type;
 		this.bodyPart = bodyPart;
 		this.name = name;
 		this.description = description;
+		this.chance = chance;
 	}
 	
 	public Wound(Wound other){

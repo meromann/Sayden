@@ -6,35 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 
 import asciiPanel.AsciiPanel;
-import rltut.Item.ItemType;
 import rltut.ai.CreatureAi;
 import rltut.screens.Option;
 
-public class Creature {
+public class Creature extends Thing{
 	private World world;
-	public World getWorld() { return world; }
+	public World world() { return world; }
 	public void setWorld(World world) { this.world = world; }
 	
 	public int x;
 	public int y;
 	public int z;
 	
-	private char gender;
-	public char gender() { return gender; }
-	
-	private char glyph;
-	public char glyph() { return glyph; }
-	
-	private Color originalColor;
-	public Color originalColor() { return originalColor; }
-	
-	private Color color;
-	public Color color() { return color; }
-	public void modifyColor(Color newColor) { this.color = newColor; }
-	
-	private Color statusColor;
-	public Color statusColor() { return statusColor; }
-	public void modifyStatusColor(Color newColor) { this.statusColor = newColor; }
+	public Color color() { return (Color) (getData(RPG.STATUS_COLOR) != null ? getData(RPG.STATUS_COLOR) : getData(RPG.COLOR)); }
 	
 	private CreatureAi ai;
 	public void setCreatureAi(CreatureAi ai) { this.ai = ai; }
@@ -79,6 +63,9 @@ public class Creature {
 	private String name;
 	public String name() { return name; }
 	public void setName(String newName) { this.name = newName; }
+	
+	public String nameElLa() { return ((char)getData(RPG.GENDER) == 'M' ? "el " : "la ") + name(); }
+	public String nameUnUna() { return ((char)getData(RPG.GENDER) == 'M' ? "un " : "una ") + name(); }
 
 	private Inventory inventory;
 	public Inventory inventory() { return inventory; }
@@ -110,18 +97,18 @@ public class Creature {
 	
 	private int movementSpeed;
 	public int movementSpeed() { return movementSpeed
-			+ (armor != null ? armor.movementSpeedModifier() : 0)
-			+ (helment != null ? helment.movementSpeedModifier() : 0)
-			+ (shield != null ? shield.movementSpeedModifier() : 0)
-			+ (weapon != null ? weapon.movementSpeedModifier() : 0); }
+			+ (armor != null ? armor.getIntegerData(RPG.MOVEMENT_SPEED) : 0)
+			+ (helment != null ? helment.getIntegerData(RPG.MOVEMENT_SPEED) : 0)
+			+ (shield != null ? shield.getIntegerData(RPG.MOVEMENT_SPEED) : 0)
+			+ (weapon != null ? weapon.getIntegerData(RPG.MOVEMENT_SPEED) : 0); }
 	public void modifyMovementSpeed(int amount) { this.movementSpeed += amount; }
 	
 	public int attackSpeed;
 	public int attackSpeed() { return attackSpeed 
-			+ (armor != null ? armor.attackSpeedModifier() : 0)
-			+ (helment != null ? helment.attackSpeedModifier() : 0)
-			+ (shield != null ? shield.attackSpeedModifier() : 0)
-			+ (weapon != null ? weapon.attackSpeedModifier() : 0); }
+			+ (armor != null ? armor.getIntegerData(RPG.ATTACK_SPEED) : 0)
+			+ (helment != null ? helment.getIntegerData(RPG.ATTACK_SPEED) : 0)
+			+ (shield != null ? shield.getIntegerData(RPG.ATTACK_SPEED) : 0)
+			+ (weapon != null ? weapon.getIntegerData(RPG.ATTACK_SPEED) : 0); }
 	public void modifyAttackSpeed(int amount) { this.attackSpeed += amount; }
 	
 	private Point attackQue = null;
@@ -225,10 +212,15 @@ public class Creature {
 	public boolean dismembered() { return dismembered; }
 	
 	public Creature(World world, char glyph, char gender, Color color, String name, int maxHp, Item weapon, Item armor){
+		this.data = new HashMap<String, Object>();
+		setData(RPG.GENDER, gender);
+		setData(RPG.NAME, name);
+		setData(RPG.ORIGINAL_NAME, name);
+		setData(RPG.GLYPH, glyph);
+		setData(RPG.COLOR, color);
+		setData(RPG.ORIGINAL_COLOR, color);
+		
 		this.world = world;
-		this.glyph = glyph;
-		this.color = color;
-		this.originalColor = color;
 		this.maxHp = maxHp;
 		this.hp = maxHp;
 		this.visionRadius = Constants.STARTING_VISION_RADIUS;
@@ -239,8 +231,6 @@ public class Creature {
 		this.limbs = new ArrayList<BodyPart>();
 		this.wounds = new ArrayList<Wound>();
 		this.options = new ArrayList<Option>();
-		this.job = name;
-		this.gender = gender;
 		this.intrinsicWeapon = weapon;
 		this.intrinsicArmor = armor;
 		this.attackSpeed = Constants.STARTING_ATTACK_SPEED;
@@ -266,7 +256,7 @@ public class Creature {
 		
 		if(statusEffect != null && (getActionPoints() > 0 || isPlayer)){
 			statusEffect = null;
-			modifyStatusColor(null);
+			unsetData(RPG.STATUS_COLOR);
 		}
 		
 		if(attackQue != null && getActionPoints() >= attackSpeed()){
@@ -278,7 +268,7 @@ public class Creature {
 			}
 			modifyActionPoints(-attackSpeed());
 			attackQue = null;
-			modifyStatusColor(null);
+			unsetData(RPG.BACKGROUND_COLOR);
 			return;
 		}
 		
@@ -346,7 +336,7 @@ public class Creature {
 			}else if(getActionPoints() <= (attackSpeed() * 0.5f) && getActionPoints() > 0){
 				doAction(Constants.MESSAGE_DODGE_COLOR, "se " + Constants.MESSAGE_DODGE_WARNING);
 				attackQue = new Point(x+mx, y+my, z+mz);
-				modifyStatusColor(Constants.MESSAGE_DODGE_COLOR);
+				setData(RPG.BACKGROUND_COLOR, Constants.MESSAGE_DODGE_COLOR);
 				return;
 			}else if(getActionPoints() < attackSpeed()){
 				return;
@@ -444,46 +434,42 @@ public class Creature {
 		if(defendingObject == null){
 			defendingObject = other.intrinsicArmor();
 		}
-				
+		
+		List<DamageType> availableDamageTypes = DamageType.getAvailableDamageTypes();
+		
 		//Comienza a recorrer todos los ataques posibles del objeto con el que se ataca
-		for(int i = 0; i < damagingObject.damageTypes().size(); i++){
-			int power = damagingObject.damageTypes().get(i).power();		//Guardamos el poder
-			DamageType type = damagingObject.damageTypes().get(i);	//Guardamos el tipo
+		for(int i = 0; i < availableDamageTypes.size(); i++){
+			int power = damagingObject.getIntegerData(availableDamageTypes.get(i).wondType());		//Guardamos el poder
+			DamageType type = availableDamageTypes.get(i);											//Guardamos el tipo
 			
-			if(damagingObject.broken())
+			if(damagingObject.getBooleanData(Flags.IS_BROKEN))
 				power = 1;
 			
 			damageType = type;
 			damagePower = power;
 			
 			//Comienza a recorrer todas las defensas posibles del objetivo
-			for(int n = 0; n < defendingObject.damageTypes().size(); n++){
-				int defense_power = defendingObject.damageTypes().get(n).power();		//Guardamos el poder
-				String defense_type = defendingObject.damageTypes().get(n).wondType();	//Guardamos el tipo
-				
-				//Si esta defendiendo con "la piel" no lo hace desde la cabeza
-				if(defendingObject.itemType() == ItemType.INTRINSIC &&
-						position == BodyPart.HEAD){
-					defense_power = 0;
-				}
-				
-				//Las debilidades a ciertos tipos se resuelven con numeros negativos, en otro caso se le resta al poder de ataque
-				if(defense_power < 0)
-					power += Math.abs(defense_power);
-				else
-					power -= defense_power;
-				
-				//Si es diferente el tipo no le prestemos atencion (BLUNT vs SLICE no hace nada)
-				if(type.wondType() != defense_type)
-					continue;
 
-				//Si este es el mayor daño que encontramos, lo guardamos (el = es para que se guarde tambien la defensa)
-				if(damagePower <= power){
-					damageType = type;
-					damagePower = power;
-					defendingPower = defense_power;
-				}
-			}			
+			int defense_power = defendingObject.getIntegerData(damageType.wondType());				//Guardamos el poder
+			
+			//Si esta defendiendo con "la piel" no lo hace desde la cabeza
+			if(defendingObject.getBooleanData(Flags.IS_INTRINSIC) &&
+					position == BodyPart.HEAD){
+				defense_power = 0;
+			}
+			
+			//Las debilidades a ciertos tipos se resuelven con numeros negativos, en otro caso se le resta al poder de ataque
+			if(defense_power < 0)
+				power += Math.abs(defense_power);
+			else
+				power -= defense_power;
+
+			//Si este es el mayor daño que encontramos, lo guardamos (el = es para que se guarde tambien la defensa)
+			if(damagePower <= power){
+				damageType = type;
+				damagePower = power;
+				defendingPower = defense_power;
+			}		
 		}
 		
 		//Efecto de COUNTER en el enemigo
@@ -491,10 +477,10 @@ public class Creature {
 		//es lo suficientemente rapido para que no efectue el ataque el mismo, uno contrarresta el ataque		
 		if(other.attackQue() != null && 
 				other.getActionPoints() <= other.attackSpeed()){
-			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_COUNTER + " a " + StringUtils.genderizeCreature(other.gender(), other.name(), false) +"!");
+			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_COUNTER + " a " + other.nameElLa() +"!");
 			other.modifyAttackQue(null);
 			other.resetActionPoints();
-			other.modifyStatusColor(null);
+			other.unsetData(RPG.BACKGROUND_COLOR);
 		}
 		
 		//Si tus chances de pegar son mayores que la presicion del enemigo efectuas un golpe critico
@@ -509,25 +495,25 @@ public class Creature {
 		
 		//Si el poder es menor que la defensa (teniendo en cuenta que es el mismo tipo de daño) no hace nada
 		if(damagePower <= defendingPower){
-			other.doAction("resiste el ataque"+ (defendingObject.itemType() != ItemType.INTRINSIC ?
+			other.doAction("resiste el ataque"+ (defendingObject.getBooleanData(Flags.IS_INTRINSIC) ?
 					" con %s %s" : ""), other.isPlayer() ? "tu" : "su", defendingObject.name());
 			
 			//Si el objeto que defiende es un escudo y tiene mas de la mitad defensa el arma se CAE
-			if(defendingObject.itemType() != ItemType.INTRINSIC
-					&& damagingObject.itemType() != ItemType.INTRINSIC
+			if(!defendingObject.getBooleanData(Flags.IS_INTRINSIC)
+					&& !damagingObject.getBooleanData(Flags.IS_INTRINSIC)
 					&& damagePower <= defendingPower * 0.5f
 					&& damagePower > defendingPower * 0.3f){
-				notifyArround(damagingObject.gender() == 'M' ? "El " : "La " + damagingObject.name() + " cae al suelo"
-						+" al impactar contra " + (defendingObject.gender() == 'M' ? "el " : "la " + defendingObject.name()));
+				notifyArround(StringUtils.capitalize(damagingObject.nameElLa()) + " cae al suelo"
+						+" al impactar contra " + defendingObject.nameElLa());
 				drop(damagingObject, "");
 			}else
 			//Si el objeto que defiende es un escudo y tiene mas de tres veces la defensa el arma se ROMPE contra el
-			if(defendingObject.itemType() != ItemType.INTRINSIC
-					&& damagingObject.itemType() != ItemType.INTRINSIC
+			if(!defendingObject.getBooleanData(Flags.IS_INTRINSIC)
+					&& !damagingObject.getBooleanData(Flags.IS_INTRINSIC)
 					&& damagePower <= defendingPower * 0.3f){
-				notifyArround(damagingObject.gender() == 'M' ? "El " : "La " + damagingObject.name() + " se rompe"
-						+" al impactar contra " + (defendingObject.gender() == 'M' ? "el " : "la " + defendingObject.name()));
-				damagingObject.makeBroken(true);
+				notifyArround(StringUtils.capitalize(damagingObject.nameElLa()) + " se rompe"
+						+" al impactar contra " + (defendingObject.nameElLa()));
+				damagingObject.setData(Flags.IS_BROKEN, true);
 			}
 			
 			return;
@@ -590,7 +576,10 @@ public class Creature {
 	}
 	
 	private void leaveCorpse(){
-		Item corpse = new Item(ItemType.STATIC, '%', 'M', color, "cadaver de " + name, null);
+		Item corpse = new Item('%', 'M', (Color)getData(RPG.ORIGINAL_COLOR), "cadaver de " + name, null);
+		corpse.setData(Flags.IS_EDIBLE, true);
+		corpse.setData(Flags.IS_CORPSE, true);
+		
 		world.addAtEmptySpace(corpse, x, y, z);
 		for (Item item : inventory.getItems()){
 			if (item != null){
@@ -694,7 +683,7 @@ public class Creature {
 			if (other == this){
 				other.notify(StringUtils.makeSecondPerson(message, true) + (hasPunctuation ? "" : "."), params);
 			} else {
-				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
+				String nombre = !name.equals(name.toLowerCase()) ? name : StringUtils.capitalize(nameElLa());
 				other.notify(String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 		}
@@ -706,7 +695,7 @@ public class Creature {
 			if (other == this){
 				other.notify(actionColor, StringUtils.makeSecondPerson(message, true) + (hasPunctuation ? "" : "."), params);
 			} else {
-				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " + name : "La " + name);
+				String nombre = !name.equals(name.toLowerCase()) ? name : StringUtils.capitalize(nameElLa());
 				other.notify(actionColor, String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 		}
@@ -722,7 +711,7 @@ public class Creature {
 			if (other == this){
 				other.notify(StringUtils.makeSecondPerson(message, false) + (hasPunctuation ? "" : "."), params);
 			} else {
-				String nombre = !name.equals(name.toLowerCase()) ? name : (gender == 'M' ? "El " : "La " + name);
+				String nombre = !name.equals(name.toLowerCase()) ? name : StringUtils.capitalize(nameElLa());
 				other.notify(String.format("%s %s"+ (hasPunctuation ? "" : "."), nombre, message), params);
 			}
 			other.learnName(item);
@@ -796,7 +785,7 @@ public class Creature {
 		if (inventory.isFull() || item == null){
 			doAction("agarra la nada");
 		} else {
-			doAction("levanta "+ StringUtils.checkGender(item.gender(), false, this.isPlayer()) +" %s", nameOf(item));
+			doAction("levanta "+ item.nameUnUna() +"");
 			world.remove(x, y, z);
 			inventory.add(item);
 		}
@@ -820,11 +809,11 @@ public class Creature {
 			return;
 		
 		if (world.addAtEmptySpace(item, x, y, z)){
-			doAction("suelta "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s", nameOf(item));
+			doAction("suelta "+ item.nameUnUna() + "");
 			inventory.remove(item);
 			unequip(item);
 		} else {
-			notify("No hay lugar donde soltar"+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s.", nameOf(item));
+			notify("No hay lugar donde soltar "+ item.nameElLa() + "");
 		}
 	}
 	
@@ -833,29 +822,29 @@ public class Creature {
 			return;
 		
 		if (world.addAtEmptySpace(item, x, y, z)){
-			doAction("suelta "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s", nameOf(item));
+			doAction("suelta "+ item.nameUnUna() + "");
 			inventory.remove(item);
 			unequip(item, action);
 		} else {
-			notify("No hay lugar donde soltar"+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s.", nameOf(item));
+			notify("No hay lugar donde soltar "+ item.nameElLa() + "");
 		}
 	}
 	
 	public void eat(Item item){
-		doAction("consume " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+		doAction("consume " + item.nameElLa());
 		consume(item);
 	}
 	
 	public void quaff(Item item){
-		doAction("bebe " + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+		doAction("bebe " + item.nameElLa());
 		consume(item);
 	}
 	
 	private void consume(Item item){
-		if (item.itemType() != ItemType.EDIBLE)
+		if (!item.getBooleanData(Flags.IS_EDIBLE))
 			notify("Asqueroso!");
 		
-		addEffect(item.quaffEffect());
+		addEffect((Effect)item.getData("ConsumeEffect"));
 		
 		getRidOf(item);
 	}
@@ -889,22 +878,22 @@ public class Creature {
 		
 		if (item == armor){
 			if (hp > 0 && !action.isEmpty())
-				doAction(action == null ? "remueve " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+				doAction(action == null ? "remueve " : action + " " + item.nameElLa());
 			
 			armor = null;
 		} else if (item == weapon) {
 			if (hp > 0 && !action.isEmpty()) 
-				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+				doAction(action == null ? "guarda " : action + " " + item.nameElLa());
 			
 			weapon = null;
 		} else if (item == shield) {
 			if (hp > 0 && !action.isEmpty()) 
-				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+				doAction(action == null ? "guarda " : action + " " + item.nameElLa());
 			
 			shield = null;
 		} else if (item == helment) {
 			if (hp > 0 && !action.isEmpty()) 
-				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+				doAction(action == null ? "guarda " : action + " " + item.nameElLa());
 			
 			helment = null;
 		}
@@ -913,7 +902,7 @@ public class Creature {
 	public void equip(Item item){
 		if (!inventory.contains(item)) {
 			if (inventory.isFull()) {
-				notify("No puedes equipar "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " %s ya que el inventario esta lleno!", nameOf(item));
+				notify("No puedes equipar "+ item.nameElLa() + "ya que el inventario esta lleno!");
 				return;
 			} else {
 				world.remove(item);
@@ -921,27 +910,27 @@ public class Creature {
 			}
 		}
 		
-		if (item.itemType() != ItemType.ARMOR && 
-				item.itemType() != ItemType.HELMENT && 
-				item.itemType() != ItemType.SHIELD && 
-				item.itemType() != ItemType.WEAPON)
+		if (!item.getBooleanData(Flags.IS_ARMOR) && 
+				!item.getBooleanData(Flags.IS_HELMENT) && 
+				!item.getBooleanData(Flags.IS_SHIELD) && 
+				!item.getBooleanData(Flags.IS_WEAPON))
 			return;
 		
-		if (item.itemType() == ItemType.WEAPON){
+		if (item.getBooleanData(Flags.IS_WEAPON)){
 			unequip(weapon);
-			doAction("sujeta " +  StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+			doAction("sujeta " +  item.nameElLa());
 			weapon = item;
-		} else if(item.itemType() == ItemType.ARMOR){
+		} else if(item.getBooleanData(Flags.IS_ARMOR)){
 			unequip(armor);
-			doAction("viste " +  StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+			doAction("viste "  +  item.nameElLa());
 			armor = item;
-		} else if(item.itemType() == ItemType.HELMENT){
+		} else if(item.getBooleanData(Flags.IS_HELMENT)){
 			unequip(helment);
-			doAction("coloca " +  StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+			doAction("coloca " +  item.nameElLa());
 			helment = item;
-		} else if(item.itemType() == ItemType.SHIELD){
+		} else if(item.getBooleanData(Flags.IS_SHIELD)){
 			unequip(shield);
-			doAction("alza " +  StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+			doAction("alza " +  item.nameElLa());
 			shield = item;
 		}
 	}
@@ -975,9 +964,9 @@ public class Creature {
 		if (c != null)
 			throwAttack(item, c);				
 		else
-			doAction("arroja "+ StringUtils.checkGender(item.gender(), true, this.isPlayer()) +" %s", nameOf(item));
+			doAction("arroja " + item.nameElLa());
 		
-		if (item.quaffEffect() != null && c != null)
+		if (item.getData("ConsumeEffect") != null && c != null)
 			getRidOf(item);
 		else
 			putAt(item, wx, wy, wz);
@@ -1003,8 +992,8 @@ public class Creature {
 	}
 	
 	public void learnName(Item item){
-		notify(StringUtils.capitalize(StringUtils.checkGender(item.gender(), true, this.isPlayer())) + item.appearance() + " es " 
-					+ StringUtils.checkGender(item.gender(), false, this.isPlayer()) + " " + item.name() + "!");
+		/*notify(StringUtils.capitalize(StringUtils.checkGender(item.gender(), true, this.isPlayer())) + item.appearance() + " es " 
+					+ StringUtils.checkGender(item.gender(), false, this.isPlayer()) + " " + item.name() + "!");*/
 		ai.setName(item, item.name());
 	}
 }

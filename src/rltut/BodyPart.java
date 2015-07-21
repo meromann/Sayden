@@ -1,7 +1,5 @@
 package rltut;
 
-import rltut.Item.ItemType;
-
 public class BodyPart {
 	//creature.force_drop(new Item(ItemType.STATIC,(char)191, 'M', creature.color(), "brazo separado", null));
 	public static final BodyPart HEAD = new BodyPart("cabeza", (char)248);
@@ -12,18 +10,26 @@ public class BodyPart {
 	
 	public static final BodyPart DER_ARM = new BodyPart("brazo derecho", (char)218){
 		public void onRemove(Creature creature) {
+			Item shield = new Item('M', "brazo inhabilitado");
+			
+			shield.setData(DamageType.BLUNT.wondType(), 1);
+			shield.setData(Flags.IS_SHIELD, true);
+			shield.setData(Flags.IS_UNEQUIPABLE, true);
+			
 			creature.drop(creature.shield());
-			creature.setShield(
-				new Item(ItemType.UNEQUIPPABLE, 'M', "brazo inhabilitado").addDamageType(DamageType.BLUNT, 1)
-			);
+			creature.setShield(shield);
 		}
 	};
 	public static final BodyPart IZQ_ARM = new BodyPart("brazo izquierdo", (char)191){
 		public void onRemove(Creature creature) {
+			Item arm = new Item('M', "brazo inhabilitado");
+			
+			arm.setData(DamageType.BLUNT.wondType(), 1);
+			arm.setData(Flags.IS_WEAPON, true);
+			arm.setData(Flags.IS_UNEQUIPABLE, true);
+			
 			creature.drop(creature.weapon());
-			creature.setWeapon(
-				new Item(ItemType.UNEQUIPPABLE, 'M', "brazo inhabilitado").addDamageType(DamageType.BLUNT, 1)
-			);
+			creature.setWeapon(arm);
 		}
 	};
 	public static final BodyPart DER_LEG = new BodyPart("pierna derecha", (char)192){
@@ -38,11 +44,6 @@ public class BodyPart {
 			creature.modifyMovementSpeed(Constants.SEV_LEG_PENALTY);
 		}
 	};
-	
-	private int piercingLvl;
-	public int piercingLvl() { return piercingLvl; }
-	public void modifyPiercingLvl(int amount) { this.piercingLvl += amount; }
-	public void setPiercingLvl(int set) { this.piercingLvl = set; }
 	
 	private String position;
 	public String position() { return position; }

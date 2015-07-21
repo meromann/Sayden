@@ -1,13 +1,22 @@
 package rltut;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DamageType {
-	public static DamageType BLUNT = new DamageType("contundente", "BLUNT", "Mueres por un fuerte impacto de un arma contundente");
-	public static DamageType SLICE = new DamageType("corte", "SLICE", "Mueres por un corte");
-	public static DamageType PIERCING = new DamageType("penetrante", "PIERCING", "Mueres apunialado");
+	public static DamageType BLUNT = new DamageType("contundente", "BluntDamage", "Mueres por un fuerte impacto de un arma contundente");
+	public static DamageType SLICE = new DamageType("corte", "SliceDamage", "Mueres por un corte");
+	public static DamageType PIERCING = new DamageType("penetrante", "PiercingDamage", "Mueres apunialado");
 	
-	private int power = 0;
-	public int power() { return power; }
-	public DamageType addPower(int pow) { this.power += pow; return this; }
+	public static List<DamageType> getAvailableDamageTypes(){
+		ArrayList<DamageType> damageTypes = new ArrayList<DamageType>();
+		
+		damageTypes.add(BLUNT);
+		damageTypes.add(SLICE);
+		damageTypes.add(PIERCING);
+		
+		return damageTypes;
+	}
 	
 	private String name;
 	public String name() { return name; }
@@ -17,7 +26,13 @@ public class DamageType {
 	
 	private String woundType;
 	public String wondType() { return woundType; }
-		
+	
+	public DamageType(DamageType clone){
+		this.name = clone.name();
+		this.woundType = clone.wondType();
+		this.causeOfDeath = clone.causeOfDeath();
+	}
+	
 	public DamageType(String name, String woundType, String causeOfDeath){
 		this.name = name;
 		this.woundType = woundType;
