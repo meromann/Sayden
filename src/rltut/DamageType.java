@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class DamageType {
 	public static DamageType BLUNT = new DamageType("contundente", "BLUNT", "Mueres por un fuerte impacto de un arma contundente");
 	public static DamageType SLICE = new DamageType("corte", "SLICE", "Mueres por un corte");
-	public static DamageType PIERCING = new DamageType("penetrante", "PIERCING", "Mueres apunialado");
+	public static DamageType PIERCING = new DamageType("penetrante", "PIERCING", "Mueres apuñalado");
 	
 	public static ArrayList<DamageType> getDamageTypes(){
 		ArrayList<DamageType> allTypes = new ArrayList<DamageType>();
@@ -17,6 +17,10 @@ public class DamageType {
 		
 		return allTypes;
 	}
+	
+	private Item itemOrigin;
+	public Item itemOrigin() { return itemOrigin; }
+	public void setOrigin(Item item) { this.itemOrigin = item; }
 	
 	private int power = 0;
 	public int power() { return power; }

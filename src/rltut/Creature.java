@@ -40,10 +40,6 @@ public class Creature extends DataStructure{
 	public void setCreatureAi(CreatureAi ai) { this.ai = ai; }
 	public CreatureAi ai() { return ai; }
 	
-	private String job;
-	public String job() { return job; }
-	public void setJob(String job) { this.job = job; }
-	
 	private int hp;
 	public int hp() { return hp; }
 	
@@ -69,10 +65,6 @@ public class Creature extends DataStructure{
 	public int accuracy() { return accuracy; }
 	public void modifyAccuracy(int amount) { this.accuracy += amount; }
 	
-	private int missChance;
-	public int missChance() { return missChance; }
-	public void modifyMissChance(int amount) { this.missChance += amount; }
-	
 	private String originalName;
 	public String originalName() { return originalName; } 
 	
@@ -81,6 +73,8 @@ public class Creature extends DataStructure{
 	public void setName(String newName) { this.name = newName; }
 	
 	public String nameElLa() { return (gender == 'M' ? "el " : "la ") + name(); }
+	public String nameElLaTu() { return isPlayer() ? "tu " + name() : (gender == 'M' ? "el " : "la ") + name(); } 
+	public String nameDelDeLa() { return (gender == 'M' ? "del " : "de la ") + name(); }
 	public String nameUnUna() { return (gender == 'M' ? "un " : "una ") + name(); }
 
 	private Inventory inventory;
@@ -180,8 +174,9 @@ public class Creature extends DataStructure{
 				return true;
 		}
 		return false;
-	}	
+	}
 	
+	//Usado para mostrar opciones de eleccion al dialogar con personajes
 	private ArrayList<Option> options;
 	public ArrayList<Option> options() { return options; }
 	public void addOptions(ArrayList<Option> newOptions) { options.clear(); options.addAll(newOptions); }
@@ -244,7 +239,6 @@ public class Creature extends DataStructure{
 		this.limbs = new ArrayList<BodyPart>();
 		this.wounds = new ArrayList<Wound>();
 		this.options = new ArrayList<Option>();
-		this.job = name;
 		this.gender = gender;
 		this.intrinsicWeapon = weapon;
 		this.intrinsicArmor = armor;
@@ -389,17 +383,17 @@ public class Creature extends DataStructure{
 	 * Esta funcion maneja todos los tipos de ataque
 	 */
 	private void commonAttack(Creature other, Item damagingObject) {
-		BodyPart position = null;					//Posicion del ataque
-		DamageType damageType = null;				//Tipo de daño inflinjido (BLUNT, SLICE, etc) Declarados en DamageType
-		int damagePower = 0;						//Poder del daño inflinjido (si el arma tiene varios tipos de ataque tomaria el mayor
-		int defendingPower = 0;						//Poder de defensa contra el mayor daño, usado para chequear bloqueos
-		Item defendingObject = null;				//Objeto con el que la criatura esta intentando defender el ataque
-		int chanceToHit = StringUtils.randInt(accuracy() - missChance(), accuracy());	//Chances de fallar el golpe	//TODO: Mejorar formula
-		
+		BodyPart position = null;						//Posicion del ataque
+		DamageType damageType = null;					//Tipo de daño inflinjido (BLUNT, SLICE, etc) Declarados en DamageType
+		int damagePower = -9999;							//Poder del daño inflinjido (si el arma tiene varios tipos de ataque tomaria el mayor
+		int defendingPower = 0;							//Poder de defensa contra el mayor daño, usado para chequear bloqueos
+		Item defendingObject = null;					//Objeto con el que la criatura esta intentando defender el ataque
+		int chanceToHit = StringUtils.randInt(0, 100);	//Chances de fallar el golpe
+
 		if(other.hp() < 0)
 			return;
 		
-		if(chanceToHit <= other.accuracy() * .5f){	//Si las chances de pegar son menores que la mitad del accurancy de tu enemigo
+		if(chanceToHit > accuracy()){					//Si las chances de golpear son menores que el acc el ataque se FALLA
 			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_DODGE);
 			return;
 		}
@@ -473,16 +467,10 @@ public class Creature extends DataStructure{
 			
 			//Si esta defendiendo con "la piel" no lo hace desde la cabeza
 			if(defendingObject.itemType() == ItemType.INTRINSIC &&
-					position == BodyPart.HEAD){
+					position == BodyPart.HEAD && defense_power > 0){
 				defense_power = 0;
 			}
 			
-			//Las debilidades a ciertos tipos se resuelven con numeros negativos, en otro caso se le resta al poder de ataque
-			if(defense_power < 0)
-				power += Math.abs(defense_power);
-			else
-				power -= defense_power;
-
 			//Si este es el mayor daño que encontramos, lo guardamos (el = es para que se guarde tambien la defensa)
 			if(damagePower <= power){
 				damageType = type;
@@ -490,7 +478,7 @@ public class Creature extends DataStructure{
 				defendingPower = defense_power;
 			}		
 		}
-		
+
 		//Efecto de COUNTER en el enemigo
 		//Si el enemigo tiene un ataque guardado (fue muy lento para pegar) y uno le pega y al pegarle
 		//es lo suficientemente rapido para que no efectue el ataque el mismo, uno contrarresta el ataque		
@@ -502,20 +490,17 @@ public class Creature extends DataStructure{
 			other.modifyStatusColor(null);
 		}
 		
-		//Si tus chances de pegar son mayores que la presicion del enemigo efectuas un golpe critico
-		if(chanceToHit > other.accuracy()){
+		//Si tus chances de pegar son mayores que 100 esas son las chances de golpear un critico!
+		if(chanceToHit < accuracy() - 100){
 			damagePower++;
 			doAction(Constants.MESSAGE_CRIT_COLOR, Constants.MESSAGE_CRIT);
-		//Si tus chances de pegar son menores que tu 80% de presicion entonces efectuas un golpe parcial
-		}else if(chanceToHit <= accuracy() * .8f){
-			damagePower--;
-			doAction(Constants.MESSAGE_DODGE_COLOR, Constants.MESSAGE_PARTIAL_HIT);
 		}
 		
 		//Si el poder es menor que la defensa (teniendo en cuenta que es el mismo tipo de daño) no hace nada
 		if(damagePower <= defendingPower){
-			other.doAction("resiste el ataque"+ (defendingObject.itemType() != ItemType.INTRINSIC ?
-					" con %s %s" : ""), other.isPlayer() ? "tu" : "su", defendingObject.name());
+			other.notifyArround((isPlayer() ? "No logras dañar " : StringUtils.capitalize(nameElLa()) + " no logra dañar") +
+				(isPlayer() ? (defendingObject.itemType() == ItemType.INTRINSIC ? defendingObject.nameElLa() + " " + other.nameDelDeLa() : "a " + other.nameElLa()) : 
+					(defendingObject.itemType() == ItemType.INTRINSIC ? " tu " + defendingObject.name() : "te")));
 			
 			//Si el objeto que defiende es un escudo y tiene mas de la mitad defensa el arma se CAE
 			if(defendingObject.itemType() != ItemType.INTRINSIC
@@ -537,11 +522,16 @@ public class Creature extends DataStructure{
 			
 			return;
 		}
-								
-		if(damagePower < other.woundResistance()){
+
+		//Guarda de donde viene el tipo de daño para mayor control
+		damageType.setOrigin(damagingObject);
+		//Si la defensa es negativa (bonus de daño) -- = +
+		damagePower -= defendingPower;
+		
+		if(damagePower <= other.woundResistance()){
 			doAction("golpea efectuando %s "+ (damagePower > 1 ? "puntos" : "punto")  +" de herida", damagePower);
 			
-			Wound force_wound = ai.getWoundAttack(damageType, position, other);
+			Wound force_wound = ai().getWoundAttack(damageType, position, other);
 			
 			if(force_wound != null)
 				other.addWound(force_wound, this);
@@ -551,13 +541,13 @@ public class Creature extends DataStructure{
 			Wound wound_to_apply = other.ai().getWound(damageType, position, other);
 			
 			if(wound_to_apply == null)
-				wound_to_apply = ai.getWoundAttack(damageType, position, other);
+				wound_to_apply = ai().getWoundAttack(damageType, position, other);
 			
 			if(wound_to_apply == null)
 				wound_to_apply = damagingObject.getWound(damageType, position, other);
 			
 			if(wound_to_apply == null)
-				wound_to_apply = Wound.getWound(damageType, position, other);
+				wound_to_apply = Wound.getDefaultWound(damageType, position, other);
 			
 			if(wound_to_apply != null)
 				other.addWound(wound_to_apply, this);
@@ -892,24 +882,24 @@ public class Creature extends DataStructure{
 		if (item == null)
 			return;
 		
-		if (item == armor){
-			if (hp > 0 && !action.isEmpty())
-				doAction(action == null ? "remueve " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+		if (item == armor()){
+			if (hp() > 0 && action != null)
+				doAction(action.isEmpty() ? "remueve " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			
 			armor = null;
-		} else if (item == weapon) {
-			if (hp > 0 && !action.isEmpty()) 
-				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+		} else if (item == weapon()) {
+			if (hp() > 0 && action != null) 
+				doAction(action.isEmpty() ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			
 			weapon = null;
-		} else if (item == shield) {
-			if (hp > 0 && !action.isEmpty()) 
-				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+		} else if (item == shield()) {
+			if (hp() > 0 && action != null) 
+				doAction(action.isEmpty() ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			
 			shield = null;
-		} else if (item == helment) {
-			if (hp > 0 && !action.isEmpty()) 
-				doAction(action == null ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
+		} else if (item == helment()) {
+			if (hp() > 0 && action != null) 
+				doAction(action.isEmpty() ? "guarda " : action + StringUtils.checkGender(item.gender(), true, this.isPlayer()) + " " + nameOf(item));
 			
 			helment = null;
 		}

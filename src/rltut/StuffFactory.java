@@ -81,20 +81,21 @@ public class StuffFactory {
 	
 	public Creature newPlayer(List<Message> messages, FieldOfView fov){
 		Item puños = new Item(ItemType.INTRINSIC, 'M', "nudillos").addDamageType(DamageType.BLUNT, 1);
-		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1);
+		Item piel = new Item(ItemType.INTRINSIC, 'F', "piel").addDamageType(DamageType.BLUNT, 1).addDamageType(DamageType.SLICE, 1);
 		Creature player = new Creature(world, '@', 'M', AsciiPanel.brightWhite, "jugador", 20, puños, piel);
 		world.addAtEmptyLocation(player, 0);
 		new PlayerAi(player, messages, fov);
 		player.makePlayer();
-		player.modifyWoundResistance(2);
+		player.modifyWoundResistance(1);
 		player.modifyHpRegeneration(1);
+		player.inventory().add(newStaff(-1));
 		player = makeBiped(player);
 		
 		return player;
 	}
 
 	public Creature newMaleWolf(int depth, Creature player){
-		Item garras = new Item(ItemType.INTRINSIC, 'L', "garras").addDamageType(DamageType.SLICE, 1);
+		Item garras = new Item(ItemType.INTRINSIC, 'L', "garras").addDamageType(DamageType.BLUNT, 3);
 		Item pelaje = new Item(ItemType.INTRINSIC, 'M', "pelaje").addDamageType(DamageType.BLUNT, 1).addDamageType(DamageType.SLICE, 1);
 		Creature maleWolf = new Creature(world, 'l', 'M', AsciiPanel.brightBlack, "lobo", 4, garras, pelaje);
 		world.addAtEmptyLocation(maleWolf, depth);
@@ -179,7 +180,7 @@ public class StuffFactory {
 	public Item newStaff(int depth){
 		Item item = new Item(ItemType.WEAPON, ')', 'M', AsciiPanel.yellow, "baston", null);
 		world.addAtEmptyLocation(item, depth);
-		item.addDamageType(DamageType.BLUNT, 2);
+		item.addDamageType(DamageType.BLUNT, 3);
 		return item;
 	}
 

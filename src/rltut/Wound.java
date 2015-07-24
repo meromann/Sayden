@@ -3,8 +3,6 @@ package rltut;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import rltut.Item.ItemType;
-
 public class Wound {
 	protected int duration;
 	public int duration() { return duration; }
@@ -30,24 +28,132 @@ public class Wound {
 	private String description;
 	public String description() { return description; }
 	
-	public static Wound getWound(DamageType type, BodyPart bodyPart, Creature target) {
+	private double weight;
+	public double weight() { return weight; }
+	
+	public static Wound pickRandomWound(ArrayList<Wound> wounds){
+		Collections.shuffle(wounds);
+		
+		double totalWeight = 0.0d;
+		
+		for (Wound i : wounds)
+		{
+		    totalWeight += i.weight();
+		}
+
+		int randomIndex = -1;
+		double random = Math.random() * totalWeight;
+		for (int i = 0; i < wounds.size(); ++i)
+		{
+		    random -= wounds.get(i).weight();
+		    if (random <= 0.0d)
+		    {
+		        randomIndex = i;
+		        break;
+		    }
+		}
+		
+		return wounds.get(randomIndex);
+	}
+	
+	public static Wound getDefaultWound(final DamageType type, BodyPart bodyPart, Creature target) {
 		ArrayList<Wound> possibleWounds = new ArrayList<Wound>();
 		
+		if(type.wondType() == DamageType.BLUNT.wondType()){
+			if(bodyPart.position() == BodyPart.HEAD.position()){
+				if(!target.hasWound("Mandibula rota"))
+					possibleWounds.add(new Wound("Mandibula rota", "imposibilita dialogo", Constants.WOUND_DURATION_MID, type, bodyPart, 0.8){
+						public void onApply(Creature creature, Creature applier){
+							creature.notifyArround(Constants.WOUND_COLOR, "Crack!! Al golpear con "+ type.itemOrigin().nameElLaTu(applier)+ " " +
+										(applier.isPlayer() ? "destrozas la mandibula " + creature.nameDelDeLa() : applier.nameElLa() + " destroza tu mandibula"));
+							creature.notify(Constants.WOUND_COLOR, "[-2 vitalidad maxima y no puedes pronunciar palabras]");
+							creature.setData("IsSilenced", true);
+							creature.modifyMaxHp(-2);
+						}
+						public void onFinish(Creature creature){
+							creature.unsetData("IsSilenced");
+							creature.modifyMaxHp(2);
+						}
+					});
+				
+				possibleWounds.add(new Wound("Lesion craneal", "reduce vitalidad", Constants.WOUND_DURATION_HIGH, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						creature.notifyArround(Constants.WOUND_COLOR, "Crush!! "+ StringUtils.capitalize(type.itemOrigin().nameElLaTu(applier)) +
+								(applier.isPlayer() ? "" : " " + applier.nameDelDeLa()) + " impacta con fuerza y "+ (creature.isPlayer() ? "tu craneo" : "el craneo "+creature.nameDelDeLa()) +" cruje horriblemente");
+						creature.notify(Constants.WOUND_COLOR, "[-2 vitalidad maxima y aturdimiento]");
+						creature.modifyMaxHp(-2);
+						creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
+						creature.modifyActionPoints(-100, "aturdido por el impacto en el craneo");
+					}
+					public void onFinish(Creature creature){
+						creature.modifyMaxHp(2);
+					}
+				});
+			}
+			if(bodyPart.position() == BodyPart.ARMS.position()){
+				if(target.hasWound("Lesion en brazo"))
+					possibleWounds.add(new Wound("Fractura en brazo", "penaliza velocidad ataque", Constants.WOUND_DURATION_HIGH, type, bodyPart, 0.8){
+						public void onApply(Creature creature, Creature applier){
+							creature.notifyArround(Constants.WOUND_COLOR, "CRA-CRACK!! "+(creature.isPlayer() ? "Tu brazo lesionado" : "El brazo lesionado" + creature.nameDelDeLa())+ 
+									" cede, exponiendo un ensangrentado hueso fracturado!");
+							creature.notify("[50 penalizador velocidad ataque y desequipar arma]");
+							creature.drop(creature.weapon());
+							creature.modifyAttackSpeed(50);
+						}
+						public void onFinish(Creature creature){
+							creature.modifyAttackSpeed(-50);
+						}
+					});
+				
+				possibleWounds.add(new Wound("Lesion en brazo", "reduce vitalidad", Constants.WOUND_DURATION_MID, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						creature.notifyArround(Constants.WOUND_COLOR, (applier.isPlayer() ? "Impactas" : StringUtils.capitalize(applier.nameElLa()) + " impacta ") +
+								(creature.isPlayer() ? "tu brazo" : "el brazo " + creature.nameDelDeLa())+ ", lesionandolo"+ (creature.weapon() != null ? 
+										(creature.isPlayer() ? " y forzandote a que sueltes " : " y forzando que suelte ")+creature.weapon().nameTuSu(creature) : ""));
+						creature.notify("[-2 vitalidad maxima y desequipar arma]");
+						creature.drop(creature.weapon());
+						creature.modifyMaxHp(-2);
+					}
+					public void onFinish(Creature creature){
+						creature.modifyMaxHp(2);
+					}
+				});
+			}
+			if(bodyPart.position() == BodyPart.LEGS.position()){
+				possibleWounds.add(new Wound("Lesion en pierna", "reduce vitalidad y penaliza movimiento", Constants.WOUND_DURATION_MID, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						creature.notifyArround(Constants.WOUND_COLOR, "Crush!! El impacto de "+type.itemOrigin().nameElLaTu(applier)+" lesiona"
+								+(creature.isPlayer() ? " tu pierna" : " la pierna " + creature.nameDelDeLa()));
+						creature.notify("[-2 vitalidad y 50 penalizador movimiento]");
+						creature.modifyMaxHp(-2);
+						creature.modifyMovementSpeed(50);
+					}
+					public void onFinish(Creature creature){
+						creature.modifyMaxHp(2);
+						creature.modifyMovementSpeed(-50);
+					}
+				});
+			}
+			if(bodyPart.position() == BodyPart.BACK.position()){
+				possibleWounds.add(new Wound("Costilla lesionada", "reduce vitalidad", Constants.WOUND_DURATION_MID, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						creature.notifyArround(Constants.WOUND_COLOR, "Slam!! Escuchas el crujir de una de"+(creature.isPlayer() ? " tus costillas" : " las costillas "+creature.nameDelDeLa())+ 
+								(creature.isPlayer() ? " mientras caes de rodillas, adolorido" : " mientras se desploma adolorido"));
+						creature.modifyActionPoints(-100, "de rodillas");
+						creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
+						creature.modifyMaxHp(-2);
+					}
+					public void onFinish(Creature creature){
+						creature.modifyMaxHp(2);
+					}
+				});
+			}
+		}
+		/*
 		if(type.wondType() == DamageType.PIERCING.wondType()){
-			possibleWounds.add(new Wound("Estocada", "bonus de herida por estocada", 2, type, bodyPart){
-				public void onApply(Creature creature, Creature applier){
-					if(!creature.hasWound("Estocada"))
-						creature.getBodyPart(this.bodyPart().position()).setPiercingLvl(0);
-					
-					int piercingLvl = creature.getBodyPart(this.bodyPart().position()).piercingLvl() + 1;
-					creature.notifyArround(Constants.WOUND_COLOR, "Slash! %s%s con un rapido movimiento! (x%s)", 
-							applier.isPlayer() ? "Impactas" : StringUtils.capitalize(StringUtils.genderizeCreature(applier.gender(), applier.name(), false)),
-									creature.isPlayer() ? " te impacta" : StringUtils.formatTextToGender("", creature), piercingLvl);
-					creature.notify(Constants.WOUND_COLOR,"["+piercingLvl+" bonus de herida por estocada]");
-					creature.modifyHp(-piercingLvl, "Mueres por multiples estocadas al cuerpo");
-					creature.getBodyPart(this.bodyPart().position()).setPiercingLvl(piercingLvl);
-				}
-			});
+			
+			possibleWounds.add(new Wound("Estocada", "bonus de herida por estocada", 2, type, bodyPart));
+			
 			if(bodyPart.position() == BodyPart.HEAD.position())
 				possibleWounds.add(new Wound("Filo al ojo", "reduce vision", Constants.WOUND_DURATION_MID, type, bodyPart){
 					public void onApply(Creature creature, Creature applier){
@@ -282,23 +388,21 @@ public class Wound {
 						creature.modifyHp(-1, "El hueso expuesto de tu pierna fracturada es demasiado, mueres en agonia");
 					}
 				});
-		}
-		
-		Collections.shuffle(possibleWounds);
-		
+		}*/
 		if(!possibleWounds.isEmpty())
-			return possibleWounds.get(0);
+			return pickRandomWound(possibleWounds);
 		else
 			return null;
 	}
 	
-	public Wound(String name, String description, int duration, DamageType type, BodyPart bodyPart){
+	public Wound(String name, String description, int duration, DamageType type, BodyPart bodyPart, double weight){
 		this.duration = duration;
 		this.originalDuration = duration;
 		this.type = type;
 		this.bodyPart = bodyPart;
 		this.name = name;
 		this.description = description;
+		this.weight = weight;
 	}
 	
 	public Wound(Wound other){
@@ -306,6 +410,7 @@ public class Wound {
 		this.originalDuration = other.duration();
 		this.type = other.type();
 		this.bodyPart = other.bodyPart();
+		this.weight = other.weight();
 		this.reference = other;
 	}
 	

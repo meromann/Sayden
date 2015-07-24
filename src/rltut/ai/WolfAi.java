@@ -60,7 +60,7 @@ public class WolfAi extends CreatureAi {
 	public Wound getWound(DamageType type, BodyPart bodyPart, Creature target) {
 		if(bodyPart.position() == BodyPart.ARMS.position()
 				&& type.wondType() == DamageType.SLICE.wondType()){
-			return new Wound("Pierna amputada", "pierna amputada", Constants.WOUND_PERMANENT, type, bodyPart){
+			return new Wound("Pierna amputada", "pierna amputada", Constants.WOUND_PERMANENT, type, bodyPart, 2){
 				public void onApply(Creature creature, Creature applier){
 					creature.notifyArround(Constants.WOUND_COLOR, "El ataque es certero y separa %s!", 
 							creature.isPlayer() ? "tu pierna":"la pierna "+ StringUtils.genderizeCreature(creature.gender(), creature.name(),false));
@@ -73,9 +73,9 @@ public class WolfAi extends CreatureAi {
 		return null;
 	}
 	
-	public Wound getWoundAttack(DamageType type, BodyPart bodyPart, Creature target) { 
+	/*public Wound getWoundAttack(DamageType type, BodyPart bodyPart, Creature target) { 
 		if(bodyPart.position() == BodyPart.HEAD.position() && !target.hasWound("Mordida a la yugular"))
-			return new Wound("Mordida a la yugular", "sangrado al moverse", 10, type, bodyPart){
+			return new Wound("Mordida a la yugular", "sangrado al moverse", 10, type, bodyPart, 2){
 				public void onApply(Creature creature, Creature applier){
 					creature.notifyArround(Constants.WOUND_COLOR, "El lobo logra morder tu yugular, inflingiendo un horrible corte!");
 					creature.notifyArround(Constants.WOUND_COLOR, "Logras detener el sangrado aplicando presion...");
@@ -89,7 +89,7 @@ public class WolfAi extends CreatureAi {
 			};
 		else
 			return null;
-	}
+	}*/
 		
 	public void onAttack(Creature target){
 		if(player.hp() <= creature.maxHp()){

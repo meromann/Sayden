@@ -18,6 +18,11 @@ public class TomasAi extends CreatureAi {
 		messages = new ArrayList<String>();
 	}
 	public void onTalkTo(Creature talker){
+		if(talker.getBooleanData("IsSilenced")){
+			talker.notify(creature.color(), "...");
+			return;
+		}
+		
 		if(!creature.getBooleanData("IsIntroduced") && messages.isEmpty()){
 			messages.clear();
 			messages.add("Mi nombre es Tomas, mi camino es el del herrero");

@@ -39,11 +39,6 @@ public class BodyPart {
 		}
 	};
 	
-	private int piercingLvl;
-	public int piercingLvl() { return piercingLvl; }
-	public void modifyPiercingLvl(int amount) { this.piercingLvl += amount; }
-	public void setPiercingLvl(int set) { this.piercingLvl = set; }
-	
 	private String position;
 	public String position() { return position; }
 	

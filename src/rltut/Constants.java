@@ -28,7 +28,6 @@ public class Constants {
 	public static final String MESSAGE_DODGE = "falla el ataque!";				//doAction(MESSAGE_DODGE)
 	public static final Color MESSAGE_CRIT_COLOR = Color.RED;
 	public static final String MESSAGE_CRIT = "impacta con gran presicion!";		//doAction(MESSAGE_CRIT)
-	public static final String MESSAGE_PARTIAL_HIT = "efectua un ataque impresiso!";		//doAction(MESSAGE_CRIT)
 	public static final Color MESSAGE_DODGE_COLOR = AsciiPanel.brightBlue;
 	public static final String MESSAGE_DODGE_WARNING = "prepara para atacar";	//doAction(MESSAGE_DODGE_WARNING)
 	public static final String MESSAGE_COUNTER = "aprovecha la oportunidad para atacar";

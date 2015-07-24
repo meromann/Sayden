@@ -105,7 +105,7 @@ public class CreatureAi {
 		itemNames.put(item.name(), name);
 	}
 	
-	public void onTalkTo(Creature talker){	}
+	public void onTalkTo(Creature talker){}
 	
 	/** Esta funcion se llama luego de que una unidad entre en una casilla*/
 	public void onEnter(int x, int y, int z, Tile tile){
