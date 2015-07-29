@@ -190,6 +190,8 @@ public class Wound extends DataStructure{
 					public void onApply(Creature creature, Creature applier){
 						//Sliiick!! Un horrendo corte se genera en tu brazo
 						//Sliiick!! Un horrendo corte se genera en el brazo del jefe ogro
+						//Sliiick!! El filo del jefe ogro produce un gran corte en tu brazo, desgarrando tus tendones
+						//Sliiick!! El filo de tu arma produce un gran corte en el brazo del jefe ogro, desgarrando sus tendones
 						creature.notifyArround(Constants.WOUND_COLOR, "Slliiick!! Un horrendo corte se genera en " + (creature.isPlayer() ? "tu brazo" : "el brazo " + creature.nameDelDeLa()));
 						creature.notify(Constants.WOUND_COLOR, "[sangrado y reduce presicion]");
 						creature.modifyAccuracy(-20);
@@ -208,6 +210,8 @@ public class Wound extends DataStructure{
 					public void onApply(Creature creature, Creature applier){
 						//Impactas en la pierna del jefe ogro generando un feo corte!
 						//El jefe ogro impacta en tu pierna generando un feo corte!
+						//Cortas la pierna del jefe ogro reventando su rodilla y cirniendolo sobre el piso
+						//El jefe ogro corta tu pierna, reventando tu rodilla y cirniendote sobre el piso
 						creature.notifyArround(Constants.WOUND_COLOR, creature.isPlayer() ? "Impactas en la pierna " + applier.nameDelDeLa() : StringUtils.capitalize(creature.nameElLa() + " impacta en tu pierna")+
 								" generando un feo corte!");
 						creature.notify(Constants.WOUND_COLOR, "[sangrado y reduce velocidad]");
@@ -242,6 +246,8 @@ public class Wound extends DataStructure{
 					public void onApply(Creature creature, Creature applier){
 						//Aaaargh! El filo de la daga penetra en tu ojo
 						//Aaaargh! El filo de la daga penetra en el ojo del jefe ogro
+						//Aaaargh! La punta de la daga penetra en tu ojo, encegueciendote
+						//Aaaargh! La punta de la daga penetra en el ojo del jefe ogro, encegueciendolo
 						creature.notifyArround(Constants.WOUND_COLOR, "Aaaargh!! El filo de "+type.itemOrigin().nameElLaTu(applier)+ " penetra "+ (creature.isPlayer() ? "en tu ojo": "en el ojo " + creature.nameDelDeLa()));
 						creature.notify("[reduccion vision]");
 						creature.modifyVisionRadius(-4);
@@ -256,6 +262,8 @@ public class Wound extends DataStructure{
 					public void onApply(Creature creature, Creature applier){
 						//Penetrando tu pulmon la daga impacta generando un dolor inimaginable!
 						//Penetrando el pulmon del jefe ogro tu daga impacta generando un dolor inimaginable!
+						//Penetrando tu pulmon la daga genera un dolor inimaginable!
+						//Penetrando el pulmon del jefe ogro tu daga genera un dolor inimaginable!
 						creature.notifyArround(Constants.WOUND_COLOR, "Penetrando " + (creature.isPlayer() ? "tu pulmon" : "el pulmon " + creature.nameDelDeLa())+ 
 								" "+ type.itemOrigin().nameElLaTu(applier) + " impacta generando un dolor inimaginable!");
 						creature.notify("[bonus de daño]");
