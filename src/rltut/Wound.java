@@ -64,6 +64,8 @@ public class Wound {
 				if(!target.hasWound("Mandibula rota"))
 					possibleWounds.add(new Wound("Mandibula rota", "imposibilita dialogo", Constants.WOUND_DURATION_MID, type, bodyPart, 0.8){
 						public void onApply(Creature creature, Creature applier){
+							//Crack!! Al golpear con tu martillo destrozas la mandibula del jefe ogro
+							//Crack!! Al golpear con el martillo el jefe ogro destroza tu mandibula
 							creature.notifyArround(Constants.WOUND_COLOR, "Crack!! Al golpear con "+ type.itemOrigin().nameElLaTu(applier)+ " " +
 										(applier.isPlayer() ? "destrozas la mandibula " + creature.nameDelDeLa() : applier.nameElLa() + " destroza tu mandibula"));
 							creature.notify(Constants.WOUND_COLOR, "[-2 vitalidad maxima y no puedes pronunciar palabras]");
@@ -78,6 +80,8 @@ public class Wound {
 				
 				possibleWounds.add(new Wound("Lesion craneal", "reduce vitalidad", Constants.WOUND_DURATION_HIGH, type, bodyPart, 1){
 					public void onApply(Creature creature, Creature applier){
+						//Crush!! Tu martillo impacta con fuerza y el craneo del jefe ogro cruje horriblemente
+						//Crush!! El martillo del jefe ogro impacta con fuerza y tu craneo cruje horriblemente
 						creature.notifyArround(Constants.WOUND_COLOR, "Crush!! "+ StringUtils.capitalize(type.itemOrigin().nameElLaTu(applier)) +
 								(applier.isPlayer() ? "" : " " + applier.nameDelDeLa()) + " impacta con fuerza y "+ (creature.isPlayer() ? "tu craneo" : "el craneo "+creature.nameDelDeLa()) +" cruje horriblemente");
 						creature.notify(Constants.WOUND_COLOR, "[-2 vitalidad maxima y aturdimiento]");
@@ -94,6 +98,8 @@ public class Wound {
 				if(target.hasWound("Lesion en brazo"))
 					possibleWounds.add(new Wound("Fractura en brazo", "penaliza velocidad ataque", Constants.WOUND_DURATION_HIGH, type, bodyPart, 0.8){
 						public void onApply(Creature creature, Creature applier){
+							//CRA-CRACK!! El brazo lesionado del jefe ogro cede, exponiendo un ensangrentado hueso fracturado!
+							//CRA-CRACK!! Tu brazo lesionado cede, exponiendo un ensangrentado hueso fracturado!
 							creature.notifyArround(Constants.WOUND_COLOR, "CRA-CRACK!! "+(creature.isPlayer() ? "Tu brazo lesionado" : "El brazo lesionado" + creature.nameDelDeLa())+ 
 									" cede, exponiendo un ensangrentado hueso fracturado!");
 							creature.notify("[50 penalizador velocidad ataque y desequipar arma]");
@@ -107,6 +113,8 @@ public class Wound {
 				
 				possibleWounds.add(new Wound("Lesion en brazo", "reduce vitalidad", Constants.WOUND_DURATION_MID, type, bodyPart, 1){
 					public void onApply(Creature creature, Creature applier){
+						//Impactas el brazo del jefe ogro, lesionandolo [y forzando que suelte su martillo] <- si tiene arma
+						//El jefe ogro impacta tu brazo, lesionandolo [y forzandote a que sueltes tu martillo] <- si tiene arma
 						creature.notifyArround(Constants.WOUND_COLOR, (applier.isPlayer() ? "Impactas" : StringUtils.capitalize(applier.nameElLa()) + " impacta ") +
 								(creature.isPlayer() ? "tu brazo" : "el brazo " + creature.nameDelDeLa())+ ", lesionandolo"+ (creature.weapon() != null ? 
 										(creature.isPlayer() ? " y forzandote a que sueltes " : " y forzando que suelte ")+creature.weapon().nameTuSu(creature) : ""));
@@ -122,6 +130,8 @@ public class Wound {
 			if(bodyPart.position() == BodyPart.LEGS.position()){
 				possibleWounds.add(new Wound("Lesion en pierna", "reduce vitalidad y penaliza movimiento", Constants.WOUND_DURATION_MID, type, bodyPart, 1){
 					public void onApply(Creature creature, Creature applier){
+						//Crush!! El impacto de el martillo lesiona tu pierna
+						//Crush!! El impacto de el martillo lesiona la pierna del jefe ogro
 						creature.notifyArround(Constants.WOUND_COLOR, "Crush!! El impacto de "+type.itemOrigin().nameElLaTu(applier)+" lesiona"
 								+(creature.isPlayer() ? " tu pierna" : " la pierna " + creature.nameDelDeLa()));
 						creature.notify("[-2 vitalidad y 50 penalizador movimiento]");
@@ -137,14 +147,125 @@ public class Wound {
 			if(bodyPart.position() == BodyPart.BACK.position()){
 				possibleWounds.add(new Wound("Costilla lesionada", "reduce vitalidad", Constants.WOUND_DURATION_MID, type, bodyPart, 1){
 					public void onApply(Creature creature, Creature applier){
+						//Slam!! Escuchas el crujir de una de tus costillas mientras caes de rodillas adolorido
+						//Slam!! Escuchas el crujir de una de las costillas del jefe ogro mientras se desploma adolorido
 						creature.notifyArround(Constants.WOUND_COLOR, "Slam!! Escuchas el crujir de una de"+(creature.isPlayer() ? " tus costillas" : " las costillas "+creature.nameDelDeLa())+ 
 								(creature.isPlayer() ? " mientras caes de rodillas, adolorido" : " mientras se desploma adolorido"));
 						creature.modifyActionPoints(-100, "de rodillas");
+						creature.notify("[-2 vitalidad y aturdimiento]");
 						creature.modifyStatusColor(Constants.MESSAGE_STATUS_EFFECT_COLOR);
 						creature.modifyMaxHp(-2);
 					}
 					public void onFinish(Creature creature){
 						creature.modifyMaxHp(2);
+					}
+				});
+			}
+		}
+		
+		if(type.wondType() == DamageType.SLICE.wondType()){
+			if(bodyPart.position() == BodyPart.HEAD.position()){
+				possibleWounds.add(new Wound("Corte a la cien", "desangra y enceguece", Constants.WOUND_DURATION_LOW, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						//Slash!! La espada del jefe ogro produce un severo corte en tu cabeza que comienza a sangrar!
+						//Slash!! Tu espada produce un severo corte en la cabeza del jefe ogro que comienza a sangrar!
+						creature.notifyArround(Constants.WOUND_COLOR, "Slash!! "+ StringUtils.capitalize(type.itemOrigin().nameElLaTu(applier)) + " " + (creature.isPlayer() ? applier.nameDelDeLa() + " " : "") +
+								(type.itemOrigin().nameElLa().endsWith("s") ? "producen" : "produce") +  " un "
+								+ "severo corte en " + (creature.isPlayer() ? "tu cabeza" : "la cabeza " + applier.nameDelDeLa()) + " que comienza a sangrar!");
+						creature.notify(Constants.WOUND_COLOR, "[sangrado y -2 vision]");
+						creature.modifyVisionRadius(-2);
+					}
+					public void onMove(Creature creature){
+						creature.bleed(1);
+						creature.modifyHp(-1, "Mueres desangrado");
+					}
+					public void onFinish(Creature creature){
+						creature.modifyVisionRadius(2);
+					}
+				});
+			}
+			if(bodyPart.position() == BodyPart.ARMS.position()){
+				possibleWounds.add(new Wound("Corte en el brazo", "sangrado y reduce presicion", Constants.WOUND_DURATION_LOW, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						//Sliiick!! Un horrendo corte se genera en tu brazo
+						//Sliiick!! Un horrendo corte se genera en el brazo del jefe ogro
+						creature.notifyArround(Constants.WOUND_COLOR, "Slliiick!! Un horrendo corte se genera en " + (creature.isPlayer() ? "tu brazo" : "el brazo " + creature.nameDelDeLa()));
+						creature.notify(Constants.WOUND_COLOR, "[sangrado y reduce presicion]");
+						creature.modifyAccuracy(-20);
+					}
+					public void onMove(Creature creature){
+						creature.bleed(1);
+						creature.modifyHp(-1, "Mueres desangrado");
+					}
+					public void onFinish(Creature creature){
+						creature.modifyAccuracy(20);
+					}
+				});
+			}
+			if(bodyPart.position() == BodyPart.LEGS.position()){
+				possibleWounds.add(new Wound("Corte en la pierna", "sangrado y reduce velocidad", Constants.WOUND_DURATION_LOW, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						//Impactas en la pierna del jefe ogro generando un feo corte!
+						//El jefe ogro impacta en tu pierna generando un feo corte!
+						creature.notifyArround(Constants.WOUND_COLOR, creature.isPlayer() ? "Impactas en la pierna " + applier.nameDelDeLa() : StringUtils.capitalize(creature.nameElLa() + " impacta en tu pierna")+
+								" generando un feo corte!");
+						creature.notify(Constants.WOUND_COLOR, "[sangrado y reduce velocidad]");
+						creature.modifyMovementSpeed(50);
+					}
+					public void onMove(Creature creature){
+						creature.bleed(1);
+						creature.modifyHp(-1, "Mueres desangrado");
+					}
+					public void onFinish(Creature creature){
+						creature.modifyMovementSpeed(-50);
+					}
+				});
+			}
+			if(bodyPart.position() == BodyPart.BACK.position()){
+				possibleWounds.add(new Wound("Corte a la espalda", "sangrado", Constants.WOUND_DURATION_LOW, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						creature.notifyArround(Constants.WOUND_COLOR, "A este punto me harte de hacer heridas, te pegaron o pegaste en la espalda con un arma cortante");
+						creature.notify("[sangrado]");
+					}
+					public void onMove(Creature creature){
+						creature.bleed(1);
+						creature.modifyHp(-1, "Mueres desangrado");
+					}
+				});
+			}
+		}
+		
+		if(type.wondType() == DamageType.PIERCING.wondType()){
+			if(bodyPart.position() == BodyPart.HEAD.position()){
+				possibleWounds.add(new Wound("Puñal al ojo", "reduccion vision", Constants.WOUND_DURATION_MID, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						//Aaaargh! El filo de la daga penetra en tu ojo
+						//Aaaargh! El filo de la daga penetra en el ojo del jefe ogro
+						creature.notifyArround(Constants.WOUND_COLOR, "Aaaargh!! El filo de "+type.itemOrigin().nameElLaTu(applier)+ " penetra "+ (creature.isPlayer() ? "en tu ojo": "en el ojo " + creature.nameDelDeLa()));
+						creature.notify("[reduccion vision]");
+						creature.modifyVisionRadius(-4);
+					}
+					public void onFinish(Creature creature){
+						creature.modifyVisionRadius(4);
+					}
+				});
+			}
+			if(bodyPart.position() == BodyPart.BACK.position()){
+				possibleWounds.add(new Wound("Backstab!", "masivo daño!", Constants.WOUND_DURATION_MID, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						//Penetrando tu pulmon la daga impacta generando un dolor inimaginable!
+						//Penetrando el pulmon del jefe ogro tu daga impacta generando un dolor inimaginable!
+						creature.notifyArround(Constants.WOUND_COLOR, "Penetrando " + (creature.isPlayer() ? "tu pulmon" : "el pulmon " + creature.nameDelDeLa())+ 
+								" "+ type.itemOrigin().nameElLaTu(applier) + " impacta generando un dolor inimaginable!");
+						creature.notify("[bonus de daño]");
+						creature.modifyHp(-4, "Pulmon perforado!");
+					}
+				});
+			}
+			if(bodyPart.position() == BodyPart.ARMS.position()){
+				possibleWounds.add(new Wound("Puñal al brazo", "reduce velocidad", Constants.WOUND_DURATION_MID, type, bodyPart, 1){
+					public void onApply(Creature creature, Creature applier){
+						creature.notifyArround(Constants.WOUND_COLOR, "");
 					}
 				});
 			}

@@ -198,4 +198,8 @@ public class StringUtils {
 			return (g == 'M' ? "un" : "una");
 		}
 	}
+	
+	public static String replaceNTilde(String text){
+		return text.replace('ñ', (char)164).replace('Ñ', (char)165);
+	}
 }

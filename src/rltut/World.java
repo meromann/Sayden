@@ -279,6 +279,7 @@ public class World {
 				
 				bloodyTile.setBackgroundColor(Constants.BLOOD_COLOR);
 				bloodyTile.setDetails(bloodyTile.details() + " Hay un charco de sangre.");
+				
 				changeTile(p.x, p.y, p.z, bloodyTile);
 
 				return true;

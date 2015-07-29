@@ -13,6 +13,8 @@ public class Effect {
 		this.duration = other.duration; 
 	}
 	
+	public void onMove(Creature creature){}
+	
 	public void update(Creature creature){
 		duration--;
 	}

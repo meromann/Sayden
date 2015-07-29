@@ -116,7 +116,7 @@ public class PlayScreen implements Screen {
 			for(int m = 0; m < woundName.size(); m++){
 				last_wound_y += m;
 
-				terminal.write(woundName.get(m).message(), Constants.SCREEN_WIDTH, last_wound_y, Color.ORANGE);
+				terminal.write(StringUtils.replaceNTilde(woundName.get(m).message()), Constants.SCREEN_WIDTH, last_wound_y, Color.ORANGE);
 				
 				if(m > woundName.size() - 2){
 					terminal.write(woundDuration, Constants.SCREEN_WIDTH + (woundName.get(m).message().length() - woundDuration.length()), last_wound_y, Constants.MESSAGE_STATUS_EFFECT_COLOR);
@@ -127,7 +127,7 @@ public class PlayScreen implements Screen {
 			
 			for(int m = 0; m < woundDesc.size(); m++){
 				last_wound_y += m;	
-				terminal.write(woundDesc.get(m).message(), Constants.SCREEN_WIDTH, last_wound_y);
+				terminal.write(StringUtils.replaceNTilde(woundDesc.get(m).message()), Constants.SCREEN_WIDTH, last_wound_y);
 			}
 			
 			last_wound_y++;
@@ -161,7 +161,7 @@ public class PlayScreen implements Screen {
 		for (int i = 0; i < messages.size(); i++){
 			int msg_x = StringUtils.positionBetweenCoordinates(0, Constants.SCREEN_WIDTH, messages.get(i).message());
 
-			terminal.write(messages.get(i).message(), msg_x, top + i, messages.get(i).color());
+			terminal.write(StringUtils.replaceNTilde(messages.get(i).message()), msg_x, top + i, messages.get(i).color());
 		}
 		
 		if (subscreen == null)

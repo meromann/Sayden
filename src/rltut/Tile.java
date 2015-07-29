@@ -97,6 +97,10 @@ public class Tile {
 	public Interaction interaction() { return interaction; }
 	public void setInteraction(Interaction interaction) { this.interaction = interaction; }
 	
+	private int fluid;
+	public int fluid() { return fluid; }
+	public void modifyFluid(int amount) { this.fluid += amount; }
+	
 	private Tile change_to;
 	public Tile change_to() { return change_to; }
 	public void setChangeTo(Tile tile) { this.change_to = tile; }
@@ -135,6 +139,7 @@ public class Tile {
 		this.isGround = clone.isGround();
 		this.portal_to = clone.getPortalTo();
 		this.change_to = clone.change_to();
+		this.fluid = clone.fluid();
 	}
 	
 	Tile(){

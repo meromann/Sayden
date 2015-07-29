@@ -193,7 +193,6 @@ public class Creature extends DataStructure{
 			if(limbs.get(i).position().indexOf(bodyPart) != -1){
 				limbs.get(i).onRemove(this);
 				limbs.remove(limbs.get(i));
-				dismembered = true;
 				return;
 			}
 		}
@@ -219,8 +218,6 @@ public class Creature extends DataStructure{
 		}
 		return false;
 	}
-	private boolean dismembered;
-	public boolean dismembered() { return dismembered; }
 	
 	public Creature(World world, char glyph, char gender, Color color, String name, int maxHp, Item weapon, Item armor){
 		super();
@@ -244,14 +241,13 @@ public class Creature extends DataStructure{
 		this.intrinsicArmor = armor;
 		this.attackSpeed = Constants.STARTING_ATTACK_SPEED;
 		this.movementSpeed = Constants.STARTING_MOVE_SPEED;
-		this.dismembered = false;
 		this.accuracy = 100;
 		this.woundResistance = 0;
 	}
 	
 	public void moveBy(int mx, int my, int mz){
 		if (mx==0 && my==0 && mz==0 || (isPlayer && getActionPoints() < 0)){
-			if(isPlayer){
+			if(isPlayer()){
 				if(getActionPoints() < 0){
 					doAction(Constants.MESSAGE_STATUS_EFFECT_COLOR, "esta " + statusEffect()); 
 					modifyActionPoints(100);
@@ -422,16 +418,20 @@ public class Creature extends DataStructure{
 			defendingObject = other.helment();
 		}else if(x > other.x && y <= other.y){
 			if(other.hasBodyPart(BodyPart.ARMS.position())){//TODO: Arreglar esto
-				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? BodyPart.ARMS : BodyPart.CHEST) : BodyPart.ARMS);
-				defendingObject = (position == BodyPart.CHEST ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
+				//position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? BodyPart.ARMS : BodyPart.CHEST) : BodyPart.ARMS);
+				//defendingObject = (position == BodyPart.CHEST ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
+				position = BodyPart.ARMS;
+				defendingObject = other.shield();
 			}else{
 				position = BodyPart.CHEST;
 				defendingObject = other.armor();
 			}
 		}else if(y > other.y && x >= other.x){
 			if(other.hasBodyPart(BodyPart.LEGS.position())){
-				position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? BodyPart.LEGS : BodyPart.CHEST) : BodyPart.LEGS);
-				defendingObject = (position == BodyPart.CHEST ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
+				//position = (other.dismembered() ? (Math.random() < Constants.DISMEMBER_CHANCE_LIMB_OVER_KILL ? BodyPart.LEGS : BodyPart.CHEST) : BodyPart.LEGS);
+				//defendingObject = (position == BodyPart.CHEST ? other.armor() : (other.shield() != null ? other.shield() : other.armor()));
+				position = BodyPart.LEGS;
+				defendingObject = other.shield();
 			}else{
 				position = BodyPart.CHEST;
 				defendingObject = other.armor();
@@ -855,7 +855,7 @@ public class Creature extends DataStructure{
 		getRidOf(item);
 	}
 	
-	private void addEffect(Effect effect){
+	public void addEffect(Effect effect){
 		if (effect == null)
 			return;
 		

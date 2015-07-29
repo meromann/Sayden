@@ -88,14 +88,15 @@ public class StuffFactory {
 		player.makePlayer();
 		player.modifyWoundResistance(1);
 		player.modifyHpRegeneration(1);
-		player.inventory().add(newStaff(-1));
+		player.inventory().add(newDagger(-1));
+		player.inventory().add(newBread(-1));
 		player = makeBiped(player);
 		
 		return player;
 	}
 
 	public Creature newMaleWolf(int depth, Creature player){
-		Item garras = new Item(ItemType.INTRINSIC, 'L', "garras").addDamageType(DamageType.BLUNT, 3);
+		Item garras = new Item(ItemType.INTRINSIC, 'L', "garras").addDamageType(DamageType.SLICE, 3);
 		Item pelaje = new Item(ItemType.INTRINSIC, 'M', "pelaje").addDamageType(DamageType.BLUNT, 1).addDamageType(DamageType.SLICE, 1);
 		Creature maleWolf = new Creature(world, 'l', 'M', AsciiPanel.brightBlack, "lobo", 4, garras, pelaje);
 		world.addAtEmptyLocation(maleWolf, depth);
