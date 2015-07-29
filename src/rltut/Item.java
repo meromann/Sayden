@@ -11,8 +11,6 @@ public class Item extends DataStructure{
 		ARMOR,
 		HELMENT,
 		STATIC,
-		EDIBLE,
-		READABLE,
 		INTRINSIC,
 		UNEQUIPPABLE
 	}

@@ -3,9 +3,10 @@ package rltut;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Wound {
+public class Wound extends DataStructure{
 	protected int duration;
 	public int duration() { return duration; }
+	public void endDuration() { this.duration = 0; }
 	
 	protected int originalDuration;
 	public void resetDuration() { this.duration = this.originalDuration; }
@@ -533,6 +534,7 @@ public class Wound {
 		this.bodyPart = other.bodyPart();
 		this.weight = other.weight();
 		this.reference = other;
+		this.setAllData(other.getAllData());
 	}
 	
 	public void update(Creature creature){

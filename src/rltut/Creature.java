@@ -847,7 +847,7 @@ public class Creature extends DataStructure{
 	}
 	
 	private void consume(Item item){
-		if (item.itemType() != ItemType.EDIBLE)
+		if (!item.getBooleanData("IsEdible"))
 			notify("Asqueroso!");
 		
 		addEffect(item.quaffEffect());

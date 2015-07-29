@@ -132,6 +132,73 @@ public class StuffFactory {
 		return goblin;
 	}*/
 	
+	public Item getHealCorpse(){
+		List<Item> items = new ArrayList<Item>();
+		
+		items.add(newBonePowder(-1));
+		items.add(newBowlsJuice(-1));
+		items.add(newBonePowder(-1));
+		
+		Collections.shuffle(items);
+		
+		return items.get(0);
+	}
+	
+	public Item newBonePowder(int depth){
+		Item bonePowder = new Item(ItemType.STATIC, '~', 'M', AsciiPanel.brightWhite, "polvo de hueso", null);
+		bonePowder.setData("IsEdible", true);
+		bonePowder.setQuaffEffect(new Effect(1){
+			public void start(Creature creature){
+				for(Wound w : creature.wounds()){
+					if(w.type() == DamageType.SLICE){
+						w.onFinish(creature);
+						w.endDuration();
+						return;
+					}
+				}
+			}
+		});
+		world.addAtEmptyLocation(bonePowder, depth);
+		return bonePowder;
+	}
+	
+	public Item newBowlsJuice(int depth){
+		Item bonePowder = new Item(ItemType.STATIC, '~', 'M', Color.ORANGE, "jugo de viceras", null);
+		bonePowder.setData("IsEdible", true);
+		bonePowder.setQuaffEffect(new Effect(1){
+			public void start(Creature creature){
+				for(Wound w : creature.wounds()){
+					if(w.type() == DamageType.PIERCING){
+						w.onFinish(creature);
+						w.endDuration();
+						return;
+					}
+				}
+			}
+		});
+		world.addAtEmptyLocation(bonePowder, depth);
+		return bonePowder;
+	}
+
+	public Item newBowlsPomada(int depth){
+		Item bonePowder = new Item(ItemType.STATIC, '~', 'F', AsciiPanel.red, "pomada de viceras", null);
+		bonePowder.setData("IsEdible", true);
+		bonePowder.setQuaffEffect(new Effect(1){
+			public void start(Creature creature){
+				for(Wound w : creature.wounds()){
+					if(w.type() == DamageType.BLUNT){
+						w.onFinish(creature);
+						w.endDuration();
+						return;
+					}
+				}
+			}
+		});
+		world.addAtEmptyLocation(bonePowder, depth);
+		return bonePowder;
+	}
+	
+	
 	public Item newRock(int depth){
 		Item rock = new Item(ItemType.STATIC, ',', 'F', AsciiPanel.yellow, "roca", null);
 		world.addAtEmptyTileLocation(rock, depth, Tile.FLOOR);
@@ -139,13 +206,15 @@ public class StuffFactory {
 	}
 	
 	public Item newBread(int depth){
-		Item item = new Item(ItemType.EDIBLE, '%', 'M', AsciiPanel.yellow, "pan", null);
+		Item item = new Item(ItemType.STATIC, '%', 'M', AsciiPanel.yellow, "pan", null);
+		item.setData("IsEdible", true);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
 	
 	public Item newFruit(int depth){
-		Item item = new Item(ItemType.EDIBLE, '%', 'F', AsciiPanel.brightRed, "manzana", null);
+		Item item = new Item(ItemType.STATIC, '%', 'F', AsciiPanel.brightRed, "manzana", null);
+		item.setData("IsEdible", true);
 		world.addAtEmptyLocation(item, depth);
 		return item;
 	}
@@ -230,7 +299,7 @@ public class StuffFactory {
 	
 	public Item newPotionOfHealth(int depth){
 		String appearance = potionAppearances.get(0);
-		final Item item = new Item(ItemType.EDIBLE, '!', 'F', potionColors.get(appearance), "pocion de vida", appearance);
+		final Item item = new Item(ItemType.STATIC, '!', 'F', potionColors.get(appearance), "pocion de vida", appearance);
 		item.setQuaffEffect(new Effect(1){
 			public void start(Creature creature){
 				
@@ -245,7 +314,7 @@ public class StuffFactory {
 	
 	public Item newPotionOfMana(int depth){
 		String appearance = potionAppearances.get(1);
-		final Item item = new Item(ItemType.EDIBLE, '!', 'F', potionColors.get(appearance), "pocion de mana", appearance);
+		final Item item = new Item(ItemType.STATIC, '!', 'F', potionColors.get(appearance), "pocion de mana", appearance);
 		item.setQuaffEffect(new Effect(1){
 			public void start(Creature creature){
 				
@@ -259,7 +328,7 @@ public class StuffFactory {
 	
 	public Item newPotionOfSlowHealth(int depth){
 		String appearance = potionAppearances.get(2);
-		final Item item = new Item(ItemType.EDIBLE, '!', 'F', potionColors.get(appearance), "pocion rejuvenecedora", appearance);
+		final Item item = new Item(ItemType.STATIC, '!', 'F', potionColors.get(appearance), "pocion rejuvenecedora", appearance);
 		item.setQuaffEffect(new Effect(100){
 			public void start(Creature creature){
 				creature.doAction(item, "ve un poco mejor");
@@ -277,7 +346,7 @@ public class StuffFactory {
 	
 	public Item newPotionOfPoison(int depth){
 		String appearance = potionAppearances.get(3);
-		final Item item = new Item(ItemType.EDIBLE, '!', 'F', potionColors.get(appearance), "pocion de veneno", appearance);
+		final Item item = new Item(ItemType.STATIC, '!', 'F', potionColors.get(appearance), "pocion de veneno", appearance);
 		item.setQuaffEffect(new Effect(20){
 			public void start(Creature creature){
 				creature.doAction(item, "ve muy enfermo");
@@ -295,7 +364,7 @@ public class StuffFactory {
 	
 	public Item newPotionOfWarrior(int depth){
 		String appearance = potionAppearances.get(4);
-		final Item item = new Item(ItemType.EDIBLE, '!', 'F', potionColors.get(appearance), "pocion de veneno", appearance);
+		final Item item = new Item(ItemType.STATIC, '!', 'F', potionColors.get(appearance), "pocion de veneno", appearance);
 		item.setQuaffEffect(new Effect(20){
 			public void start(Creature creature){
 				creature.doAction(item, "ve mucho mas peligroso");
@@ -311,7 +380,7 @@ public class StuffFactory {
 
 	public Item newPotionOfArcher(int depth){
 		String appearance = potionAppearances.get(5);
-		final Item item = new Item(ItemType.EDIBLE, '!', 'F', potionColors.get(appearance), "pocion del arquero", appearance);
+		final Item item = new Item(ItemType.STATIC, '!', 'F', potionColors.get(appearance), "pocion del arquero", appearance);
 		item.setQuaffEffect(new Effect(20){
 			public void start(Creature creature){
 				creature.modifyVisionRadius(3);
@@ -329,7 +398,7 @@ public class StuffFactory {
 
 	public Item newPotionOfExperience(int depth){
 		String appearance = potionAppearances.get(6);
-		final Item item = new Item(ItemType.EDIBLE, '!', 'F', potionColors.get(appearance), "pocion de experiencia", appearance);
+		final Item item = new Item(ItemType.STATIC, '!', 'F', potionColors.get(appearance), "pocion de experiencia", appearance);
 		item.setQuaffEffect(new Effect(20){
 			public void start(Creature creature){
 				creature.doAction(item, "ve mucho mas sabio");
@@ -355,7 +424,7 @@ public class StuffFactory {
 	}
 	
 	public Item newWhiteMagesSpellbook(int depth) {
-		Item item = new Item(ItemType.READABLE, '+', 'M',AsciiPanel.brightWhite, "libro blanco", null);
+		Item item = new Item(ItemType.STATIC, '+', 'M',AsciiPanel.brightWhite, "libro blanco", null);
 		item.addWrittenSpell("ligera curacion", 4, new Effect(1){
 			public void start(Creature creature){
 					
@@ -399,7 +468,7 @@ public class StuffFactory {
 	}
 	
 	public Item newBlueMagesSpellbook(int depth) {
-		Item item = new Item(ItemType.READABLE, '+', 'M', AsciiPanel.brightBlue, "libro azul", null);
+		Item item = new Item(ItemType.STATIC, '+', 'M', AsciiPanel.brightBlue, "libro azul", null);
 
 		item.addWrittenSpell("sangre por mana", 1, new Effect(1){
 			public void start(Creature creature){

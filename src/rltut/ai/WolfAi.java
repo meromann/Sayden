@@ -153,7 +153,7 @@ public class WolfAi extends CreatureAi {
 			Item check = creature.item(creature.x, creature.y, creature.z);
 
 			if(check != null
-					&& check.itemType() == ItemType.EDIBLE){
+					&& check.getBooleanData("IsEdible")){
 								
 				if(Point.distance(creature.x, creature.y, player.x, player.y) < 2){
 					hunt(player);
@@ -178,7 +178,7 @@ public class WolfAi extends CreatureAi {
 			
 			if(!items.isEmpty()){
 				for(Item i : items.keySet()){
-					if(i.itemType() == ItemType.EDIBLE)
+					if(i.getBooleanData("IsEdible"))
 						moveTo(items.get(i));
 				}
 			}

@@ -3,7 +3,6 @@ package rltut.screens;
 import rltut.Constants;
 import rltut.Creature;
 import rltut.Item;
-import rltut.Item.ItemType;
 
 public class EatScreen extends InventoryBasedScreen {
 
@@ -32,7 +31,7 @@ public class EatScreen extends InventoryBasedScreen {
 
 	@Override
 	protected boolean isAcceptable(Item item) {
-		return item.itemType() == ItemType.EDIBLE;
+		return item.getBooleanData("IsEdible");
 	}
 
 	@Override
